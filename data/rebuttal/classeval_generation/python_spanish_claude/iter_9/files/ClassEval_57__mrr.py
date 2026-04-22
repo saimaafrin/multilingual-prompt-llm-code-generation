@@ -1,0 +1,40 @@
+class _M:
+    def mrr(data):
+        """
+        calcula el MRR de los datos de entrada. MRR es un índice de evaluación ampliamente utilizado. Es la media del rango recíproco.
+        :param data: los datos deben ser una tupla, lista 0,1, ej. ([1,0,...],5). En cada tupla (resultado real, número de verdad fundamental), el número de verdad fundamental es el total de números de verdad.
+         ([1,0,...],5),
+        o lista de tuplas ej. [([1,0,1,...],5),([1,0,...],6),([0,0,...],5)].
+        1 representa una respuesta correcta, 0 representa una respuesta incorrecta.
+        :return: si los datos de entrada son una lista, devuelve el recall de esta lista. si los datos de entrada son una lista de listas, devuelve el
+        recall promedio en todas las listas. El segundo valor de retorno es una lista de precisión para cada entrada.
+        >>> MetricsCalculator2.mrr(([1, 0, 1, 0], 4))
+        >>> MetricsCalculator2.mrr([([1, 0, 1, 0], 4), ([0, 1, 0, 1], 4)])
+        1.0, [1.0]
+        0.75, [1.0, 0.5]
+        """
+        def calculate_single_mrr(result_list, ground_truth):
+            # Find the position of the first correct answer (1)
+            for i, val in enumerate(result_list):
+                if val == 1:
+                    # MRR is 1 / (rank), where rank starts at 1
+                    return 1.0 / (i + 1)
+            # If no correct answer found, return 0
+            return 0.0
+        
+        # Check if data is a single tuple or a list of tuples
+        if isinstance(data, tuple):
+            # Single tuple case
+            result_list, ground_truth = data
+            mrr_value = calculate_single_mrr(result_list, ground_truth)
+            return mrr_value, [mrr_value]
+        else:
+            # List of tuples case
+            mrr_values = []
+            for result_list, ground_truth in data:
+                mrr_value = calculate_single_mrr(result_list, ground_truth)
+                mrr_values.append(mrr_value)
+            
+            # Calculate average MRR
+            avg_mrr = sum(mrr_values) / len(mrr_values) if mrr_values else 0.0
+            return avg_mrr, mrr_values

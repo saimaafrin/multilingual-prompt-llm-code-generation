@@ -1,0 +1,35 @@
+class _M:
+    def is_valid_ipv4(ip_address):
+        """
+        Verifica si la dirección IP dada es una dirección IPv4 válida.
+        :param ip_address: cadena, la dirección IP a verificar
+        :return: bool, True si la dirección IP es válida, False en caso contrario
+        >>> IpUtil.is_valid_ipv4('192.168.0.123')
+        True
+        >>> IpUtil.is_valid_ipv4('256.0.0.0')
+        False
+    
+        """
+        if not isinstance(ip_address, str):
+            return False
+        
+        parts = ip_address.split('.')
+        
+        if len(parts) != 4:
+            return False
+        
+        for part in parts:
+            if not part:
+                return False
+            
+            if not part.isdigit():
+                return False
+            
+            if part[0] == '0' and len(part) > 1:
+                return False
+            
+            num = int(part)
+            if num < 0 or num > 255:
+                return False
+        
+        return True

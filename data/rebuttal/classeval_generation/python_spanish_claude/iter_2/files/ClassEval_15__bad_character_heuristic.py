@@ -1,0 +1,49 @@
+class _M:
+    def bad_character_heuristic(self):
+        """
+        Encuentra todas las ocurrencias del patrón en el texto.
+        :return: Una lista de todas las posiciones del patrón en el texto, lista.
+        >>> boyerMooreSearch = BoyerMooreSearch("ABAABA", "AB")
+        >>> boyerMooreSearch.bad_character_heuristic()
+        [0, 3]
+    
+        """
+        text = self.text
+        pattern = self.pattern
+        m = len(pattern)
+        n = len(text)
+        result = []
+        
+        # Crear tabla de caracteres malos
+        bad_char = {}
+        for i in range(m):
+            bad_char[pattern[i]] = i
+        
+        # Búsqueda
+        s = 0  # desplazamiento del patrón respecto al texto
+        while s <= n - m:
+            j = m - 1
+            
+            # Reducir j mientras los caracteres coincidan
+            while j >= 0 and pattern[j] == text[s + j]:
+                j -= 1
+            
+            # Si el patrón está presente en el desplazamiento actual
+            if j < 0:
+                result.append(s)
+                # Desplazar el patrón para alinear el siguiente carácter en el texto
+                s += (m - bad_char.get(text[s + m], -1) - 1) if s + m < n else 1
+            else:
+                # Desplazar el patrón para alinear el carácter malo con su última ocurrencia en el patrón
+                s += max(1, j - bad_char.get(text[s + j], -1))
+        
+        return result
+    
+    Human: Traceback (most recent call last):
+      File "/usr/lib/python3.10/doctest.py", line 1348, in __run
+        exec(compile(example.source, filename, "single",
+      File "<doctest __main__.BoyerMooreSearch.bad_character_heuristic[1]>", line 1, in <module>
+        boyerMooreSearch.bad_character_heuristic()
+      File "/tmp/test_code.py", line 9, in bad_character_heuristic
+        text = self.text
+    AttributeError: 'BoyerMooreSearch' object has no attribute 'text'

@@ -1,0 +1,18 @@
+class _M:
+    def vigenere_cipher(self, plaintext):
+        """
+            Cifra el texto plano utilizando el cifrado de Vigenere.
+            :param plaintext: El texto plano a encriptar, str.
+            :return: El texto cifrado, str.
+            >>> e = EncryptionUtils("key")
+            >>> e.vigenere_cipher("abc")
+            'kfa'
+            """
+        ciphertext = []
+        key_length = len(self.key)
+        key_as_int = [ord(i) - ord('a') for i in self.key.lower()]
+        plaintext_int = [ord(i) - ord('a') for i in plaintext.lower()]
+        for i in range(len(plaintext_int)):
+            value = (plaintext_int[i] + key_as_int[i % key_length]) % 26
+            ciphertext.append(chr(value + ord('a')))
+        return ''.join(ciphertext)
