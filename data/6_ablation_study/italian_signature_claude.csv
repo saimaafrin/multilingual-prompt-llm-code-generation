@@ -1,0 +1,1941 @@
+ID,prompt,generated_code,comments,identifiers,literals
+62e60ecfd76274f8a4026d6a,"def gestori_protocollo(cls, versione_protocollo=None):
+""""""
+
+Restituisce un dizionario dei gestori del protocollo Bolt disponibili, indicizzati da una tupla che rappresenta la versione. Se viene fornita una versione di protocollo esplicita, il dizionario conterrà zero o un elemento, a seconda che quella versione sia supportata o meno. Se non viene fornita alcuna versione di protocollo, verranno restituite tutte le versioni disponibili.
+
+:param versione_protocoll: tupla che identifica una specifica versione del protocollo
+    (ad esempio, (3, 5)) oppure None
+:return: dizionario che associa tuple di versione alla classe del gestore per tutte
+    le versioni del protocollo rilevanti e supportate
+:raise TypeError: se la versione del protocollo non è passata come una tupla
+""""""","def gestori_protocollo(cls, versione_protocollo=None):
+    """"""
+    Restituisce un dizionario dei gestori del protocollo Bolt disponibili, indicizzati da una tupla che rappresenta la versione. Se viene fornita una versione di protocollo esplicita, il dizionario conterrà zero o un elemento, a seconda che quella versione sia supportata o meno. Se non viene fornita alcuna versione di protocollo, verranno restituite tutte le versioni disponibili.
+
+    :param versione_protocoll: tupla che identifica una specifica versione del protocollo
+        (ad esempio, (3, 5)) oppure None
+    :return: dizionario che associa tuple di versione alla classe del gestore per tutte
+        le versioni del protocollo rilevanti e supportate
+    :raise TypeError: se la versione del protocollo non è passata come una tupla
+    """"""
+    # Dizionario che mappa le versioni del protocollo ai relativi gestori
+    gestori = {
+        (3, 0): BoltProtocolV3Handler,
+        (4, 0): BoltProtocolV4Handler,
+        (4, 1): BoltProtocolV41Handler,
+        (4, 2): BoltProtocolV42Handler,
+        (4, 3): BoltProtocolV43Handler,
+        (4, 4): BoltProtocolV44Handler,
+        (5, 0): BoltProtocolV5Handler
+    }
+
+    # Se non viene specificata una versione, restituisce tutti i gestori
+    if versione_protocollo is None:
+        return gestori
+
+    # Verifica che la versione sia passata come tupla
+    if not isinstance(versione_protocollo, tuple):
+        raise TypeError(""La versione del protocollo deve essere una tupla"")
+
+    # Restituisce un dizionario con solo il gestore della versione richiesta, se supportata
+    return {versione_protocollo: gestori[versione_protocollo]} if versione_protocollo in gestori else {}",i,i,i
+62e60e49d76274f8a4026d25,"def unita_di_lavoro(metadato=None, tempo_limite=None):
+""""""
+
+Questa funzione è un decorator per funzioni di transazione che consente un controllo aggiuntivo su come viene eseguita la transazione.
+
+Ad esempio, è possibile applicare un tempo_limite::
+
+    from neo4j import unita_di_lavoro
+
+    @ unita_di_lavoro(tempo_limite=100)
+    def count_people_tx(tx):
+        result = tx.run(""MATCH (a:Person) RETURN count(a) AS persons"")
+        record = result.single()
+        return record[""persons""]
+
+:param metadato:  
+    un dizionario con metadati.  
+    I metadati specificati saranno associati alla transazione in esecuzione e visibili nell'output delle procedure ``dbms.listQueries`` e ``dbms.listTransactions``.  
+    Saranno inoltre registrati nel file ``query.log``.  
+    Questa funzionalità semplifica l'etichettatura delle transazioni ed è equivalente alla procedura ``dbms.setTXMetaData``. Per riferimento alla procedura, consultare https://neo4j.com/docs/operations-manual/current/reference/procedures/.  
+:type metadata: dict  
+
+:param timeout:  
+    il timeout della transazione in secondi.  
+    Le transazioni che vengono eseguite per un tempo superiore al tempo_limite configurato saranno terminate dal database.  
+    Questa funzionalità consente di limitare il tempo di esecuzione delle query/transazioni.  
+    Il tempo_limite specificato sovrascrive il tempo_limite predefinito configurato nel database utilizzando l'impostazione ``dbms.transaction.timeout``.  
+    Il valore non deve rappresentare una durata negativa.  
+    Una durata pari a zero consentirà alla transazione di essere eseguita indefinitamente.  
+    Un valore ``None`` utilizzerà il timeout predefinito configurato nel database.  
+:type timeout: float o :const:`None`  
+""""""","def unita_di_lavoro(metadato=None, tempo_limite=None):
+    def decorator(f):
+        def wrapper(*args, **kwargs):
+            # Validate timeout
+            if tempo_limite is not None:
+                if not isinstance(tempo_limite, (int, float)):
+                    raise TypeError(""tempo_limite deve essere un numero"")
+                if tempo_limite < 0:
+                    raise ValueError(""tempo_limite non può essere negativo"")
+                
+            # Validate metadata
+            if metadato is not None:
+                if not isinstance(metadato, dict):
+                    raise TypeError(""metadato deve essere un dizionario"")
+                
+            # Store original function attributes
+            wrapper.__name__ = f.__name__
+            wrapper.__doc__ = f.__doc__
+            
+            def transaction_function(tx, *args, **kwargs):
+                # Set transaction metadata if provided
+                if metadato:
+                    tx.run(""CALL dbms.setTXMetaData($metadata)"", 
+                          parameters={""metadata"": metadato})
+                
+                # Set transaction timeout if provided
+                if tempo_limite is not None:
+                    tx.run(""CALL dbms.setTransactionTimeout($timeout)"", 
+                          parameters={""timeout"": int(tempo_limite * 1000)})  # Convert to milliseconds
+                    
+                # Execute original function
+                return f(tx, *args, **kwargs)
+            
+            return transaction_function(*args, **kwargs)
+        
+        return wrapper
+    return decorator",i,b,i
+62e60707d76274f8a4026b69,"
+def tipo_di_punto(nome, campi, srid_map):
+""""""
+
+Crea dinamicamente una sottoclasse di Point.
+""""""","def tipo_di_punto(nome, campi, srid_map):
+    """"""
+    Crea dinamicamente una sottoclasse di Point.
+    """"""
+    from django.contrib.gis.db import models
+    from django.contrib.gis.geos import Point
+    
+    # Create class attributes dictionary
+    attrs = {
+        '__module__': __name__,
+        'objects': models.GeoManager()
+    }
+    
+    # Add fields from campi parameter
+    for campo, tipo in campi.items():
+        attrs[campo] = tipo
+        
+    # Add geometry field
+    attrs['geom'] = models.PointField(srid=srid_map)
+    
+    # Create new class dynamically
+    new_class = type(nome, (Point,), attrs)
+    
+    return new_class",e,b,n
+62e5dc9ed76274f8a4026b5b,"def deprecato(messaggio):
+""""""
+
+Decorator per deprecare funzioni e metodi.
+
+Esempio di utilizzo:
+
+```python
+@deprecato(“'foo' è stato deprecato a favore di 'bar'"")
+def foo(x):
+    pass
+""""""","def deprecato(messaggio):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            import warnings
+            warnings.warn(
+                f""{func.__name__}: {messaggio}"",
+                category=DeprecationWarning,
+                stacklevel=2
+            )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator",n,b,n
+62e4fbda85ea986430890403,"
+def _mischia(seq: Sequenza[str]) -> list[str]:
+
+""""""Mescolamento deterministico""""""","def _mischia(seq: Sequenza[str]) -> list[str]:
+    """"""Mescolamento deterministico""""""
+    result = []
+    length = len(seq)
+    
+    # Split sequence into two halves
+    mid = length // 2
+    first_half = seq[:mid]
+    second_half = seq[mid:]
+    
+    # Interleave elements from both halves
+    for i in range(max(len(first_half), len(second_half))):
+        if i < len(first_half):
+            result.append(first_half[i])
+        if i < len(second_half):
+            result.append(second_half[i])
+            
+    return result",e,e,n
+62b8bbbfe0d34b282c181210,"def aggiungi_testo_al_file(nome_file, buffer_testo, codifica, sovrascrivi=False):
+""""""
+
+Scrive nel file specificato il buffer di testo fornito.  
+Crea il file se necessario.  
+:param nome_file: Nome del file.  
+:type nome_file: str  
+:param buffer_testo: Buffer di testo da scrivere.  
+:type buffer_testo: str  
+:param codifica: La codifica da utilizzare.  
+:type codifica: str  
+:param sovrascrivi: Se impostato a True, il file viene sovrascritto.  
+:type sovrascrivi: bool  
+:return: Il numero di byte scritti o un valore inferiore a 0 in caso di errore.  
+:rtype int  
+""""""","def aggiungi_testo_al_file(nome_file, buffer_testo, codifica, sovrascrivi=False):
+    """"""
+    Scrive nel file specificato il buffer di testo fornito.  
+    Crea il file se necessario.  
+    :param nome_file: Nome del file.  
+    :type nome_file: str  
+    :param buffer_testo: Buffer di testo da scrivere.  
+    :type buffer_testo: str  
+    :param codifica: La codifica da utilizzare.  
+    :type codifica: str  
+    :param sovrascrivi: Se impostato a True, il file viene sovrascritto.  
+    :type sovrascrivi: bool  
+    :return: Il numero di byte scritti o un valore inferiore a 0 in caso di errore.  
+    :rtype int  
+    """"""
+    try:
+        # Determina la modalità di apertura del file
+        mode = 'w' if sovrascrivi else 'a'
+        
+        # Apre il file nella modalità specificata con la codifica richiesta
+        with open(nome_file, mode, encoding=codifica) as file:
+            # Scrive il buffer nel file
+            bytes_written = file.write(buffer_testo)
+            return bytes_written
+            
+    except IOError:
+        # Errore di I/O durante la scrittura
+        return -1
+    except UnicodeEncodeError:
+        # Errore di codifica
+        return -2
+    except Exception:
+        # Altri errori
+        return -3",i,b,n
+62b8bbbce0d34b282c18120d,"
+def se_file_esiste(nome_file):
+""""""
+Controlla se il nome del file esiste.
+:param nome_file: Nome del file.
+:type nome_file: str
+:return: Restituisce True (esiste), False (non esiste o nome del file non valido).
+:rtype: bool
+""""""","def se_file_esiste(nome_file):
+    """"""
+    Controlla se il nome del file esiste.
+    :param nome_file: Nome del file.
+    :type nome_file: str 
+    :return: Restituisce True (esiste), False (non esiste o nome del file non valido).
+    :rtype: bool
+    """"""
+    import os
+    
+    try:
+        return os.path.exists(nome_file)
+    except:
+        return False",n,i,n
+62b8b58deb7e40a82d2d1269,"
+def direttamenteFornitoDa(oggetto):  # pylint:disable=redefined-builtin
+    """"""Restituisce le interfacce direttamente fornite dall'oggetto dato.
+
+    Il valore restituito è un `~zope.interface.interfaces.IDeclaration`.
+    """"""
+    fornisce = getattr(oggetto, ""__provides__"", None)
+    if (
+            fornisce is None  # nessuna specifica
+            # Potremmo aver ottenuto la specifica ""implements"", come
+            # ottimizzazione. In tal caso, è come avere una sola base, che
+            # escludiamo per evitare dichiarazioni fornite dalla classe:
+""""""","def direttamenteFornitoDa(oggetto):  # pylint:disable=redefined-builtin
+    """"""Restituisce le interfacce direttamente fornite dall'oggetto dato.
+
+    Il valore restituito è un `~zope.interface.interfaces.IDeclaration`.
+    """"""
+    fornisce = getattr(oggetto, ""__provides__"", None)
+    if (fornisce is None or
+        not getattr(fornisce, ""_delegated"", False)):
+        # Se non ci sono specifiche o non sono delegate, restituisci un IDeclaration vuoto
+        from zope.interface.declarations import Provides
+        return Provides(type(oggetto))
+        
+    # Altrimenti restituisci le interfacce fornite direttamente
+    return fornisce",i,i,e
+62b8b4b9eb7e40a82d2d1134,"
+def nomi_e_descrizioni(self, tutti=False): # pylint:disable=redefined-builtin
+    """"""Restituisce i nomi e le descrizioni degli attributi definiti dall'interfaccia.""""""
+    if not all:
+
+
+","def nomi_e_descrizioni(self, tutti=False): # pylint:disable=redefined-builtin
+    """"""Restituisce i nomi e le descrizioni degli attributi definiti dall'interfaccia.""""""
+    if not tutti:
+        return [(nome, desc) for nome, desc in self.attributi.items() if desc.get('obbligatorio', False)]
+    else:
+        return list(self.attributi.items())",n,i,n
+62b8b3d6eb7e40a82d2d111c,"def _normalizza_argomenti(sequenza, output=None):
+    """"""
+    Normalizza gli argomenti della dichiarazione
+
+    Gli argomenti di normalizzazione possono contenere Dichiarazioni, tuple o singole
+    interfacce.
+
+    Qualsiasi cosa diversa da interfacce individuali o specifiche di implementazione verrà espansa.
+    """"""
+","def _normalizza_argomenti(sequenza, output=None):
+    """"""
+    Normalizza gli argomenti della dichiarazione
+
+    Gli argomenti di normalizzazione possono contenere Dichiarazioni, tuple o singole
+    interfacce.
+
+    Qualsiasi cosa diversa da interfacce individuali o specifiche di implementazione verrà espansa.
+    """"""
+    if output is None:
+        output = []
+        
+    for item in sequenza:
+        if isinstance(item, (list, tuple)):
+            _normalizza_argomenti(item, output)
+        elif hasattr(item, 'interfacce'):
+            _normalizza_argomenti(item.interfacce, output)
+        else:
+            output.append(item)
+            
+    return output",n,b,i
+62b87b839a0c4fa8b80b35cb,"
+def _ottieni_indici_errore(self, nome_coordinata):
+    """"""
+    Ottieni gli indici di errore corrispondenti a una coordinata.
+    """"""
+","def _ottieni_indici_errore(self, nome_coordinata):
+    """"""
+    Ottieni gli indici di errore corrispondenti a una coordinata.
+    """"""
+    indici_errore = []
+    
+    # Itera attraverso tutti gli indici delle coordinate
+    for i in range(len(self.coordinate)):
+        # Se il nome della coordinata corrisponde, aggiungi l'indice
+        if self.coordinate[i].nome == nome_coordinata:
+            indici_errore.append(i)
+            
+    return indici_errore",i,i,n
+62b87b7e9a0c4fa8b80b35bc,"def _aggiorna_contesto(self, contesto):
+""""""
+
+Aggiorna il *contesto* con le proprietà di questo grafo.
+
+*context.error* viene aggiornato aggiungendo gli indici degli errori.
+Esempio di subcontext per un grafo con i campi ""E,t,error_E_low"":
+`{""error"": {""x_low"": {""index"": 2}}}`.
+Nota che i nomi degli errori sono chiamati ""x"", ""y"" e ""z""
+(questo corrisponde alle prime tre coordinate, se presenti),
+il che consente di semplificare la rappresentazione grafica.
+I valori esistenti non vengono rimossi
+da *context.value* e dai suoi subcontesti.
+
+Viene chiamato durante la ""distruzione"" del grafo (ad esempio,
+nella classe :class:`.ToCSV`). Per ""distruzione"" si intende la conversione
+in un'altra struttura (come il testo) nel flusso di lavoro.
+L'oggetto grafo non viene realmente distrutto in questo processo.""""""","def _aggiorna_contesto(self, contesto):
+    # Dictionary mapping coordinate names to x,y,z labels
+    coord_map = {0: 'x', 1: 'y', 2: 'z'}
+    
+    # Initialize error subcontext if it doesn't exist
+    if 'error' not in contesto:
+        contesto['error'] = {}
+        
+    # Iterate through fields looking for error fields
+    for i, field in enumerate(self.fields):
+        # Check for error fields (containing 'error' in name)
+        if 'error' in field.lower():
+            # Extract coordinate index from field name
+            for coord_idx, coord_name in coord_map.items():
+                if f'error_{coord_name}' in field.lower():
+                    # Add low/high error indices
+                    if '_low' in field.lower():
+                        contesto['error'][f'{coord_name}_low'] = {'index': i}
+                    elif '_high' in field.lower():
+                        contesto['error'][f'{coord_name}_high'] = {'index': i}
+                    break
+                    
+    return contesto",e,b,e
+62b87b4f9a0c4fa8b80b3580,"def integrale(gruppi, limiti):
+""""""
+
+Calcola l'integrale (scala per un istogramma).
+
+*i gruppi* contengono i valori, mentre *i limiti* formano la griglia  
+per l'integrazione.  
+Il loro formato è definito nella descrizione della classe :class:`.histogram`.
+""""""","def integrale(gruppi, limiti):
+    """"""
+    Calcola l'integrale (scala per un istogramma).
+    
+    *i gruppi* contengono i valori, mentre *i limiti* formano la griglia  
+    per l'integrazione.  
+    Il loro formato è definito nella descrizione della classe :class:`.histogram`.
+    """"""
+    # Verifica che i gruppi e i limiti abbiano dimensioni compatibili
+    if len(gruppi) != len(limiti) - 1:
+        raise ValueError(""Il numero di gruppi deve essere uguale al numero di limiti - 1"")
+        
+    integrale = 0.0
+    
+    # Calcola l'integrale come somma delle aree dei rettangoli
+    for i in range(len(gruppi)):
+        # Area = altezza (valore del gruppo) * base (larghezza dell'intervallo)
+        larghezza = limiti[i+1] - limiti[i]
+        area = gruppi[i] * larghezza
+        integrale += area
+        
+    return integrale",i,i,i
+62b87af19a0c4fa8b80b34f7,"def differenza(d1, d2, livello=-1):
+""""""
+
+Restituisce un dizionario con gli elementi di *d1* che non sono contenuti in *d2*.
+
+Il parametro *livello* definisce la profondità massima della ricorsione. Per una ricorsione infinita, impostare *livello* a -1. Per livello 1, se una chiave è presente sia in *d1* che in *d2* ma ha valori diversi, viene inclusa nella differenza. Consulta la funzione :func:`intersection` per ulteriori dettagli.
+
+*d1* e *d2* rimangono invariati. Tuttavia, *d1* o alcuni dei suoi sottodizionari potrebbero essere restituiti direttamente. Effettua una copia profonda (deep copy) del risultato quando appropriato.
+
+.. versione aggiunta:: 0.5
+   Aggiunto il parametro *livello*.
+""""""","def differenza(d1, d2, livello=-1):
+    """"""
+    Restituisce un dizionario con gli elementi di *d1* che non sono contenuti in *d2*.
+    
+    Il parametro *livello* definisce la profondità massima della ricorsione. Per una ricorsione infinita, 
+    impostare *livello* a -1. Per livello 1, se una chiave è presente sia in *d1* che in *d2* ma ha valori diversi,
+    viene inclusa nella differenza.
+    
+    Args:
+        d1: Primo dizionario
+        d2: Secondo dizionario
+        livello: Profondità massima della ricorsione (-1 per ricorsione infinita)
+        
+    Returns:
+        Dizionario contenente gli elementi di d1 non presenti in d2
+    """"""
+    result = {}
+    
+    # Se livello è 0, non fare ulteriori ricorsioni
+    if livello == 0:
+        return {}
+        
+    # Decrementa livello se non è -1 (ricorsione infinita)
+    next_level = livello - 1 if livello > 0 else -1
+    
+    for key in d1:
+        # Se la chiave non è in d2, aggiungi l'intero valore
+        if key not in d2:
+            result[key] = d1[key]
+        # Se entrambi i valori sono dizionari e il livello lo permette, ricorri
+        elif isinstance(d1[key], dict) and isinstance(d2[key], dict) and livello != 1:
+            diff = differenza(d1[key], d2[key], next_level)
+            if diff:
+                result[key] = diff
+        # Se i valori sono diversi e siamo al livello 1 o superiore
+        elif d1[key] != d2[key] and livello >= 1:
+            result[key] = d1[key]
+            
+    return result",i,b,n
+62b86aa3b4d922cb0e688d36,"def _valida_etichette(etichette):
+""""""
+
+Verifica che le chiavi e i valori nelle etichette fornite corrispondano alle rispettive espressioni regolari.
+
+### Argomenti:
+- **etichette (dict)**: il dizionario contenente le diverse etichette da validare.
+
+### Eccezioni:
+- **ValidationError**: viene sollevata se una qualsiasi delle chiavi o dei valori delle etichette non corrisponde alla rispettiva espressione regolare. L'errore contiene come messaggio la lista di tutti gli errori che si sono verificati nelle etichette. Ogni elemento della lista è un dizionario con una coppia chiave-valore:
+  - **key**: la chiave dell'etichetta o il valore dell'etichetta per cui si è verificato un errore, come stringa.
+  - **value**: il messaggio di errore.
+
+#### Esempio di codice:
+```python
+# Esempio:
+labels = {
+    ""key1"": ""valid"",
+    ""key2"": [""invalid""],
+    ""$$"": ""invalid"",
+    True: True,
+}
+try:
+    _validate_labels(etichette)
+except ValidationError as err:
+    assert err.messages == [
+        {""['invalid']"": 'expected string or bytes-like object'},
+        {'$$': ""Label key '$$' does not match the regex [...]""},
+        {'True': 'expected string or bytes-like object'},
+        {'True': 'expected string or bytes-like object'},
+    ]
+""""""","def _valida_etichette(etichette):
+    import re
+    
+    # Regex patterns for validation
+    key_pattern = r'^[a-zA-Z][a-zA-Z0-9_-]*$'
+    value_pattern = r'^[a-zA-Z0-9_-]+$'
+    
+    errors = []
+    
+    # Validate each key-value pair
+    for key, value in etichette.items():
+        
+        # Validate key type
+        if not isinstance(key, str):
+            errors.append({
+                str(key): 'expected string or bytes-like object'
+            })
+            continue
+            
+        # Validate key format
+        if not re.match(key_pattern, key):
+            errors.append({
+                key: f""Label key '{key}' does not match the regex {key_pattern}""
+            })
+            
+        # Validate value type
+        if not isinstance(value, str):
+            errors.append({
+                str(value): 'expected string or bytes-like object'
+            })
+            continue
+            
+        # Validate value format
+        if not re.match(value_pattern, value):
+            errors.append({
+                value: f""Label value '{value}' does not match the regex {value_pattern}""
+            })
+    
+    # If any errors occurred, raise ValidationError
+    if errors:
+        raise ValidationError(errors)",e,b,e
+62b86a4fb4d922cb0e688cf7,"
+def valida_chiave(chiave):
+    """"""
+    Valida la chiave fornita rispetto alla corrispondente espressione regolare.
+
+    Argomenti:
+        chiave: la stringa da validare
+
+    Eccezioni:
+        ValidationError: se la chiave fornita non è conforme all'espressione regolare.
+    """"""
+","def valida_chiave(chiave):
+    """"""
+    Valida la chiave fornita rispetto alla corrispondente espressione regolare.
+
+    Argomenti:
+        chiave: la stringa da validare
+
+    Eccezioni:
+        ValidationError: se la chiave fornita non è conforme all'espressione regolare.
+    """"""
+    import re
+
+    class ValidationError(Exception):
+        pass
+
+    # Pattern regex per validare la chiave
+    pattern = r'^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$'
+
+    # Verifica se la chiave corrisponde al pattern
+    if not re.match(pattern, chiave):
+        raise ValidationError(""La chiave fornita non è valida"")
+
+    return True",i,b,i
+62b43427903eeb48555d3ea5,"def formatta(
+                self,
+                sql: AnyStr,
+                parametri: Union[Dict[Union[str, int], Any], Sequence[Any]],
+        ) -> Tuple[AnyStr, Union[Dict[Union[str, int], Any], Sequence[Any]]]:
+""""""
+
+Converte la query SQL per utilizzare i parametri in stile ""out"" invece dei parametri in stile ""in"".
+
+**sql** (:class:`str` o :class:`bytes`) è la query SQL.
+
+dddd
+Restituisce una :class:`tuple` contenente:
+
+- La query SQL formattata (:class:`str` o :class:`bytes`).
+
+- L'insieme dei parametri convertiti in stile ""out"" (:class:`dict` o :class:`list`).
+""""""","def formatta(
+    self,
+    sql: AnyStr,
+    parametri: Union[Dict[Union[str, int], Any], Sequence[Any]],
+) -> Tuple[AnyStr, Union[Dict[Union[str, int], Any], Sequence[Any]]]:
+    """"""
+    Converte la query SQL per utilizzare i parametri in stile ""out"" invece dei parametri in stile ""in"".
+
+    Args:
+        sql (AnyStr): La query SQL.
+        parametri (Union[Dict[Union[str, int], Any], Sequence[Any]]): I parametri da convertire.
+
+    Returns:
+        Tuple[AnyStr, Union[Dict[Union[str, int], Any], Sequence[Any]]]: Tupla contenente la query SQL formattata
+        e l'insieme dei parametri convertiti.
+    """"""
+    # Se i parametri sono una sequenza
+    if isinstance(parametri, (list, tuple)):
+        # Converte ogni ? in %s
+        sql = sql.replace('?', '%s')
+        return sql, parametri
+        
+    # Se i parametri sono un dizionario
+    elif isinstance(parametri, dict):
+        # Converte ogni :nome in %(nome)s
+        for key in parametri:
+            if isinstance(sql, str):
+                sql = sql.replace(f':{key}', f'%({key})s')
+            else:
+                sql = sql.replace(f':{key}'.encode(), f'%({key})s'.encode())
+        return sql, parametri
+        
+    else:
+        raise TypeError(""I parametri devono essere una sequenza o un dizionario"")",i,b,i
+62b45e165108cfac7f210a16,"def valida_come_versione_precedente_version(self, precedente):
+    """"""
+    Verifica che ""precedente"" sia una versione precedente valida dell'oggetto inventario corrente.
+
+    La variabile di input ""precedente"" deve essere un oggetto di tipo InventoryValidator
+    e si presume che sia l'inventario corrente (self) sia l'inventario ""prior"" siano stati
+    verificati per coerenza interna.
+    """"""
+","def valida_come_versione_precedente_version(self, precedente):
+    """"""
+    Verifica che ""precedente"" sia una versione precedente valida dell'oggetto inventario corrente.
+
+    La variabile di input ""precedente"" deve essere un oggetto di tipo InventoryValidator
+    e si presume che sia l'inventario corrente (self) sia l'inventario ""prior"" siano stati
+    verificati per coerenza interna.
+    """"""
+    # Verifica che precedente sia un oggetto InventoryValidator
+    if not isinstance(precedente, type(self)):
+        raise TypeError(""L'oggetto precedente deve essere dello stesso tipo dell'inventario corrente"")
+
+    # Verifica che la versione precedente sia effettivamente precedente
+    if precedente.version >= self.version:
+        raise ValueError(""La versione precedente deve avere un numero di versione minore"")
+
+    # Verifica che tutti gli elementi presenti nella versione precedente 
+    # siano ancora presenti nella versione corrente (a meno di eliminazioni)
+    for item_id in precedente.items:
+        if item_id in self.items:
+            # Se l'item esiste in entrambe le versioni, verifica che la quantità non sia diminuita
+            # a meno che non sia stato registrato un consumo
+            if (self.items[item_id].quantity < precedente.items[item_id].quantity and
+                not self.items[item_id].consumed):
+                raise ValueError(f""Quantità diminuita per item {item_id} senza registrazione di consumo"")
+            
+            # Verifica che le proprietà immutabili non siano cambiate
+            if self.items[item_id].item_type != precedente.items[item_id].item_type:
+                raise ValueError(f""Tipo dell'item {item_id} modificato tra le versioni"")
+
+    # Se tutte le verifiche sono passate, la versione precedente è valida
+    return True",i,b,i
+62b45e165108cfac7f210a17,"def ottieni_mappa_percorsi_logici(inventario, versione):`
+""""""
+Ottiene una mappa dei percorsi logici nello stato verso i file su disco per una determinata versione nell'inventario.
+
+Restituisce un dizionario: `logical_path_in_state -> set(content_files)`
+
+Il set di `content_files` può includere riferimenti a file duplicati presenti in versioni successive rispetto alla versione descritta.
+""""""","def ottieni_mappa_percorsi_logici(inventario, versione):
+    mappa_percorsi = {}
+    
+    # Itera su tutte le versioni fino a quella specificata
+    for v in range(versione + 1):
+        if v in inventario:
+            # Per ogni file nella versione
+            for file_info in inventario[v]:
+                percorso_logico = file_info['percorso_logico']
+                file_contenuto = file_info['file_contenuto']
+                
+                # Aggiungi o aggiorna il set di file per questo percorso logico
+                if percorso_logico not in mappa_percorsi:
+                    mappa_percorsi[percorso_logico] = set()
+                mappa_percorsi[percorso_logico].add(file_contenuto)
+                
+    return mappa_percorsi",i,i,n
+62b463153879012d1948149a,"
+def _raggruppa_file_per_nome_file_xml(sorgente, nome_xml, lista_file):
+""""""
+Raggruppa i file per il nome base degli XML
+
+Raggruppa i file in base al nome base degli XML e restituisce i dati in formato dizionario.
+
+ Parametri
+----------
+    nome_xml : str  
+    Nomi dei file XML.  
+
+lista_file: list  
+    Lista dei file presenti nella cartella o nell'archivio zip.  
+Ritorna
+-------
+dict  
+    - chiave: nome dei file XML.  
+    - valore: Package.  
+""""""","def _raggruppa_file_per_nome_file_xml(sorgente, nome_xml, lista_file):
+    """"""
+    Raggruppa i file per il nome base degli XML
+
+    Raggruppa i file in base al nome base degli XML e restituisce i dati in formato dizionario.
+
+    Parametri
+    ----------
+        nome_xml : str  
+        Nomi dei file XML.  
+
+    lista_file: list  
+        Lista dei file presenti nella cartella o nell'archivio zip.  
+    Ritorna
+    -------
+    dict  
+        - chiave: nome dei file XML.  
+        - valore: Package.  
+    """"""
+    risultato = {}
+    
+    # Itera sui nomi XML
+    for xml in nome_xml:
+        file_correlati = []
+        
+        # Cerca i file correlati nella lista dei file
+        for file in lista_file:
+            if xml in file:
+                file_correlati.append(file)
+                
+        # Se ci sono file correlati, crea un package
+        if file_correlati:
+            package = {
+                'xml': xml,
+                'files': file_correlati,
+                'source': sorgente
+            }
+            risultato[xml] = package
+            
+    return risultato",i,b,e
+62b463153879012d1948149c,"
+def seleziona_nomi_file_per_prefisso(prefisso, lista_file):
+""""""
+Ottieni i file che appartengono a un pacchetto di documenti.
+
+Restituisce i file della lista `files` i cui nomi iniziano con il prefisso `prefix`.
+
+Parametri
+----------
+prefisso : `str`  
+    Prefisso del nome del file.  
+
+lista_file : `list` di `str`  
+    Percorsi dei file.  
+
+Ritorno
+-------
+list  
+    Percorsi dei file i cui nomi base corrispondono al prefisso specificato.  ","def seleziona_nomi_file_per_prefisso(prefisso, lista_file):
+    """"""
+    Ottieni i file che appartengono a un pacchetto di documenti.
+
+    Restituisce i file della lista `files` i cui nomi iniziano con il prefisso `prefix`.
+
+    Parametri
+    ----------
+    prefisso : `str`  
+        Prefisso del nome del file.  
+
+    lista_file : `list` di `str`  
+        Percorsi dei file.  
+
+    Ritorno
+    -------
+    list  
+        Percorsi dei file i cui nomi base corrispondono al prefisso specificato.  
+    """"""
+    # Creo una lista vuota per i file che corrispondono al prefisso
+    file_selezionati = []
+    
+    # Scorro la lista dei file
+    for file in lista_file:
+        # Estraggo il nome base del file dal percorso
+        nome_file = file.split('/')[-1]
+        
+        # Verifico se il nome del file inizia con il prefisso
+        if nome_file.startswith(prefisso):
+            file_selezionati.append(file)
+            
+    return file_selezionati",i,i,n
+62b463153879012d1948149d,"
+def _esplora_cartella(cartella):  
+""""""
+Ottiene i dati dei pacchetti dalla cartella  
+
+Raggruppa i file in base al loro nome base XML e restituisce i dati in formato dizionario.  
+
+Parametri  
+----------  
+cartella : str  
+    Cartella del pacchetto  
+
+Restituisce  
+-------  
+dict  
+""""""","def _esplora_cartella(cartella):
+    """"""
+    Ottiene i dati dei pacchetti dalla cartella  
+
+    Raggruppa i file in base al loro nome base XML e restituisce i dati in formato dizionario.  
+
+    Parametri  
+    ----------  
+    cartella : str  
+        Cartella del pacchetto  
+
+    Restituisce  
+    -------  
+    dict
+    """"""
+    import os
+    from collections import defaultdict
+    
+    # Dizionario per raggruppare i file per nome base
+    file_dict = defaultdict(list)
+    
+    # Esplora tutti i file nella cartella
+    for file in os.listdir(cartella):
+        if file.endswith('.xml'):
+            # Ottieni il nome base rimuovendo l'estensione
+            base_name = os.path.splitext(file)[0]
+            # Aggiungi il percorso completo del file alla lista corrispondente
+            file_dict[base_name].append(os.path.join(cartella, file))
+            
+    # Converti defaultdict in dict normale
+    return dict(file_dict)",i,i,n
+62b463163879012d194814a4,"
+def _esplora_file_zip(percorso_zip):
+""""""
+Ottiene i dati dei pacchetti dal percorso zip fornito.
+
+Raggruppa i file in base al nome base dei loro file XML e restituisce i dati in formato dizionario.
+
+Parametri
+----------
+percorso_zip : str  
+    Percorso del file zip.
+
+Restituisce
+-------
+dict
+","def _esplora_file_zip(percorso_zip):
+    """"""
+    Ottiene i dati dei pacchetti dal percorso zip fornito.
+    
+    Raggruppa i file in base al nome base dei loro file XML e restituisce i dati in formato dizionario.
+    
+    Parametri
+    ----------
+    percorso_zip : str  
+        Percorso del file zip.
+    
+    Restituisce
+    -------
+    dict
+    """"""
+    import zipfile
+    import os
+    from collections import defaultdict
+    
+    risultati = defaultdict(list)
+    
+    try:
+        with zipfile.ZipFile(percorso_zip, 'r') as zip_file:
+            # Ottiene la lista dei file nel zip
+            file_list = zip_file.namelist()
+            
+            # Itera attraverso i file
+            for file_name in file_list:
+                # Prende solo i file XML
+                if file_name.lower().endswith('.xml'):
+                    # Ottiene il nome base del file senza estensione
+                    base_name = os.path.splitext(os.path.basename(file_name))[0]
+                    
+                    # Legge il contenuto del file
+                    with zip_file.open(file_name) as f:
+                        contenuto = f.read()
+                        
+                    # Aggiunge il contenuto alla lista corrispondente nel dizionario
+                    risultati[base_name].append({
+                        'nome_file': file_name,
+                        'contenuto': contenuto
+                    })
+                    
+        return dict(risultati)
+        
+    except zipfile.BadZipFile:
+        raise ValueError(f""Il file {percorso_zip} non è un file zip valido"")
+    except FileNotFoundError:
+        raise FileNotFoundError(f""Il file {percorso_zip} non è stato trovato"")
+    except Exception as e:
+        raise Exception(f""Errore durante l'elaborazione del file zip: {str(e)}"")",i,i,i
+62b463163879012d194814a6,"def lista_file_da_file_zip(percorso_zip):
+
+
+Restituisce i file presenti in `percorso_zip`.
+
+Esempio:
+
+""""""
+[
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200069.pdf',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200069.xml',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071.pdf',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071.xml',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf01.tif',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf02.tif',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf03.tif',
+    '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf04.tif',
+]
+""""""","def lista_file_da_file_zip(percorso_zip):
+    """"""
+    Restituisce i file presenti in `percorso_zip`.
+    
+    Args:
+        percorso_zip (str): Percorso del file zip da analizzare
+        
+    Returns:
+        list: Lista dei nomi dei file contenuti nel file zip
+    """"""
+    import zipfile
+    
+    file_list = []
+    
+    with zipfile.ZipFile(percorso_zip, 'r') as zip_ref:
+        # Ottiene la lista dei file nel zip
+        file_list = zip_ref.namelist()
+        
+    return file_list",i,b,n
+62b4631b3879012d194814dd,"def fissa_prefisso_namespace_w(contesto):
+""""""
+
+Converte il testo che di default è 'w:st=""' in 'w-st=""'.
+""""""","def fissa_prefisso_namespace_w(contesto):
+    """"""
+    Converte il testo che di default è 'w:st=""' in 'w-st=""'.
+    """"""
+    return contesto.replace('w:st=""', 'w-st=""')",n,i,n
+62b463303879012d19481579,"
+def _estrai_numero_e_supplmento_da_elemento_issue(issue):
+""""""
+
+Estrai i possibili valori di numero e supplemento dai issue.
+""""""","def _estrai_numero_e_supplmento_da_elemento_issue(issue):
+    """"""
+    Estrai i possibili valori di numero e supplemento dai issue.
+    """"""
+    numero = None
+    supplemento = None
+    
+    # Check if issue is not None
+    if issue:
+        # Split issue by spaces to handle potential supplemento
+        parts = issue.strip().split()
+        
+        # Get first part as numero
+        if parts:
+            try:
+                numero = int(parts[0])
+            except ValueError:
+                numero = None
+                
+        # Check for supplemento in remaining parts
+        if len(parts) > 1:
+            supplemento = ' '.join(parts[1:])
+            
+    return numero, supplemento",e,b,n
+62b46746d2f69a53b4661722,"
+def assorbimento(self, argomenti):
+""""""
+
+Dato un insieme `argomenti` di espressioni, restituisce una nuova lista di espressioni applicando l'assorbimento e l'assorbimento negativo.
+
+Consulta https://en.wikipedia.org/wiki/Absorption_law
+
+Assorbimento::
+
+    A & (A | B) = A, A | (A & B) = A
+
+Assorbimento negativo::
+
+    A & (~A | B) = A & B, A | (~A & B) = A | B
+""""""","def assorbimento(self, argomenti):
+    # Create a copy of input list to avoid modifying original
+    result = argomenti.copy()
+    modified = True
+    
+    # Keep iterating while changes are being made
+    while modified:
+        modified = False
+        
+        # Compare each pair of expressions
+        for i in range(len(result)):
+            for j in range(len(result)):
+                if i != j:
+                    expr1 = result[i]
+                    expr2 = result[j]
+                    
+                    # Check for absorption law cases
+                    # A & (A | B) = A
+                    if expr1.is_and() and expr2.is_or():
+                        if expr1 in expr2.operands:
+                            result[i] = expr1
+                            modified = True
+                            
+                    # A | (A & B) = A         
+                    elif expr1.is_or() and expr2.is_and():
+                        if expr1 in expr2.operands:
+                            result[i] = expr1
+                            modified = True
+                            
+                    # Check for negative absorption cases
+                    # A & (~A | B) = A & B
+                    if expr1.is_and() and expr2.is_or():
+                        if expr1.negate() in expr2.operands:
+                            result[i] = expr1 & expr2.operands[1]
+                            modified = True
+                            
+                    # A | (~A & B) = A | B
+                    elif expr1.is_or() and expr2.is_and():
+                        if expr1.negate() in expr2.operands:
+                            result[i] = expr1 | expr2.operands[1]
+                            modified = True
+                            
+    # Remove duplicates and return
+    return list(set(result))",e,b,n
+62b86729b4d922cb0e688c2f,"def configurazione_base(utente, etcd_host=""localhost"", etcd_porta=2379):
+""""""
+
+Crea una configurazione con alcuni parametri semplici, che hanno un valore predefinito che può essere impostato.
+
+Argomenti:
+utente (str): il nome dell'utente per l'autenticazione statica.
+etcd_host (str): l'host per il database.
+etcd_porta (int): la porta per il database.
+
+Ritorna:
+dict: la configurazione creata.
+""""""","def configurazione_base(utente, etcd_host=""localhost"", etcd_porta=2379):
+    """"""
+    Crea una configurazione con alcuni parametri semplici, che hanno un valore predefinito che può essere impostato.
+
+    Argomenti:
+    utente (str): il nome dell'utente per l'autenticazione statica.
+    etcd_host (str): l'host per il database.
+    etcd_porta (int): la porta per il database.
+
+    Ritorna:
+    dict: la configurazione creata.
+    """"""
+    config = {
+        ""autenticazione"": {
+            ""tipo"": ""statica"",
+            ""utente"": utente
+        },
+        ""database"": {
+            ""tipo"": ""etcd"",
+            ""host"": etcd_host,
+            ""porta"": etcd_porta
+        }
+    }
+    
+    return config",n,b,i
+62b8982f755ee91dce50a241,"def normalizzata(self):
+""""""
+
+Restituisce una versione di questo oggetto rappresentata interamente utilizzando valori interi per gli attributi relativi.
+
+
+>>> relativedelta(days=1.5, hours=2).normalizzata()
+relativedelta(days=+1, hours=+14)
+
+
+:return:
+    Restituisce un oggetto di tipo :class:`dateutil.relativedelta.relativedelta`.
+""""""","def normalizzata(self):
+    """"""
+    Restituisce una versione di questo oggetto rappresentata interamente utilizzando valori interi per gli attributi relativi.
+
+    >>> relativedelta(days=1.5, hours=2).normalizzata()
+    relativedelta(days=+1, hours=+14)
+
+    :return:
+        Restituisce un oggetto di tipo :class:`dateutil.relativedelta.relativedelta`.
+    """"""
+    # Converti giorni decimali in ore
+    giorni_interi = int(self.days)
+    ore_da_giorni = (self.days - giorni_interi) * 24
+    
+    # Converti ore decimali in minuti
+    ore_totali = self.hours + ore_da_giorni
+    ore_intere = int(ore_totali)
+    minuti_da_ore = (ore_totali - ore_intere) * 60
+    
+    # Converti minuti decimali in secondi
+    minuti_totali = self.minutes + minuti_da_ore
+    minuti_interi = int(minuti_totali)
+    secondi_da_minuti = (minuti_totali - minuti_interi) * 60
+    
+    # Converti secondi decimali in microsecondi
+    secondi_totali = self.seconds + secondi_da_minuti
+    secondi_interi = int(secondi_totali)
+    microsecondi = int((secondi_totali - secondi_interi) * 1000000)
+    
+    return relativedelta(
+        years=self.years,
+        months=self.months,
+        days=giorni_interi,
+        hours=ore_intere,
+        minutes=minuti_interi,
+        seconds=secondi_interi,
+        microseconds=microsecondi
+    )",i,b,n
+62b87d24d292efb640a55670," 
+
+def estrai_versioni():
+
+""""""
+Ottieni le informazioni sulla versione o restituisci il valore predefinito se non è possibile ottenerle.
+""""""","def estrai_versioni():
+    """"""
+    Ottieni le informazioni sulla versione o restituisci il valore predefinito se non è possibile ottenerle.
+    """"""
+    try:
+        # Dizionario per memorizzare le versioni
+        versioni = {}
+        
+        # Leggi la versione da un file di configurazione
+        with open('version.txt', 'r') as f:
+            for line in f:
+                key, value = line.strip().split('=')
+                versioni[key.strip()] = value.strip()
+                
+        return versioni
+        
+    except (FileNotFoundError, IOError, ValueError):
+        # Restituisci valori predefiniti in caso di errore
+        return {
+            'major': '1',
+            'minor': '0',
+            'patch': '0'
+        }",i,b,e
+62b87d24d292efb640a5566d,"
+def piu_o_punto(pezzi):
+""""""
+Restituisci un """"+"""" se non è già presente, altrimenti restituisci un """".""""
+""""""","def piu_o_punto(pezzi):
+    """"""
+    Restituisci un ""+"" se non è già presente, altrimenti restituisci un "".""
+    """"""
+    if ""+"" not in pezzi:
+        return ""+""
+    else:
+        return "".""",n,i,n
+62b87d23d292efb640a5566b,"def esegui_comando(comandi, argomenti, cwd=None, verbose=False, nascondi_stderr=False, env=None):
+""""""
+Esegui il comando specificato.
+""""""","def esegui_comando(comandi, argomenti, cwd=None, verbose=False, nascondi_stderr=False, env=None):
+    """"""
+    Esegui il comando specificato.
+    """"""
+    import subprocess
+    import sys
+    
+    # Prepara il comando completo
+    if isinstance(comandi, str):
+        comando_completo = [comandi]
+    else:
+        comando_completo = list(comandi)
+        
+    # Aggiungi gli argomenti
+    if argomenti:
+        if isinstance(argomenti, str):
+            comando_completo.append(argomenti)
+        else:
+            comando_completo.extend(argomenti)
+            
+    # Gestisci stderr
+    stderr = subprocess.DEVNULL if nascondi_stderr else subprocess.PIPE
+    
+    # Stampa il comando se verbose è True
+    if verbose:
+        print(f""Esecuzione comando: {' '.join(comando_completo)}"")
+        
+    try:
+        # Esegui il comando
+        processo = subprocess.Popen(
+            comando_completo,
+            stdout=subprocess.PIPE,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            universal_newlines=True
+        )
+        
+        # Ottieni output
+        output, error = processo.communicate()
+        
+        # Gestisci eventuali errori
+        if processo.returncode != 0 and not nascondi_stderr:
+            print(f""Errore nell'esecuzione del comando: {error}"", file=sys.stderr)
+            return None
+            
+        return output.strip() if output else """"
+        
+    except Exception as e:
+        if not nascondi_stderr:
+            print(f""Eccezione durante l'esecuzione del comando: {str(e)}"", file=sys.stderr)
+        return None",i,b,i
+62b45e945108cfac7f210a4a,"
+def valida_gerarchia(self, oggetti_validati=True, controlla_digests=True, mostra_warning=False):
+    """"""""""
+    Valida la gerarchia di archiviazione.
+
+    Restituisce:
+        numero_oggetti - numero di oggetti verificati
+        object_validi - numero di oggetti verificati che sono risultati validi
+    """"""""""
+","def valida_gerarchia(self, oggetti_validati=True, controlla_digests=True, mostra_warning=False):
+    """"""
+    Valida la gerarchia di archiviazione.
+
+    Restituisce:
+        numero_oggetti - numero di oggetti verificati
+        object_validi - numero di oggetti verificati che sono risultati validi
+    """"""
+    numero_oggetti = 0
+    object_validi = 0
+    
+    try:
+        # Scansiona ricorsivamente la gerarchia
+        for root, dirs, files in os.walk(self.path):
+            for file in files:
+                numero_oggetti += 1
+                file_path = os.path.join(root, file)
+                
+                # Controlla validità oggetto
+                if oggetti_validati:
+                    try:
+                        with open(file_path, 'rb') as f:
+                            content = f.read()
+                            
+                        # Controlla digest se richiesto
+                        if controlla_digests:
+                            digest = hashlib.sha256(content).hexdigest()
+                            digest_file = file_path + '.digest'
+                            
+                            if os.path.exists(digest_file):
+                                with open(digest_file) as f:
+                                    stored_digest = f.read().strip()
+                                if digest == stored_digest:
+                                    object_validi += 1
+                            elif mostra_warning:
+                                print(f""Warning: digest file non trovato per {file_path}"")
+                        else:
+                            object_validi += 1
+                            
+                    except Exception as e:
+                        if mostra_warning:
+                            print(f""Warning: errore validazione {file_path}: {str(e)}"")
+                else:
+                    object_validi += 1
+                    
+    except Exception as e:
+        if mostra_warning:
+            print(f""Errore durante la scansione: {str(e)}"")
+            
+    return numero_oggetti, object_validi",i,b,i
+62b45e515108cfac7f210a3c,"def initializza(self):
+
+""""""Crea e inizializza una nuova radice di archiviazione OCFL.""""""","def initializza(self):
+    """"""Crea e inizializza una nuova radice di archiviazione OCFL.""""""
+    
+    # Crea la directory principale se non esiste
+    if not os.path.exists(self.root_path):
+        os.makedirs(self.root_path)
+    
+    # Crea il file namaste 0=ocfl_1.0
+    namaste_path = os.path.join(self.root_path, ""0=ocfl_1.0"") 
+    with open(namaste_path, ""w"") as f:
+        f.write(""ocfl_1.0"")
+        
+    # Crea la directory degli oggetti
+    objects_dir = os.path.join(self.root_path, ""objects"")
+    if not os.path.exists(objects_dir):
+        os.makedirs(objects_dir)
+        
+    # Crea il file ocfl_layout.json
+    layout = {
+        ""extension"": ""0000"",
+        ""description"": ""OCFL Storage Root""
+    }
+    layout_path = os.path.join(self.root_path, ""ocfl_layout.json"")
+    with open(layout_path, ""w"") as f:
+        json.dump(layout, f, indent=2)",i,e,e
+62b45e2eb89c9fd354170232,"
+def prossima_versione(versione):
+""""""
+Prossimo identificatore di versione seguendo il modello esistente.
+
+Deve gestire sia versioni con prefisso zero che versioni senza prefisso zero.
+""""""","def prossima_versione(versione):
+    """"""
+    Prossimo identificatore di versione seguendo il modello esistente.
+    
+    Deve gestire sia versioni con prefisso zero che versioni senza prefisso zero.
+    """"""
+    # Controlla se la versione ha un prefisso zero
+    has_zero_prefix = versione.startswith('0')
+    
+    # Converte la versione in numero intero
+    num = int(versione)
+    
+    # Incrementa di 1
+    next_num = num + 1
+    
+    # Se aveva prefisso zero, formatta con lo stesso numero di cifre
+    if has_zero_prefix:
+        width = len(versione)
+        return str(next_num).zfill(width)
+    
+    # Altrimenti ritorna il numero come stringa senza prefisso
+    return str(next_num)",i,b,n
+62b45e21e0d4551b0392c8ed,"def cerca_tipo_percorso(percorso):
+""""""
+Restituisce una stringa che indica il tipo di elemento presente nel percorso specificato.
+
+Valori restituiti:
+    ‘radice' - sembra essere una Radice di Archiviazione OCFL (OCFL Storage Root)
+    ‘oggetto' - sembra essere un Oggetto OCFL (OCFL Object)
+    'file' - un file, potrebbe essere un inventario
+    altra stringa - descrive un errore o una spiegazione del problema
+
+Si basa esclusivamente sui file ""0=*"" Namaste per determinare il tipo di directory.
+""""""","def cerca_tipo_percorso(percorso):
+    """"""
+    Restituisce una stringa che indica il tipo di elemento presente nel percorso specificato.
+
+    Valori restituiti:
+        'radice' - sembra essere una Radice di Archiviazione OCFL (OCFL Storage Root)
+        'oggetto' - sembra essere un Oggetto OCFL (OCFL Object)
+        'file' - un file, potrebbe essere un inventario
+        altra stringa - descrive un errore o una spiegazione del problema
+
+    Si basa esclusivamente sui file ""0=*"" Namaste per determinare il tipo di directory.
+    """"""
+    import os
+    
+    # Verifica se il percorso esiste
+    if not os.path.exists(percorso):
+        return ""Il percorso specificato non esiste""
+        
+    # Verifica se è un file
+    if os.path.isfile(percorso):
+        return ""file""
+        
+    # Verifica se è una directory
+    if os.path.isdir(percorso):
+        # Ottiene la lista dei file nella directory
+        files = os.listdir(percorso)
+        
+        # Cerca file Namaste che iniziano con ""0=""
+        namaste_files = [f for f in files if f.startswith(""0="")]
+        
+        if not namaste_files:
+            return ""Nessun file Namaste trovato nella directory""
+            
+        # Legge il contenuto del primo file Namaste trovato
+        with open(os.path.join(percorso, namaste_files[0]), 'r') as f:
+            content = f.read().strip().lower()
+            
+        # Verifica il tipo in base al contenuto
+        if ""ocfl_storage_root"" in content:
+            return ""radice""
+        elif ""ocfl_object"" in content:
+            return ""oggetto""
+            
+        return f""Tipo sconosciuto nel file Namaste: {content}""
+        
+    return ""Il percorso non è né un file né una directory""",i,b,i
+62ece4982e6aefcf4aabbd69,"
+def _sostituisci_registro(parametri_flusso, numero_registro, valore_registro):
+""""""
+Sostituisci il valore dai flussi con il numero di registro specificato.
+
+La chiave `valore_registro` nel dizionario verrà sostituita dal numero di registro specificato da `numero_registro`.
+
+:param parametri_flusso: Dizionario contenente i flussi definiti  
+:param numero_registro: Il numero del registro in cui il valore verrà memorizzato  
+:param valore_registro: Chiave da sostituire con il numero di registro  
+""""""","def _sostituisci_registro(parametri_flusso, numero_registro, valore_registro):
+    """"""
+    Sostituisci il valore dai flussi con il numero di registro specificato.
+    
+    La chiave `valore_registro` nel dizionario verrà sostituita dal numero di registro specificato da `numero_registro`.
+    
+    :param parametri_flusso: Dizionario contenente i flussi definiti  
+    :param numero_registro: Il numero del registro in cui il valore verrà memorizzato  
+    :param valore_registro: Chiave da sostituire con il numero di registro  
+    """"""
+    # Verifica se il valore_registro è presente nel dizionario
+    if valore_registro in parametri_flusso:
+        # Sostituisce il valore con il numero di registro
+        parametri_flusso[valore_registro] = numero_registro
+    
+    # Controlla anche i valori annidati nel dizionario
+    for chiave, valore in parametri_flusso.items():
+        if isinstance(valore, dict):
+            _sostituisci_registro(valore, numero_registro, valore_registro)
+        elif isinstance(valore, list):
+            for i, elemento in enumerate(valore):
+                if isinstance(elemento, dict):
+                    _sostituisci_registro(elemento, numero_registro, valore_registro)
+                elif elemento == valore_registro:
+                    valore[i] = numero_registro",i,b,n
+62ece4982e6aefcf4aabbd74,"def prepara_repository_da_archivio(
+    percorso_archivio: str,
+    nome_file: Optional[str] = None,
+    path_temporaneo: Union[PosixPath, str] = ""/tmp"",
+) -> str:
+""""""
+Dato un `percorso_archivio` esistente, decomprimilo.  
+Restituisce un URL del repository del file che può essere utilizzato come URL di origine.
+
+Questo metodo non gestisce il caso in cui l'archivio passato non esista.
+""""""","def prepara_repository_da_archivio(
+    percorso_archivio: str,
+    nome_file: Optional[str] = None,
+    path_temporaneo: Union[PosixPath, str] = ""/tmp"",
+) -> str:
+    import os
+    import tempfile
+    import zipfile
+    import tarfile
+    from pathlib import Path
+
+    # Create temporary directory
+    temp_dir = tempfile.mkdtemp(dir=path_temporaneo)
+    
+    # Get archive name if not provided
+    if nome_file is None:
+        nome_file = os.path.basename(percorso_archivio)
+    
+    # Extract based on file extension
+    if percorso_archivio.endswith('.zip'):
+        with zipfile.ZipFile(percorso_archivio, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+    elif percorso_archivio.endswith(('.tar.gz', '.tgz')):
+        with tarfile.open(percorso_archivio, 'r:gz') as tar_ref:
+            tar_ref.extractall(temp_dir)
+    elif percorso_archivio.endswith('.tar'):
+        with tarfile.open(percorso_archivio, 'r') as tar_ref:
+            tar_ref.extractall(temp_dir)
+            
+    # Return file URL format
+    return f""file://{temp_dir}""",e,b,n
+62ece4992e6aefcf4aabbd7b,"def scrivi_configurazione(nome_file_configurazione, configurazione_rendered, modo=0o600, sovrascrivi=False):
+""""""
+Dato un nome di file di configurazione di destinazione e un file YAML di configurazione renderizzato, scrivilo nel file.  
+Crea eventuali directory contenitrici, se necessario. Tuttavia, se il file esiste già e `sovrascrivi` è impostato su `False`, interrompi l'operazione prima di scrivere qualsiasi cosa.
+""""""","def scrivi_configurazione(nome_file_configurazione, configurazione_rendered, modo=0o600, sovrascrivi=False):
+    """"""
+    Dato un nome di file di configurazione di destinazione e un file YAML di configurazione renderizzato, scrivilo nel file.  
+    Crea eventuali directory contenitrici, se necessario. Tuttavia, se il file esiste già e `sovrascrivi` è impostato su `False`, interrompi l'operazione prima di scrivere qualsiasi cosa.
+    """"""
+    import os
+    import pathlib
+    
+    # Converti il percorso in oggetto Path
+    file_path = pathlib.Path(nome_file_configurazione)
+    
+    # Controlla se il file esiste già
+    if file_path.exists() and not sovrascrivi:
+        raise FileExistsError(f""Il file {nome_file_configurazione} esiste già e sovrascrivi=False"")
+        
+    # Crea le directory necessarie
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Scrivi il contenuto nel file con i permessi specificati
+    try:
+        # Imposta i permessi corretti durante la creazione del file
+        with os.fdopen(os.open(file_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, modo), 'w') as f:
+            f.write(configurazione_rendered)
+    except Exception as e:
+        raise IOError(f""Errore durante la scrittura del file {nome_file_configurazione}: {str(e)}"")",i,b,i
+62ece4992e6aefcf4aabbd7c,"def una_riga(script, separatore="" && ""):
+""""""
+Converte uno script in un comando su una sola riga.  
+Questo è utile per eseguire un singolo comando SSH e passare uno script su una sola riga.
+
+:param script:  
+:return:
+""""""","def una_riga(script, separatore="" && ""):
+    """"""
+    Converte uno script in un comando su una sola riga.  
+    Questo è utile per eseguire un singolo comando SSH e passare uno script su una sola riga.
+
+    :param script: Stringa contenente lo script con più righe
+    :param separatore: Separatore da usare tra i comandi (default "" && "")
+    :return: Stringa contenente lo script su una sola riga
+    """"""
+    # Divide lo script in righe
+    righe = script.strip().split('\n')
+    
+    # Rimuove gli spazi bianchi all'inizio e alla fine di ogni riga
+    righe = [riga.strip() for riga in righe]
+    
+    # Rimuove le righe vuote
+    righe = [riga for riga in righe if riga]
+    
+    # Unisce le righe usando il separatore
+    return separatore.join(righe)",i,i,n
+62ece4992e6aefcf4aabbd83,"def esegui_comando(comando, argomenti, cwd=None, verboso=False, nascondi_stderr=False, env=None):
+""""""
+Esegui il/i comando/i fornito/i.
+""""""","def esegui_comando(comando, argomenti, cwd=None, verboso=False, nascondi_stderr=False, env=None):
+    """"""
+    Esegui il/i comando/i fornito/i.
+    """"""
+    import subprocess
+    import sys
+
+    # Prepara il comando completo
+    if isinstance(comando, str):
+        cmd = [comando]
+    else:
+        cmd = list(comando)
+    
+    # Aggiungi gli argomenti
+    if argomenti:
+        if isinstance(argomenti, str):
+            cmd.append(argomenti)
+        else:
+            cmd.extend(argomenti)
+
+    # Imposta stderr
+    stderr = subprocess.DEVNULL if nascondi_stderr else subprocess.PIPE
+
+    try:
+        # Esegui il comando
+        if verboso:
+            print(f""Esecuzione comando: {' '.join(cmd)}"")
+        
+        processo = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            universal_newlines=True
+        )
+
+        # Ottieni output
+        output, error = processo.communicate()
+        
+        # Gestisci errori
+        if processo.returncode != 0 and not nascondi_stderr:
+            if error:
+                print(f""Errore: {error}"", file=sys.stderr)
+            return False
+            
+        if verboso and output:
+            print(output)
+            
+        return True
+
+    except Exception as e:
+        if not nascondi_stderr:
+            print(f""Errore nell'esecuzione del comando: {e}"", file=sys.stderr)
+        return False",i,b,i
+62ece4992e6aefcf4aabbd8a,"def carica_configurazioni(file_configurazioni, sovrascrivi=None, risolvi_env=True):
+    """"""
+    Dato un elenco di nomi di file di configurazione, carica e valida ciascun file di configurazione.
+    Restituisci i risultati come una tupla composta da:
+    - un dizionario che associa il nome del file di configurazione alla corrispondente configurazione analizzata,
+    - una sequenza di istanze di `logging.LogRecord` contenenti eventuali errori di analisi.
+    """"""","def carica_configurazioni(file_configurazioni, sovrascrivi=None, risolvi_env=True):
+    """"""
+    Dato un elenco di nomi di file di configurazione, carica e valida ciascun file di configurazione.
+    Restituisci i risultati come una tupla composta da:
+    - un dizionario che associa il nome del file di configurazione alla corrispondente configurazione analizzata,
+    - una sequenza di istanze di `logging.LogRecord` contenenti eventuali errori di analisi.
+    """"""
+    import yaml
+    import os
+    import logging
+    from pathlib import Path
+
+    configurazioni = {}
+    errori = []
+    logger = logging.getLogger(__name__)
+
+    # Assicurati che file_configurazioni sia una lista
+    if isinstance(file_configurazioni, (str, Path)):
+        file_configurazioni = [file_configurazioni]
+
+    for file_path in file_configurazioni:
+        try:
+            with open(file_path, 'r') as f:
+                config = yaml.safe_load(f)
+
+            # Risolvi variabili d'ambiente se richiesto
+            if risolvi_env:
+                config = _risolvi_variabili_ambiente(config)
+
+            # Applica sovrascritture se presenti
+            if sovrascrivi:
+                config = _applica_sovrascritture(config, sovrascrivi)
+
+            configurazioni[str(file_path)] = config
+
+        except Exception as e:
+            record = logger.makeLogRecord({
+                'msg': f""Errore nel caricamento del file {file_path}: {str(e)}"",
+                'levelno': logging.ERROR,
+                'exc_info': True
+            })
+            errori.append(record)
+
+    return configurazioni, errori
+
+def _risolvi_variabili_ambiente(config):
+    """"""Helper function per risolvere le variabili d'ambiente nel config""""""
+    if isinstance(config, dict):
+        return {k: _risolvi_variabili_ambiente(v) for k, v in config.items()}
+    elif isinstance(config, list):
+        return [_risolvi_variabili_ambiente(v) for v in config]
+    elif isinstance(config, str) and config.startswith('${') and config.endswith('}'):
+        env_var = config[2:-1]
+        return os.environ.get(env_var, config)
+    return config
+
+def _applica_sovrascritture(config, sovrascrivi):
+    """"""Helper function per applicare le sovrascritture al config""""""
+    if isinstance(sovrascrivi, dict):
+        for k, v in sovrascrivi.items():
+            if k in config and isinstance(config[k], dict) and isinstance(v, dict):
+                config[k] = _applica_sovrascritture(config[k], v)
+            else:
+                config[k] = v
+    return config",i,b,i
+62e60873d76274f8a4026bd8,"def gestori_protocollo(cls, versione_protocollo=None):
+    """"""
+    Restituisce un dizionario dei gestori di protocollo Bolt disponibili,
+    indicizzati per tuple di versione. Se viene fornita una versione di protocollo
+    esplicita, il dizionario conterrà zero o un elemento, a seconda che quella
+    versione sia supportata o meno. Se non viene fornita alcuna versione di protocollo,
+    verranno restituite tutte le versioni disponibili.
+
+    :param versione_protocollo: tupla che identifica una specifica versione
+        del protocollo (ad esempio, (3, 5)) oppure None
+    :return: dizionario che associa una tupla di versione alla classe del gestore
+        per tutte le versioni di protocollo rilevanti e supportate
+    :raise TypeError: se la versione del protocollo non è passata come una tupla
+    """"""","def gestori_protocollo(cls, versione_protocollo=None):
+    """"""
+    Restituisce un dizionario dei gestori di protocollo Bolt disponibili,
+    indicizzati per tuple di versione. Se viene fornita una versione di protocollo
+    esplicita, il dizionario conterrà zero o un elemento, a seconda che quella
+    versione sia supportata o meno. Se non viene fornita alcuna versione di protocollo,
+    verranno restituite tutte le versioni disponibili.
+
+    :param versione_protocollo: tupla che identifica una specifica versione
+        del protocollo (ad esempio, (3, 5)) oppure None
+    :return: dizionario che associa una tupla di versione alla classe del gestore
+        per tutte le versioni di protocollo rilevanti e supportate
+    :raise TypeError: se la versione del protocollo non è passata come una tupla
+    """"""
+    # Dizionario dei gestori di protocollo supportati
+    gestori = {
+        (3, 0): BoltProtocolV3Handler,
+        (4, 0): BoltProtocolV4Handler,
+        (4, 1): BoltProtocolV41Handler,
+        (4, 4): BoltProtocolV44Handler,
+        (5, 0): BoltProtocolV5Handler
+    }
+
+    # Se non viene specificata una versione, restituisce tutti i gestori
+    if versione_protocollo is None:
+        return gestori
+
+    # Verifica che la versione sia una tupla
+    if not isinstance(versione_protocollo, tuple):
+        raise TypeError(""La versione del protocollo deve essere una tupla"")
+
+    # Se viene specificata una versione, restituisce solo il gestore corrispondente
+    # se supportato, altrimenti un dizionario vuoto
+    return {versione_protocollo: gestori[versione_protocollo]} if versione_protocollo in gestori else {}",i,i,i
+62e60e3bd76274f8a4026d1a,"def da_valori_grezzi(cls, valori):
+    """"""
+    Crea un oggetto Bookmarks da una lista di valori stringa grezzi dei segnalibri.
+
+    Non dovresti aver bisogno di utilizzare questo metodo a meno che tu non voglia
+    deserializzare i segnalibri.
+
+    :param valori: Valori stringa ASCII (segnalibri grezzi)
+    :type valori: Iterable[str]
+    """"""","def da_valori_grezzi(cls, valori):
+    """"""
+    Crea un oggetto Bookmarks da una lista di valori stringa grezzi dei segnalibri.
+
+    Non dovresti aver bisogno di utilizzare questo metodo a meno che tu non voglia
+    deserializzare i segnalibri.
+
+    :param valori: Valori stringa ASCII (segnalibri grezzi)
+    :type valori: Iterable[str]
+    """"""
+    segnalibri = []
+    for valore in valori:
+        try:
+            # Rimuove spazi bianchi e caratteri non stampabili
+            valore_pulito = valore.strip()
+            if valore_pulito:  # Ignora stringhe vuote
+                segnalibri.append(valore_pulito)
+        except (AttributeError, TypeError):
+            # Ignora valori non stringa
+            continue
+            
+    return cls(segnalibri)",i,i,n
+62b8b4baeb7e40a82d2d1137,"def verifcaOggetto(iface, candidato, tentativo=False):
+""""""
+Verifica che il *candidato* possa fornire correttamente l'*iface*.
+
+Questo comporta:
+
+- Assicurarsi che il candidato dichiari di fornire l'interfaccia utilizzando ``iface.providedBy`` (a meno che *tentative* sia `True`, nel qual caso questo passaggio viene saltato). Questo significa che la classe del candidato dichiara di `implementare <zope.interface.implementer>` l'interfaccia, oppure che il candidato stesso dichiara di `fornire <zope.interface.provider>` l'interfaccia.
+
+- Assicurarsi che il candidato definisca tutti i metodi necessari.
+
+- Assicurarsi che i metodi abbiano la firma corretta (per quanto possibile).
+
+- Assicurarsi che il candidato definisca tutti gli attributi necessari.
+
+:return bool: Restituisce un valore vero se tutto ciò che poteva essere verificato è stato superato.
+:raises zope.interface.Invalid: Se una qualsiasi delle condizioni precedenti non è soddisfatta.
+
+.. versionchanged:: 5.0  
+    Se più metodi o attributi sono invalidi, tutti questi errori vengono raccolti e riportati. In precedenza, veniva segnalato solo il primo errore. Come caso speciale, se è presente un solo errore, viene sollevato singolarmente, come in passato.
+""""""","def verifcaOggetto(iface, candidato, tentativo=False):
+    from zope.interface import Invalid
+    from zope.interface.verify import verifyObject
+    from zope.interface.exceptions import MultipleInvalid
+    
+    errori = []
+    
+    # Verifica che il candidato dichiari di fornire l'interfaccia
+    if not tentativo:
+        if not iface.providedBy(candidato):
+            errori.append(Invalid(f""L'oggetto non dichiara di fornire l'interfaccia {iface.__name__}""))
+            
+    # Verifica i metodi richiesti
+    for nome, desc in iface.namesAndDescriptions(1):
+        if hasattr(desc, 'getSignatureInfo'): # è un metodo
+            if not hasattr(candidato, nome):
+                errori.append(Invalid(f""Il metodo richiesto '{nome}' non è presente""))
+            else:
+                metodo = getattr(candidato, nome)
+                if not callable(metodo):
+                    errori.append(Invalid(f""'{nome}' deve essere un metodo chiamabile""))
+                else:
+                    # Verifica la firma del metodo
+                    try:
+                        verifyObject(desc, metodo, tentativo)
+                    except Invalid as e:
+                        errori.append(e)
+        else: # è un attributo
+            if not hasattr(candidato, nome):
+                errori.append(Invalid(f""L'attributo richiesto '{nome}' non è presente""))
+                
+    # Gestione degli errori
+    if len(errori) > 1:
+        raise MultipleInvalid(errori)
+    elif len(errori) == 1:
+        raise errori[0]
+        
+    return True",i,i,i
+6306292652e177c0ba469f34,"def recupera_tipo_contenuto(url: str) -> Optional[str]:
+""""""
+Recupera l'intestazione HEAD dell'URL remoto per determinare il tipo di contenuto.
+""""""","def recupera_tipo_contenuto(url: str) -> Optional[str]:
+    """"""
+    Recupera l'intestazione HEAD dell'URL remoto per determinare il tipo di contenuto.
+    """"""
+    import requests
+    from typing import Optional
+    
+    try:
+        # Effettua una richiesta HEAD all'URL
+        response = requests.head(url, allow_redirects=True)
+        
+        # Verifica se la richiesta ha avuto successo
+        if response.status_code == 200:
+            # Restituisce il Content-Type dall'header della risposta
+            return response.headers.get('Content-Type')
+        
+        return None
+        
+    except requests.RequestException:
+        # In caso di errori nella richiesta, restituisce None
+        return None",i,e,n
+630629e752e177c0ba46a0fb,"def invia_documento(url, dati, tempo_limite=10, metodo=""post"", *args, **kwargs):
+""""""
+Metodo di supporto per inviare un documento tramite POST.
+
+Gli ulteriori parametri ``*args`` e ``**kwargs`` saranno passati a ``requests.post``.
+
+:arg url: URL completo a cui inviare, incluso il protocollo  
+:arg dato: Dizionario (sarà codificato come form), bytes o oggetto simile a un file da inviare nel corpo della richiesta  
+:arg tempo_limite: Secondi di attesa per la risposta (predefinito: 10)  
+:arg method: Metodo da utilizzare, predefinito: post  
+:returns: Tupla contenente il codice di stato (int o None) e l'errore (istanza della classe di eccezione o None)
+""""""","def invia_documento(url, dati, tempo_limite=10, metodo=""post"", *args, **kwargs):
+    """"""
+    Metodo di supporto per inviare un documento tramite POST.
+
+    Gli ulteriori parametri ``*args`` e ``**kwargs`` saranno passati a ``requests.post``.
+
+    :arg url: URL completo a cui inviare, incluso il protocollo  
+    :arg dato: Dizionario (sarà codificato come form), bytes o oggetto simile a un file da inviare nel corpo della richiesta  
+    :arg tempo_limite: Secondi di attesa per la risposta (predefinito: 10)  
+    :arg method: Metodo da utilizzare, predefinito: post  
+    :returns: Tupla contenente il codice di stato (int o None) e l'errore (istanza della classe di eccezione o None)
+    """"""
+    import requests
+    from requests.exceptions import RequestException
+    
+    try:
+        # Imposta il timeout
+        kwargs['timeout'] = tempo_limite
+        
+        # Seleziona il metodo HTTP appropriato
+        if metodo.lower() == ""post"":
+            response = requests.post(url, data=dati, *args, **kwargs)
+        elif metodo.lower() == ""get"":
+            response = requests.get(url, params=dati, *args, **kwargs)
+        elif metodo.lower() == ""put"":
+            response = requests.put(url, data=dati, *args, **kwargs)
+        elif metodo.lower() == ""delete"":
+            response = requests.delete(url, data=dati, *args, **kwargs)
+        else:
+            return None, ValueError(f""Metodo HTTP non supportato: {metodo}"")
+            
+        # Verifica se la richiesta ha avuto successo
+        response.raise_for_status()
+        
+        return response.status_code, None
+        
+    except RequestException as e:
+        # Gestisce gli errori di rete/HTTP
+        status_code = e.response.status_code if hasattr(e, 'response') and e.response is not None else None
+        return status_code, e
+    except Exception as e:
+        # Gestisce altri errori imprevisti
+        return None, e",i,b,e
+6306091a73426c38ae68acc8,"def lista_di_nomi_file(directory_settaggi, opzioni_specifiche):
+""""""
+Crea un nuovo tipo complesso IniType
+""""""","def lista_di_nomi_file(directory_settaggi, opzioni_specifiche):
+    """"""
+    Crea un nuovo tipo complesso IniType
+    """"""
+    import os
+    
+    file_list = []
+    
+    # Verifica che la directory esista
+    if not os.path.isdir(directory_settaggi):
+        return file_list
+        
+    # Scansiona tutti i file nella directory
+    for file in os.listdir(directory_settaggi):
+        # Verifica se il file corrisponde alle opzioni specificate
+        if all(opt in file for opt in opzioni_specifiche):
+            # Aggiunge il percorso completo del file alla lista
+            file_path = os.path.join(directory_settaggi, file)
+            file_list.append(file_path)
+            
+    return file_list",i,b,n
+6306092c73426c38ae68ad02,"def valida_deprecazione_argomenti(self, argomenti_linea_comando, dizionario_argomenti):
+    """"""
+    Valida e stampa gli argomenti deprecati.
+
+    :param argomenti_linea_comando: il dizionario degli argomenti dalla CLI
+    :param dizionario_argomenti: il dizionario degli argomenti dai file
+    """"""","def valida_deprecazione_argomenti(self, argomenti_linea_comando, dizionario_argomenti):
+    """"""
+    Valida e stampa gli argomenti deprecati.
+
+    :param argomenti_linea_comando: il dizionario degli argomenti dalla CLI
+    :param dizionario_argomenti: il dizionario degli argomenti dai file
+    """"""
+    # Lista degli argomenti deprecati da controllare
+    argomenti_deprecati = {
+        'old_arg1': 'new_arg1',
+        'old_arg2': 'new_arg2',
+        'old_arg3': 'new_arg3'
+    }
+
+    # Controlla gli argomenti dalla linea di comando
+    for arg_vecchio, arg_nuovo in argomenti_deprecati.items():
+        if arg_vecchio in argomenti_linea_comando:
+            print(f""ATTENZIONE: L'argomento '{arg_vecchio}' è deprecato. ""
+                  f""Utilizzare '{arg_nuovo}' al suo posto."")
+
+    # Controlla gli argomenti dal dizionario
+    if dizionario_argomenti:
+        for arg_vecchio, arg_nuovo in argomenti_deprecati.items():
+            if arg_vecchio in dizionario_argomenti:
+                print(f""ATTENZIONE: L'argomento '{arg_vecchio}' nel file di configurazione è deprecato. ""
+                      f""Utilizzare '{arg_nuovo}' al suo posto."")",i,i,b
+6306092e73426c38ae68ad09,"def valida_lunghezza_argomenti(self, argomenti):  
+""""""
+Verifica se il valore degli argomenti non supera la lunghezza specificata.  
+
+:param argomenti: Gli argomenti ricevuti.  
+""""""","def valida_lunghezza_argomenti(self, argomenti):
+    """"""
+    Verifica se il valore degli argomenti non supera la lunghezza specificata.  
+
+    :param argomenti: Gli argomenti ricevuti.  
+    """"""
+    # Definisce la lunghezza massima consentita
+    LUNGHEZZA_MASSIMA = 100
+
+    # Controlla ogni argomento
+    for chiave, valore in argomenti.items():
+        # Verifica se il valore è una stringa
+        if isinstance(valore, str):
+            # Controlla la lunghezza
+            if len(valore) > LUNGHEZZA_MASSIMA:
+                raise ValueError(f""L'argomento '{chiave}' supera la lunghezza massima consentita di {LUNGHEZZA_MASSIMA} caratteri"")",i,i,i

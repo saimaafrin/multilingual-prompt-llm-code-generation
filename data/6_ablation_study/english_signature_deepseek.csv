@@ -1,0 +1,1693 @@
+id,prompt,generated_code,comments,identifiers,literals,notes
+62e60f43d76274f8a4026e28,"def hydrate_time(nanoseconds, tz=None):
+""""""
+Idratatore per valori di `Time` e `LocalTime`.
+
+:param nanoseconds:  
+:param tz:  
+:return: Time
+""""""","def hydrate_time(nanosecondi, tz=None):
+    """"""
+    Idratatore per valori di `Time` e `LocalTime`.
+
+    :param nanosecondi: Tempo in nanosecondi.
+    :param tz: Fuso orario (opzionale).
+    :return: Oggetto `Time` rappresentante il tempo.
+    """"""
+    from datetime import datetime, time, timedelta
+    import pytz
+
+    # Converti nanosecondi in secondi
+    secondi = nanosecondi / 1e9
+
+    # Crea un oggetto datetime a partire dai secondi
+    data_epoch = datetime(1970, 1, 1)
+    tempo = data_epoch + timedelta(seconds=secondi)
+
+    # Se è specificato un fuso orario, applica la conversione
+    if tz:
+        fuso_orario = pytz.timezone(tz)
+        tempo = tempo.astimezone(fuso_orario)
+
+    # Estrai solo la parte temporale
+    tempo_finale = tempo.time()
+
+    return tempo_finale",i,i,n,signature translated
+62e60f3bd76274f8a4026e10,"def dehydrate_timedelta(value):
+""""""
+
+Deidratatore per valori di tipo `timedelta`.
+
+:param value:  
+:type value: timedelta  
+:return: 
+"""""" ","from datetime import timedelta
+
+def dehydrate_timedelta(value):
+    """"""
+    Deidratatore per valori di tipo `timedelta`.
+
+    :param value: Oggetto di tipo `timedelta` da deidratare.
+    :type value: timedelta
+    :return: Stringa rappresentante il valore in secondi.
+    :rtype: str
+    """"""
+    if not isinstance(value, timedelta):
+        raise TypeError(""Il parametro 'value' deve essere di tipo timedelta."")
+    
+    # Converti il timedelta in secondi totali
+    secondi_totali = int(value.total_seconds())
+    
+    # Restituisci la rappresentazione in stringa
+    return str(secondi_totali)",i,b,i,
+62e60f37d76274f8a4026dfd,"def dehydrate_time(value):
+    """"""
+    Disidratatore per valori di tipo `time`.
+
+    :param value: 
+    :type value: Time
+    :return:
+    """"""
+","def dehydrate_time(value):
+    """"""
+    Disidratatore per valori di tipo `time`.
+
+    :param value: Valore di tipo `time` da disidratare.
+    :type value: datetime.time
+    :return: Stringa rappresentante l'ora nel formato ""HH:MM:SS"".
+    :rtype: str
+    """"""
+    if value is None:
+        return None
+    # Formatta l'oggetto time come stringa nel formato ""HH:MM:SS""
+    return value.strftime(""%H:%M:%S"")",i,e,n,
+62e60f33d76274f8a4026de9,"
+def dehydrate_point(value):
+""""""
+
+Deidratatore per i dati di tipo `Point`.
+
+:param value:  
+:type value: Point  
+:return: 
+"""""" ","def dehydrate_point(value):
+    """"""
+    Deidratatore per i dati di tipo `Point`.
+
+    :param value: Un oggetto di tipo `Point` da deidratare.
+    :type value: Point
+    :return: Un dizionario con le coordinate x e y del punto.
+    :rtype: dict
+    """"""
+    if not hasattr(value, 'x') or not hasattr(value, 'y'):
+        raise ValueError(""L'oggetto fornito non è un punto valido."")
+    
+    # Restituisce un dizionario con le coordinate x e y
+    return {'x': value.x, 'y': value.y}",i,e,i,
+62e60ed4d76274f8a4026da0,"def keys(self):  
+""""""
+Restituisce le chiavi del record.  
+
+:return: lista dei nomi delle chiavi  
+""""""","def keys(self):
+    """"""
+    Restituisce le chiavi del record.  
+
+    :return: lista dei nomi delle chiavi  
+    """"""
+    # Restituisce una lista delle chiavi del record
+    return list(self.__dict__.keys())",i,e,n,
+62e60e05d76274f8a4026cfd,"def index(self, key):
+""""""
+
+Restituisce l'indice dell'elemento specificato.
+
+:param key: una chiave  
+:return: indice  
+:rtype: int
+""""""  ","def index(self, key):
+    """"""
+    Restituisce l'indice dell'elemento specificato.
+
+    :param key: una chiave  
+    :return: indice  
+    :rtype: int
+    """"""
+    # Itera attraverso la lista per trovare l'indice della chiave
+    for indice, elemento in enumerate(self):
+        if elemento == key:
+            return indice
+    # Se la chiave non è trovata, solleva un'eccezione
+    raise ValueError(f""La chiave '{key}' non è presente nella lista."")",i,b,i,
+62e60da4d76274f8a4026cf1,"def values(self, *keys):
+""""""
+
+Restituisce i valori del record, con la possibilità di filtrare per includere solo determinati valori in base all'indice o alla chiave.
+
+:param keys: indici o chiavi degli elementi da includere; se non viene fornito nessun parametro, verranno inclusi tutti i valori  
+:return: lista di valori  
+:rtype: list
+""""""","def values(self, *keys):
+    """"""
+    Restituisce i valori del record, con la possibilità di filtrare per includere solo determinati valori in base all'indice o alla chiave.
+
+    :param keys: indici o chiavi degli elementi da includere; se non viene fornito nessun parametro, verranno inclusi tutti i valori  
+    :return: lista di valori  
+    :rtype: list
+    """"""
+    # Se non vengono fornite chiavi, restituisci tutti i valori
+    if not keys:
+        return list(self.__dict__.values())
+    
+    # Filtra i valori in base alle chiavi fornite
+    valori_filtrati = []
+    for chiave in keys:
+        if chiave in self.__dict__:
+            valori_filtrati.append(self.__dict__[chiave])
+        elif isinstance(chiave, int) and 0 <= chiave < len(self.__dict__):
+            # Se la chiave è un indice, ottieni il valore corrispondente
+            valori_filtrati.append(list(self.__dict__.values())[chiave])
+    
+    return valori_filtrati",i,b,n,
+62e60b10d76274f8a4026ccd,"def data(self, *keys):
+""""""
+
+Restituisce le chiavi e i valori di questo record come un dizionario, includendo opzionalmente solo determinati valori in base all'indice o alla chiave. Le chiavi fornite negli elementi che non sono presenti nel record verranno inserite con un valore di :const:`None`; gli indici forniti che sono fuori dai limiti genereranno un'eccezione :exc:`IndexError`.
+
+:param keys: indici o chiavi degli elementi da includere; se non ne vengono forniti, verranno inclusi tutti i valori  
+:return: dizionario dei valori, indicizzati per nome del campo  
+:raises: :exc:`IndexError` se viene specificato un indice fuori dai limiti  
+""""""","def data(self, *keys):
+    """"""
+    Restituisce le chiavi e i valori di questo record come un dizionario, includendo opzionalmente solo determinati valori in base all'indice o alla chiave. Le chiavi fornite negli elementi che non sono presenti nel record verranno inserite con un valore di :const:`None`; gli indici forniti che sono fuori dai limiti genereranno un'eccezione :exc:`IndexError`.
+
+    :param keys: indici o chiavi degli elementi da includere; se non ne vengono forniti, verranno inclusi tutti i valori  
+    :return: dizionario dei valori, indicizzati per nome del campo  
+    :raises: :exc:`IndexError` se viene specificato un indice fuori dai limiti  
+    """"""
+    # Dizionario per memorizzare i risultati
+    risultato = {}
+    
+    # Se non vengono fornite chiavi, restituisci tutti i valori
+    if not keys:
+        for chiave, valore in self.__dict__.items():
+            risultato[chiave] = valore
+        return risultato
+    
+    # Itera attraverso le chiavi fornite
+    for chiave in keys:
+        # Se la chiave è un indice (intero)
+        if isinstance(chiave, int):
+            # Verifica se l'indice è valido
+            if chiave < 0 or chiave >= len(self.__dict__):
+                raise IndexError(""Indice fuori dai limiti"")
+            # Ottieni la chiave corrispondente all'indice
+            chiave_dict = list(self.__dict__.keys())[chiave]
+            risultato[chiave_dict] = self.__dict__.get(chiave_dict, None)
+        else:
+            # Se la chiave è una stringa, aggiungi il valore corrispondente
+            risultato[chiave] = self.__dict__.get(chiave, None)
+    
+    return risultato",i,b,i,
+62e6087bd76274f8a4026bfa,"def pop_u16(self):
+""""""
+
+Rimuove gli ultimi due byte da `self.data`, restituendoli come un intero senza segno a 16 bit in formato big-endian.
+""""""","def pop_u16(self):
+    """"""
+    Rimuove gli ultimi due byte da `self.data`, restituendoli come un intero senza segno a 16 bit in formato big-endian.
+    """"""
+    if len(self.data) < 2:
+        raise ValueError(""Non ci sono abbastanza byte in `self.data` per estrarre un valore a 16 bit."")
+    
+    # Estrae gli ultimi due byte
+    byte1, byte2 = self.data[-2], self.data[-1]
+    
+    # Rimuove i byte estratti da `self.data`
+    self.data = self.data[:-2]
+    
+    # Combina i byte in formato big-endian e restituisce l'intero
+    return (byte1 << 8) | byte2",i,b,i,
+62e6087ad76274f8a4026bf2,"def discard(self, n=-1, qid=-1, dehydration_hooks=None,
+                hydration_hooks=None, **handlers):
+""""""
+Aggiunge un messaggio DISCARD alla coda di output.
+
+:param n: numero di record da scartare, valore predefinito = -1 (TUTTI)
+:param qid: ID della query per cui scartare, valore predefinito = -1 (ultima query)
+:param dehydration_hooks:
+    Hook per disidratare i tipi (dizionario da tipo (classe) a funzione di disidratazione).
+    Le funzioni di disidratazione ricevono il valore e restituiscono un oggetto di tipo
+    comprensibile da packstream.
+:param hydration_hooks:
+    Hook per idratare i tipi (mappatura da tipo (classe) a funzione di idratazione).
+    Le funzioni di idratazione ricevono il valore di un tipo comprensibile da packstream
+    e possono restituire qualsiasi cosa.
+:param handlers: funzioni gestore passate all'oggetto Response restituito
+""""""","def discard(self, n=-1, qid=-1, dehydration_hooks=None,
+            hydration_hooks=None, **handlers):
+    """"""
+    Aggiunge un messaggio DISCARD alla coda di output.
+
+    :param n: numero di record da scartare, valore predefinito = -1 (TUTTI)
+    :param qid: ID della query per cui scartare, valore predefinito = -1 (ultima query)
+    :param dehydration_hooks:
+        Hook per disidratare i tipi (dizionario da tipo (classe) a funzione di disidratazione).
+        Le funzioni di disidratazione ricevono il valore e restituiscono un oggetto di tipo
+        comprensibile da packstream.
+    :param hydration_hooks:
+        Hook per idratare i tipi (mappatura da tipo (classe) a funzione di idratazione).
+        Le funzioni di idratazione ricevono il valore di un tipo comprensibile da packstream
+        e possono restituire qualsiasi cosa.
+    :param handlers: funzioni gestore passate all'oggetto Response restituito
+    """"""
+    # Creazione del messaggio DISCARD
+    messaggio_discard = {
+        ""tipo"": ""DISCARD"",
+        ""n"": n,
+        ""qid"": qid
+    }
+
+    # Aggiunta degli hook di disidratazione e idratazione se presenti
+    if dehydration_hooks is not None:
+        messaggio_discard[""dehydration_hooks""] = dehydration_hooks
+    if hydration_hooks is not None:
+        messaggio_discard[""hydration_hooks""] = hydration_hooks
+
+    # Aggiunta dei gestori se presenti
+    if handlers:
+        messaggio_discard.update(handlers)
+
+    # Aggiunta del messaggio alla coda di output
+    self.coda_output.append(messaggio_discard)
+
+    return messaggio_discard",i,b,n,
+62e60879d76274f8a4026bec,"def begin(self, mode=None, bookmarks=None, metadata=None, timeout=None,
+              db=None, imp_user=None, dehydration_hooks=None,
+              hydration_hooks=None, **handlers):
+""""""
+Aggiunge un messaggio BEGIN alla coda di output.
+
+:param mode: modalità di accesso per il routing - ""READ"" o ""WRITE"" (predefinito)
+:param bookmarks: iterabile di valori di segnalibro dopo i quali questa transazione dovrebbe iniziare
+:param metadata: dizionario di metadati personalizzati da allegare alla transazione
+:param timeout: timeout per l'esecuzione della transazione (in secondi)
+:param db: nome del database su cui avviare la transazione
+    Richiede Bolt 4.0+.
+:param imp_user: l'utente da impersonare
+    Richiede Bolt 4.4+.
+:param dehydration_hooks:
+    Hook per disidratare i tipi (dizionario da tipo (classe) a funzione di disidratazione).
+    Le funzioni di disidratazione ricevono il valore e restituiscono un oggetto di tipo
+    compreso da packstream.
+:param hydration_hooks:
+    Hook per idratare i tipi (mappatura da tipo (classe) a funzione di idratazione).
+    Le funzioni di idratazione ricevono il valore di tipo compreso da packstream
+    e possono restituire qualsiasi cosa.
+:param handlers: funzioni gestore passate all'oggetto Response restituito
+:return: oggetto Response
+""""""","def begin(self, mode=None, bookmarks=None, metadata=None, timeout=None,
+          db=None, imp_user=None, dehydration_hooks=None,
+          hydration_hooks=None, **handlers):
+    """"""
+    Aggiunge un messaggio BEGIN alla coda di output.
+
+    :param mode: modalità di accesso per il routing - ""READ"" o ""WRITE"" (predefinito)
+    :param bookmarks: iterabile di valori di segnalibro dopo i quali questa transazione dovrebbe iniziare
+    :param metadata: dizionario di metadati personalizzati da allegare alla transazione
+    :param timeout: timeout per l'esecuzione della transazione (in secondi)
+    :param db: nome del database su cui avviare la transazione
+        Richiede Bolt 4.0+.
+    :param imp_user: l'utente da impersonare
+        Richiede Bolt 4.4+.
+    :param dehydration_hooks:
+        Hook per disidratare i tipi (dizionario da tipo (classe) a funzione di disidratazione).
+        Le funzioni di disidratazione ricevono il valore e restituiscono un oggetto di tipo
+        compreso da packstream.
+    :param hydration_hooks:
+        Hook per idratare i tipi (mappatura da tipo (classe) a funzione di idratazione).
+        Le funzioni di idratazione ricevono il valore di tipo compreso da packstream
+        e possono restituire qualsiasi cosa.
+    :param handlers: funzioni gestore passate all'oggetto Response restituito
+    :return: oggetto Response
+    """"""
+    # Creazione del messaggio BEGIN
+    messaggio_begin = {
+        ""mode"": mode if mode else ""WRITE"",
+        ""bookmarks"": list(bookmarks) if bookmarks else [],
+        ""metadata"": metadata if metadata else {},
+        ""timeout"": timeout,
+        ""db"": db,
+        ""imp_user"": imp_user,
+        ""dehydration_hooks"": dehydration_hooks if dehydration_hooks else {},
+        ""hydration_hooks"": hydration_hooks if hydration_hooks else {},
+        **handlers
+    }
+
+    # Aggiunta del messaggio alla coda di output
+    self.coda_output.append(messaggio_begin)
+
+    # Creazione dell'oggetto Response
+    risposta = Response(handlers=handlers)
+
+    return risposta",i,b,n,
+62e60723d76274f8a4026b75,"def round_half_to_even(n):
+""""""
+
+Esempi di utilizzo della funzione:
+
+>>> round_half_to_even(3)
+    3
+>>> round_half_to_even(3.2)
+    3
+>>> round_half_to_even(3.5)
+    4
+>>> round_half_to_even(3.7)
+    4
+>>> round_half_to_even(4)
+    4
+>>> round_half_to_even(4.2)
+    4
+>>> round_half_to_even(4.5)
+    4
+>>> round_half_to_even(4.7)
+    5
+""""""","def round_half_to_even(n):
+    """"""
+    Arrotonda un numero al numero intero più vicino, con il caso di metà arrotondato al numero pari più vicino.
+
+    Esempi di utilizzo della funzione:
+
+    >>> round_half_to_even(3)
+    3
+    >>> round_half_to_even(3.2)
+    3
+    >>> round_half_to_even(3.5)
+    4
+    >>> round_half_to_even(3.7)
+    4
+    >>> round_half_to_even(4)
+    4
+    >>> round_half_to_even(4.2)
+    4
+    >>> round_half_to_even(4.5)
+    4
+    >>> round_half_to_even(4.7)
+    5
+    """"""
+    parte_intera = int(n)
+    parte_decimale = n - parte_intera
+    
+    if parte_decimale > 0.5:
+        return parte_intera + 1
+    elif parte_decimale < 0.5:
+        return parte_intera
+    else:
+        # Se la parte decimale è esattamente 0.5, arrotonda al numero pari più vicino
+        if parte_intera % 2 == 0:
+            return parte_intera
+        else:
+            return parte_intera + 1",i,i,n,
+62e4fc3c85ea98643089041e,"def _inline_r_setup(code: str) -> str:
+""""""
+Alcuni comportamenti di R non possono essere configurati tramite variabili di ambiente, ma possono essere configurati solo tramite opzioni di R una volta che R è stato avviato. Questi vengono impostati qui.
+""""""","def _inline_r_setup(codice: str) -> str:
+    """"""
+    Alcuni comportamenti di R non possono essere configurati tramite variabili di ambiente, ma possono essere configurati solo tramite opzioni di R una volta che R è stato avviato. Questi vengono impostati qui.
+    """"""
+    # Configurazione delle opzioni di R
+    setup_r = """"""
+    options(
+        # Disabilita la creazione di file .RData
+        save = ""no"",
+        # Disabilita il caricamento automatico di file .RData
+        load = ""no"",
+        # Imposta il numero di cifre decimali da visualizzare
+        digits = 4,
+        # Disabilita i messaggi di avviso
+        warn = -1
+    )
+    """"""
+    
+    # Aggiungi il codice di configurazione all'inizio del codice R fornito
+    codice_configurato = setup_r + ""\n"" + codice
+    
+    return codice_configurato",i,i,n,signature translated
+62e4fbda85ea986430890405,"def xargs(
+        cmd: tuple[str, ...],
+        varargs: Sequence[str],
+        *,
+        color: bool = False,
+        target_concurrency: int = 1,
+        _max_length: int = _get_platform_max_length(),
+        **kwargs: Any,
+) -> tuple[int, bytes]:
+""""""
+
+Un'implementazione semplificata di xargs.
+
+- **color**: Crea un pty se si è su una piattaforma che lo supporta.
+- **target_concurrency**: Numero target di partizioni da eseguire in parallelo.
+""""""","import subprocess
+import sys
+import os
+from typing import Sequence, Any
+
+def xargs(
+        cmd: tuple[str, ...],
+        varargs: Sequence[str],
+        *,
+        color: bool = False,
+        target_concurrency: int = 1,
+        _max_length: int = _get_platform_max_length(),
+        **kwargs: Any,
+) -> tuple[int, bytes]:
+    """"""
+    Un'implementazione semplificata di xargs.
+
+    - **color**: Crea un pty se si è su una piattaforma che lo supporta.
+    - **target_concurrency**: Numero target di partizioni da eseguire in parallelo.
+    """"""
+    
+    # Funzione per ottenere la lunghezza massima della riga di comando per la piattaforma corrente
+    def _get_platform_max_length() -> int:
+        if sys.platform == ""win32"":
+            return 8191  # Limite di Windows
+        else:
+            return 131072  # Limite comune su Unix
+    
+    # Controlla se la piattaforma supporta PTY (pseudo-terminal)
+    def _supports_pty() -> bool:
+        return hasattr(os, 'forkpty') and hasattr(os, 'openpty')
+    
+    # Dividi gli argomenti in partizioni in base alla concorrenza target
+    partizioni = [varargs[i::target_concurrency] for i in range(target_concurrency)]
+    
+    # Inizializza variabili per il risultato finale
+    exit_code_totale = 0
+    output_combinato = b""""
+    
+    # Esegui i comandi in parallelo
+    for partizione in partizioni:
+        comando_finale = list(cmd) + list(partizione)
+        
+        try:
+            if color and _supports_pty():
+                # Usa PTY se supportato e color è True
+                master, slave = os.openpty()
+                processo = subprocess.Popen(
+                    comando_finale,
+                    stdout=slave,
+                    stderr=slave,
+                    **kwargs
+                )
+                os.close(slave)
+                output, _ = processo.communicate()
+                os.close(master)
+            else:
+                # Esegui senza PTY
+                processo = subprocess.Popen(
+                    comando_finale,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    **kwargs
+                )
+                output, _ = processo.communicate()
+            
+            # Aggiorna il codice di uscita e l'output combinato
+            exit_code_totale += processo.returncode
+            output_combinato += output
+        
+        except Exception as e:
+            # Gestisci eventuali errori
+            print(f""Errore durante l'esecuzione del comando: {e}"", file=sys.stderr)
+            exit_code_totale = 1
+            break
+    
+    return (exit_code_totale, output_combinato)",i,b,i,
+62e4fb6585ea98643089032b,"def parse_version(s: str) -> tuple[int, ...]:
+
+
+""""""versione semplificata per il confronto delle versioni""""""","def parse_version(s: str) -> tuple[int, ...]:
+    """"""
+    Converte una stringa di versione in una tupla di interi per facilitare il confronto.
+    
+    Esempio:
+    >>> parse_version(""1.2.3"")
+    (1, 2, 3)
+    >>> parse_version(""2.0"")
+    (2, 0)
+    >>> parse_version(""3"")
+    (3,)
+    """"""
+    # Divide la stringa in parti usando il punto come separatore
+    parti = s.split('.')
+    
+    # Converte ogni parte in un intero e crea una tupla
+    return tuple(int(parte) for parte in parti)",i,b,n,
+62e4fb4d85ea9864308902e7,"def normalize_cmd(cmd: tuple[str, ...]) -> tuple[str, ...]:
+""""""
+
+Correzioni per i seguenti problemi su Windows:  
+- https://bugs.python.org/issue8557  
+- Windows non interpreta correttamente gli shebang  
+
+Questa funzione consente inoltre il corretto funzionamento degli shebang con percorsi profondi.
+""""""","def normalize_cmd(cmd: tuple[str, ...]) -> tuple[str, ...]:
+    """"""
+    Correzione dei problemi relativi agli shebang su Windows.
+    Questa funzione garantisce che i comandi con shebang siano interpretati correttamente,
+    specialmente per percorsi profondi.
+
+    Args:
+        cmd (tuple[str, ...]): Tupla contenente il comando e i suoi argomenti.
+
+    Returns:
+        tuple[str, ...]: Tupla con il comando normalizzato e i suoi argomenti.
+    """"""
+    import os
+    import sys
+
+    # Se il sistema operativo non è Windows, restituisci il comando originale
+    if os.name != 'nt':
+        return cmd
+
+    # Se il comando è vuoto, restituisci una tupla vuota
+    if not cmd:
+        return ()
+
+    # Estrai il primo elemento del comando (il percorso dell'eseguibile)
+    percorso_eseguibile = cmd[0]
+
+    # Se il percorso contiene uno shebang, sostituiscilo con l'interprete Python
+    if percorso_eseguibile.startswith('#!'):
+        # Trova l'interprete Python corretto
+        interprete_python = sys.executable
+        # Crea una nuova tupla con l'interprete Python e gli argomenti originali
+        return (interprete_python,) + cmd[1:]
+
+    # Altrimenti, restituisci il comando originale
+    return cmd",i,b,n,
+62b8d27a48ba5a41d1c3f4c6,"def cached(cache, key=hashkey, lock=None):
+""""""
+
+Decorator per racchiudere una funzione con un callable di memoizzazione che salva  
+i risultati in una cache.
+""""""","def cached(cache, key=hashkey, lock=None):
+    """"""
+    Decorator per racchiudere una funzione con un callable di memoizzazione che salva  
+    i risultati in una cache.
+    """"""
+    def decoratore(funzione):
+        def funzione_decorata(*args, **kwargs):
+            # Genera la chiave per la cache
+            chiave_cache = key(*args, **kwargs)
+            
+            # Controlla se il risultato è già in cache
+            if lock:
+                with lock:
+                    if chiave_cache in cache:
+                        return cache[chiave_cache]
+            else:
+                if chiave_cache in cache:
+                    return cache[chiave_cache]
+            
+            # Se non è in cache, esegui la funzione e salva il risultato
+            risultato = funzione(*args, **kwargs)
+            
+            if lock:
+                with lock:
+                    cache[chiave_cache] = risultato
+            else:
+                cache[chiave_cache] = risultato
+            
+            return risultato
+        
+        return funzione_decorata
+    
+    return decoratore",i,i,n,wrong attributes
+62b8d24048ba5a41d1c3f49f,"def ttl_cache(maxsize=128, ttl=600, timer=time.monotonic, typed=False):
+""""""
+
+Decorator per racchiudere una funzione con un oggetto callable di memorizzazione (memoization) che salva fino a `maxsize` risultati basandosi su un algoritmo Least Recently Used (LRU) con un valore di time-to-live (TTL) per ogni elemento.
+""""""","import time
+from functools import wraps, lru_cache
+
+def ttl_cache(maxsize=128, ttl=600, timer=time.monotonic, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto callable di memorizzazione (memoization) 
+    che salva fino a `maxsize` risultati basandosi su un algoritmo Least Recently Used (LRU) 
+    con un valore di time-to-live (TTL) per ogni elemento.
+    """"""
+    def decoratore(funzione):
+        # Cache LRU con dimensione massima
+        cache = lru_cache(maxsize=maxsize, typed=typed)(funzione)
+        
+        @wraps(funzione)
+        def wrapper(*args, **kwargs):
+            # Ottieni il tempo corrente
+            tempo_corrente = timer()
+            
+            # Ottieni il risultato dalla cache
+            risultato, tempo_scadenza = cache(*args, **kwargs)
+            
+            # Se il risultato è scaduto, ricalcola e aggiorna la cache
+            if tempo_corrente >= tempo_scadenza:
+                risultato = funzione(*args, **kwargs)
+                tempo_scadenza = tempo_corrente + ttl
+                cache.cache_set((args, frozenset(kwargs.items())), (risultato, tempo_scadenza))
+            
+            return risultato
+        
+        # Inizializza la cache con il tempo di scadenza
+        def cache_set(key, value):
+            cache.cache_set(key, (value[0], timer() + ttl))
+        
+        wrapper.cache_set = cache_set
+        wrapper.cache_info = cache.cache_info
+        wrapper.cache_clear = cache.cache_clear
+        
+        return wrapper
+    return decoratore",i,b,n,
+62b8d23b48ba5a41d1c3f49a,"def mru_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto richiamabile che memorizza
+    fino a `maxsize` risultati basandosi su un algoritmo di tipo Most Recently Used (MRU).
+    """"""","from functools import wraps
+from collections import OrderedDict
+
+def mru_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto richiamabile che memorizza
+    fino a `maxsize` risultati basandosi su un algoritmo di tipo Most Recently Used (MRU).
+    """"""
+    def decoratore(funzione):
+        cache = OrderedDict()  # Dizionario ordinato per memorizzare i risultati
+        @wraps(funzione)
+        def wrapper(*args, **kwargs):
+            # Creazione della chiave basata sugli argomenti
+            if typed:
+                chiave = (args, tuple((k, type(v)) for k, v in sorted(kwargs.items())))
+            else:
+                chiave = (args, tuple(sorted(kwargs.items())))
+            
+            # Se la chiave è già nella cache, spostala alla fine (MRU)
+            if chiave in cache:
+                risultato = cache.pop(chiave)
+                cache[chiave] = risultato
+                return risultato
+            
+            # Calcola il risultato se non è nella cache
+            risultato = funzione(*args, **kwargs)
+            
+            # Inserisci il risultato nella cache
+            cache[chiave] = risultato
+            
+            # Se la cache supera il maxsize, rimuovi l'elemento meno recentemente usato
+            if len(cache) > maxsize:
+                cache.popitem(last=False)
+            
+            return risultato
+        return wrapper
+    return decoratore",i,b,n,
+62b8d23948ba5a41d1c3f498,"def lru_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto callable che memorizza
+    fino a `maxsize` risultati basandosi su un algoritmo Least Recently Used (LRU).
+    """"""","from functools import lru_cache as _lru_cache
+
+def lru_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto callable che memorizza
+    fino a `maxsize` risultati basandosi su un algoritmo Least Recently Used (LRU).
+    """"""
+    def decoratore(funzione):
+        return _lru_cache(maxsize=maxsize, typed=typed)(funzione)
+    return decoratore",n,b,n,
+62b8d23748ba5a41d1c3f496,"def lfu_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto callable di memoizzazione
+    che salva fino a `maxsize` risultati basandosi su un algoritmo Least Frequently Used (LFU).
+    """"""","from functools import wraps
+from collections import defaultdict, OrderedDict
+
+def lfu_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto callable di memoizzazione
+    che salva fino a `maxsize` risultati basandosi su un algoritmo Least Frequently Used (LFU).
+    """"""
+    def decoratore(funzione):
+        if maxsize is None or maxsize <= 0:
+            # Se maxsize è None o <= 0, non memorizzare nulla
+            @wraps(funzione)
+            def wrapper(*args, **kwargs):
+                return funzione(*args, **kwargs)
+            return wrapper
+
+        # Dizionario per memorizzare i risultati della funzione
+        cache = {}
+        # Dizionario per tenere traccia della frequenza di utilizzo delle chiavi
+        frequenza = defaultdict(int)
+        # Dizionario ordinato per gestire le chiavi in base alla frequenza
+        frequenza_ordinata = OrderedDict()
+
+        @wraps(funzione)
+        def wrapper(*args, **kwargs):
+            # Creazione della chiave in base agli argomenti
+            chiave = args + tuple(sorted(kwargs.items())) if typed else args + tuple(kwargs.items())
+
+            if chiave in cache:
+                # Incrementa la frequenza della chiave
+                frequenza[chiave] += 1
+                # Aggiorna l'ordine della chiave in frequenza_ordinata
+                frequenza_ordinata.move_to_end(chiave)
+                return cache[chiave]
+
+            # Se la cache è piena, rimuove l'elemento meno usato
+            if len(cache) >= maxsize:
+                # Trova la chiave con la frequenza più bassa
+                chiave_min_frequenza = min(frequenza_ordinata, key=lambda k: frequenza[k])
+                # Rimuove la chiave dalla cache e dalla frequenza
+                del cache[chiave_min_frequenza]
+                del frequenza[chiave_min_frequenza]
+                del frequenza_ordinata[chiave_min_frequenza]
+
+            # Esegue la funzione e memorizza il risultato nella cache
+            risultato = funzione(*args, **kwargs)
+            cache[chiave] = risultato
+            frequenza[chiave] = 1
+            frequenza_ordinata[chiave] = None
+
+            return risultato
+
+        return wrapper
+
+    return decoratore",i,b,n,
+62b8d22f48ba5a41d1c3f488,"
+def popitem(self):
+""""""
+
+Rimuove e restituisce la coppia `(chiave, valore)` inserita per prima.
+""""""","def popitem(self):
+    """"""
+    Rimuove e restituisce la coppia `(chiave, valore)` inserita per prima.
+    """"""
+    if not self:
+        raise KeyError(""Il dizionario è vuoto"")
+    
+    # Trova la prima chiave inserita
+    prima_chiave = next(iter(self))
+    
+    # Rimuove e restituisce la coppia (chiave, valore)
+    valore = self[prima_chiave]
+    del self[prima_chiave]
+    
+    return (prima_chiave, valore)",i,i,i,
+62b8d22a48ba5a41d1c3f47e,"
+def setdefault(self, key, default=None):
+""""""
+
+`D.setdefault(k[,d]) -> D.get(k,d)`, imposta anche `D[k]=d` se `k` non è presente in `D`.
+""""""","def setdefault(self, chiave, default=None):
+    """"""
+    Restituisce il valore associato alla `chiave` se presente nel dizionario.
+    Se la `chiave` non è presente, imposta `D[chiave] = default` e restituisce `default`.
+    
+    :param chiave: La chiave da cercare nel dizionario.
+    :param default: Il valore da impostare se la chiave non è presente (default è None).
+    :return: Il valore associato alla chiave se presente, altrimenti `default`.
+    """"""
+    if chiave in self:
+        return self[chiave]
+    else:
+        self[chiave] = default
+        return default",n,i,n,signature translated
+62b8d22948ba5a41d1c3f47c,"
+def get(self, key, default=None):
+""""""
+
+`D.get(k[, d]) -> D[k]` se `k` è presente in `D`, altrimenti `d`. Il valore predefinito di `d` è `None`.
+""""""","def get(self, key, default=None):
+    """"""
+    Restituisce il valore associato alla chiave `key` se presente nel dizionario `D`, 
+    altrimenti restituisce il valore predefinito `default`. Se `default` non è specificato, 
+    il valore predefinito è `None`.
+    """"""
+    if key in self:
+        return self[key]
+    else:
+        return default",n,e,n,
+62b8d22548ba5a41d1c3f472,"
+def cachedmethod(cache, key=hashkey, lock=None):
+""""""
+
+Decorator per racchiudere un metodo di classe o di istanza con una funzione memoizzante che salva i risultati in una cache.
+""""""","def cachedmethod(cache, key=hashkey, lock=None):
+    """"""
+    Decorator per racchiudere un metodo di classe o di istanza con una funzione memoizzante che salva i risultati in una cache.
+    """"""
+    def decoratore(metodo):
+        def wrapper(*args, **kwargs):
+            # Genera la chiave per la cache
+            chiave_cache = key(*args, **kwargs)
+            
+            # Controlla se il risultato è già in cache
+            if chiave_cache in cache:
+                return cache[chiave_cache]
+            
+            # Se non è in cache, esegui il metodo e salva il risultato
+            if lock:
+                with lock:
+                    risultato = metodo(*args, **kwargs)
+                    cache[chiave_cache] = risultato
+            else:
+                risultato = metodo(*args, **kwargs)
+                cache[chiave_cache] = risultato
+            
+            return risultato
+        return wrapper
+    return decoratore",i,b,n,
+62b8c517e0d34b282c18122e,"def extostr(cls, e, max_level=30, max_path_level=5):
+""""""
+
+Formatta un'eccezione.  
+:param e: Qualsiasi istanza di eccezione.  
+:type e: Exception  
+:param max_level: Livello massimo dello stack delle chiamate (predefinito 30)  
+:type max_level: int  
+:param max_path_level: Livello massimo del percorso (predefinito 5)  
+:type max_path_level: int  
+:return: La stringa leggibile dell'eccezione  
+:rtype: str  
+""""""","def extostr(cls, e, max_level=30, max_path_level=5):
+    """"""
+    Formatta un'eccezione.
+    
+    :param e: Qualsiasi istanza di eccezione.
+    :type e: Exception
+    :param max_level: Livello massimo dello stack delle chiamate (predefinito 30)
+    :type max_level: int
+    :param max_path_level: Livello massimo del percorso (predefinito 5)
+    :type max_path_level: int
+    :return: La stringa leggibile dell'eccezione
+    :rtype: str
+    """"""
+    import traceback
+    
+    # Ottieni lo stack trace dell'eccezione
+    stack_trace = traceback.format_exc()
+    
+    # Limita il numero di livelli dello stack
+    stack_lines = stack_trace.splitlines()
+    stack_lines = stack_lines[:max_level]
+    stack_trace_limite = ""\n"".join(stack_lines)
+    
+    # Limita il numero di livelli del percorso
+    percorso = str(e).split("":"")[0]
+    percorso_parts = percorso.split(""/"")
+    percorso_parts = percorso_parts[:max_path_level]
+    percorso_limite = ""/"".join(percorso_parts)
+    
+    # Costruisci la stringa finale
+    risultato = f""Eccezione: {type(e).__name__}\n""
+    risultato += f""Messaggio: {str(e)}\n""
+    risultato += f""Percorso: {percorso_limite}\n""
+    risultato += f""Stack Trace:\n{stack_trace_limite}""
+    
+    return risultato",i,b,i,
+62b8bbbfe0d34b282c18120f,"def file_to_textbuffer(file_name, encoding):
+    """"""
+    Carica un file in un buffer di testo (UTF-8), utilizzando la codifica specificata durante la lettura.
+    ATTENZIONE: Questo metodo leggerà l'intero file IN MEMORIA.
+    :param file_name: Nome del file.
+    :type file_name: str
+    :param encoding: Codifica da utilizzare.
+    :type encoding: str
+    :return: Un buffer di testo o None in caso di errore.
+    :rtype: str
+    """"""","def file_to_textbuffer(file_name, encoding):
+    """"""
+    Carica un file in un buffer di testo (UTF-8), utilizzando la codifica specificata durante la lettura.
+    ATTENZIONE: Questo metodo leggerà l'intero file IN MEMORIA.
+    :param file_name: Nome del file.
+    :type file_name: str
+    :param encoding: Codifica da utilizzare.
+    :type encoding: str
+    :return: Un buffer di testo o None in caso di errore.
+    :rtype: str
+    """"""
+    try:
+        with open(file_name, 'r', encoding=encoding) as file:
+            # Legge l'intero contenuto del file in memoria
+            buffer = file.read()
+            return buffer
+    except Exception as e:
+        # Gestisce eventuali errori durante la lettura del file
+        print(f""Errore durante la lettura del file: {e}"")
+        return None",i,e,i,
+62b8b99de0d34b282c1811f8,"def _reset_logging(cls):  
+""""""
+Reimposta
+""""""","def _reset_logging(cls):
+    """"""
+    Reimposta la configurazione del logging alla configurazione di default.
+    """"""
+    import logging
+    
+    # Rimuovi tutti gli handler esistenti
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    
+    # Reimposta la configurazione di base del logging
+    logging.basicConfig(level=logging.WARNING)",i,e,n,
+62b8b59feb7e40a82d2d1291,"def _getTargetClass(self):
+""""""
+Definire questo metodo per restituire l'implementazione in uso, 
+senza il suffisso 'Py' o 'Fallback'.
+""""""","def _getTargetClass(self):
+    """"""
+    Definire questo metodo per restituire l'implementazione in uso, 
+    senza il suffisso 'Py' o 'Fallback'.
+    """"""
+    # Ottieni il nome della classe corrente
+    nome_classe_corrente = self.__class__.__name__
+    
+    # Rimuovi il suffisso 'Py' o 'Fallback' se presente
+    if nome_classe_corrente.endswith('Py'):
+        nome_classe = nome_classe_corrente[:-2]
+    elif nome_classe_corrente.endswith('Fallback'):
+        nome_classe = nome_classe_corrente[:-8]
+    else:
+        nome_classe = nome_classe_corrente
+    
+    return nome_classe",i,i,n,
+62b8b590eb7e40a82d2d1275,"def _legacy_mergeOrderings(orderings):
+""""""
+
+Unisci più ordinamenti in modo che l'ordine all'interno di ciascun ordinamento venga preservato.
+
+Gli ordinamenti sono vincolati in modo tale che, se un oggetto appare in due o più ordinamenti, il suffisso che inizia con l'oggetto deve essere presente in entrambi gli ordinamenti.
+
+Ad esempio:
+
+
+>>> _mergeOrderings([
+... ['x', 'y', 'z'],
+... ['q', 'z'],
+... [1, 3, 5],
+... ['z']
+... ])
+['x', 'y', 'q', 1, 3, 5, 'z']
+""""""","def _legacy_mergeOrderings(ordinamenti):
+    """"""
+    Unisci più ordinamenti in modo che l'ordine all'interno di ciascun ordinamento venga preservato.
+
+    Gli ordinamenti sono vincolati in modo tale che, se un oggetto appare in due o più ordinamenti, 
+    il suffisso che inizia con l'oggetto deve essere presente in entrambi gli ordinamenti.
+
+    Ad esempio:
+
+    >>> _legacy_mergeOrderings([
+    ... ['x', 'y', 'z'],
+    ... ['q', 'z'],
+    ... [1, 3, 5],
+    ... ['z']
+    ... ])
+    ['x', 'y', 'q', 1, 3, 5, 'z']
+    """"""
+    # Dizionario per tenere traccia delle relazioni di precedenza
+    precedenze = {}
+    
+    # Costruisci il grafo delle precedenze
+    for ordinamento in ordinamenti:
+        for i in range(len(ordinamento) - 1):
+            elemento_corrente = ordinamento[i]
+            elemento_successivo = ordinamento[i + 1]
+            
+            if elemento_corrente not in precedenze:
+                precedenze[elemento_corrente] = set()
+            if elemento_successivo not in precedenze:
+                precedenze[elemento_successivo] = set()
+            
+            precedenze[elemento_corrente].add(elemento_successivo)
+    
+    # Lista per memorizzare l'ordinamento topologico
+    ordinamento_topologico = []
+    
+    # Funzione ricorsiva per l'ordinamento topologico
+    def visita(elemento):
+        if elemento not in ordinamento_topologico:
+            for successivo in precedenze.get(elemento, []):
+                visita(successivo)
+            ordinamento_topologico.append(elemento)
+    
+    # Esegui l'ordinamento topologico su tutti gli elementi
+    for elemento in list(precedenze.keys()):
+        visita(elemento)
+    
+    return ordinamento_topologico",i,i,n,signature translated
+62b8b559eb7e40a82d2d11f8,"def minimalBases(classes):
+""""""
+Riduce una lista di classi base al suo equivalente minimo ordinato.
+""""""","def minimalBases(classes):
+    """"""
+    Riduce una lista di classi base al suo equivalente minimo ordinato.
+    
+    :param classes: Lista di classi base da ridurre.
+    :return: Lista ordinata delle classi base ridotte al minimo.
+    """"""
+    # Creiamo un insieme per rimuovere duplicati
+    classi_uniche = set(classes)
+    
+    # Filtriamo le classi che sono già presenti nella gerarchia di altre classi
+    classi_ridotte = []
+    for classe in classi_uniche:
+        # Verifichiamo se la classe è una sottoclasse di altre classi nell'insieme
+        if not any(issubclass(classe, altra_classe) for altra_classe in classi_uniche if altra_classe != classe):
+            classi_ridotte.append(classe)
+    
+    # Ordiniamo le classi ridotte
+    classi_ridotte.sort(key=lambda c: c.__name__)
+    
+    return classi_ridotte",i,b,n,
+62b8b416eb7e40a82d2d1129,"
+def names(self, all=False): # pylint:disable=redefined-builtin
+    """"""Restituisce i nomi degli attributi definiti dall'interfaccia.""""""
+    if not all:
+","def names(self, all=False):  # pylint:disable=redefined-builtin
+    """"""Restituisce i nomi degli attributi definiti dall'interfaccia.""""""
+    attributi = [attr for attr in dir(self) if not attr.startswith('_')]
+    
+    if not all:
+        attributi = [attr for attr in attributi if not callable(getattr(self, attr))]
+    
+    return attributi",n,b,n,
+62b8b3d5eb7e40a82d2d1110,"
+def _c_optimizations_available():
+""""""
+
+Restituisce il modulo di ottimizzazione C, se disponibile, altrimenti un valore falso.
+
+Se le ottimizzazioni sono richieste ma non disponibili, viene sollevata un'eccezione `ImportError`.
+
+Questo non specifica se le ottimizzazioni debbano essere utilizzate o meno.
+""""""","def _c_optimizations_available():
+    """"""
+    Restituisce il modulo di ottimizzazione C, se disponibile, altrimenti un valore falso.
+
+    Se le ottimizzazioni sono richieste ma non disponibili, viene sollevata un'eccezione `ImportError`.
+
+    Questo non specifica se le ottimizzazioni debbano essere utilizzate o meno.
+    """"""
+    try:
+        import _c_optimizations  # Prova a importare il modulo di ottimizzazione C
+        return _c_optimizations
+    except ImportError:
+        return False  # Restituisce False se il modulo non è disponibile",i,e,n,
+62b8b3d4eb7e40a82d2d110f,"
+def _should_attempt_c_optimizations():
+""""""
+
+Restituisce un valore vero se dovremmo tentare di utilizzare le ottimizzazioni in C.
+
+Questo tiene conto del fatto che stiamo utilizzando PyPy e del valore della variabile di ambiente  
+``PURE_PYTHON``, come definito in `_use_c_impl`.
+""""""","def _should_attempt_c_optimizations():
+    """"""
+    Restituisce un valore vero se dovremmo tentare di utilizzare le ottimizzazioni in C.
+
+    Questo tiene conto del fatto che stiamo utilizzando PyPy e del valore della variabile di ambiente  
+    ``PURE_PYTHON``, come definito in `_use_c_impl`.
+    """"""
+    import os
+    import platform
+
+    # Controlla se stiamo eseguendo su PyPy
+    è_pypy = platform.python_implementation() == ""PyPy""
+
+    # Controlla se la variabile di ambiente PURE_PYTHON è impostata
+    pure_python = os.getenv(""PURE_PYTHON"", """").lower() in (""1"", ""true"", ""yes"")
+
+    # Tentiamo le ottimizzazioni in C solo se non siamo su PyPy e PURE_PYTHON non è impostato
+    return not è_pypy and not pure_python",i,e,n,
+62b8b3d4eb7e40a82d2d110e,"
+def _c_optimizations_ignored():
+""""""
+L'opposto di `_c_optimizations_required`.
+""""""","def _c_optimizations_ignored():
+    """"""
+    L'opposto di `_c_optimizations_required`.
+    """"""
+    # Questa funzione indica che le ottimizzazioni C non sono necessarie
+    return True",i,n,n,
+62b8b3d4eb7e40a82d2d110d,"
+def _c_optimizations_required():
+    """"""
+    Restituisce un valore vero se le ottimizzazioni in C sono richieste.
+
+    Questo utilizza la variabile ``PURE_PYTHON`` come     
+    documentato in `_use_c_impl`.
+    """"""
+","def _c_optimizations_required():
+    """"""
+    Restituisce un valore vero se le ottimizzazioni in C sono richieste.
+
+    Questo utilizza la variabile ``PURE_PYTHON`` come     
+    documentato in `_use_c_impl`.
+    """"""
+    # Controlla se la variabile PURE_PYTHON è impostata
+    import os
+    return not os.getenv('PURE_PYTHON', '').lower() in ('1', 'true', 'yes')",i,e,n,
+62b87b989a0c4fa8b80b35ee,"
+def reset(self):
+    """"""
+    Reimposta l'istogramma.
+
+    Il contesto attuale viene reimpostato a un dizionario vuoto.
+    I bin vengono reinizializzati con il *valore_iniziale*
+    o con *make_bins()* (a seconda dell'inizializzazione).
+    """"""
+","def reset(self):
+    """"""
+    Reimposta l'istogramma.
+
+    Il contesto attuale viene reimpostato a un dizionario vuoto.
+    I bin vengono reinizializzati con il *valore_iniziale*
+    o con *make_bins()* (a seconda dell'inizializzazione).
+    """"""
+    # Reimposta il contesto attuale a un dizionario vuoto
+    self.contesto_attuale = {}
+
+    # Reinizializza i bin con il valore iniziale o con make_bins()
+    if hasattr(self, 'valore_iniziale'):
+        self.bin = [self.valore_iniziale] * len(self.bin)
+    else:
+        self.bin = self.make_bins()",i,i,n,
+62b87b859a0c4fa8b80b35d7,"def to_csv(self, separator="","", header=None):
+""""""
+
+.. deprecated:: 0.5 in Lena 0.5 to_csv non è più utilizzato.  
+      Gli iterabili vengono convertiti in tabelle.
+
+Converte i punti del grafico in formato CSV.
+
+*separator* delimita i valori, il valore predefinito è la virgola.
+
+*header*, se non è ``None``, è la prima stringa dell'output  
+(una nuova riga viene aggiunta automaticamente).
+
+Poiché un grafico può essere multidimensionale,  
+per ogni punto, prima le sue coordinate vengono convertite in stringa  
+(separate da *separator*), poi ogni parte del suo valore.
+
+
+Per convertire un :class:`Graph` in formato CSV all'interno di una sequenza Lena,  
+utilizzare :class:`lena.output.ToCSV`.
+""""""","def to_csv(self, separator="","", header=None):
+    """"""
+    Converte i punti del grafico in formato CSV.
+
+    :param separator: delimita i valori, il valore predefinito è la virgola.
+    :param header: se non è None, è la prima stringa dell'output (una nuova riga viene aggiunta automaticamente).
+    :return: una stringa in formato CSV.
+    """"""
+    # Lista per memorizzare le righe CSV
+    righe_csv = []
+
+    # Aggiungi l'header se specificato
+    if header is not None:
+        righe_csv.append(header)
+
+    # Itera sui punti del grafico
+    for punto in self.punti:
+        # Converte le coordinate e i valori in stringhe separate dal separatore
+        coordinate = separator.join(map(str, punto.coordinate))
+        valori = separator.join(map(str, punto.valore))
+        riga_csv = f""{coordinate}{separator}{valori}""
+        righe_csv.append(riga_csv)
+
+    # Unisci tutte le righe con una nuova linea
+    return ""\n"".join(righe_csv)",i,b,n,
+62b87b199a0c4fa8b80b354e,"def is_fill_request_seq(seq):
+""""""
+
+Verifica se *seq* può essere convertito in un oggetto di tipo FillRequestSeq.
+
+Restituisce `True` solo se *seq* è un elemento di tipo FillRequest  
+o contiene almeno un elemento di questo tipo,  
+e non è una sequenza di tipo Source.
+""""""","def is_fill_request_seq(seq):
+    """"""
+    Verifica se *seq* può essere convertito in un oggetto di tipo FillRequestSeq.
+
+    Restituisce `True` solo se *seq* è un elemento di tipo FillRequest  
+    o contiene almeno un elemento di questo tipo,  
+    e non è una sequenza di tipo Source.
+    """"""
+    # Verifica se seq è un'istanza di FillRequest
+    if isinstance(seq, FillRequest):
+        return True
+    
+    # Verifica se seq è una sequenza e contiene almeno un elemento di tipo FillRequest
+    if isinstance(seq, (list, tuple)):
+        for elemento in seq:
+            if isinstance(elemento, FillRequest):
+                return True
+    
+    # Verifica se seq è una sequenza di tipo Source
+    if isinstance(seq, Source):
+        return False
+    
+    return False",i,b,n,
+62b87b099a0c4fa8b80b3538,"
+def is_fill_request_el(obj):
+""""""
+
+L'oggetto contiene i metodi eseguibili `fill` e `request`.
+""""""","def is_fill_request_el(obj):
+    """"""
+    Verifica se l'oggetto contiene i metodi eseguibili `fill` e `request`.
+
+    Args:
+        obj: Oggetto da verificare.
+
+    Returns:
+        bool: True se l'oggetto ha i metodi `fill` e `request`, False altrimenti.
+    """"""
+    return callable(getattr(obj, ""fill"", None)) and callable(getattr(obj, ""request"", None))",n,e,n,
+62b87af99a0c4fa8b80b3524,"
+def is_run_el(obj):
+    """"""
+     Controlla se l'oggetto contiene il metodo eseguibile 'run'.
+    """"""
+","def is_run_el(obj):
+    """"""
+    Controlla se l'oggetto contiene il metodo eseguibile 'run'.
+    """"""
+    # Verifica se l'oggetto ha l'attributo 'run' e se è un metodo chiamabile
+    return hasattr(obj, 'run') and callable(getattr(obj, 'run'))",i,e,n,
+62b87af69a0c4fa8b80b351a,"def is_fill_compute_el(obj):
+     """"""
+    Verifica se l'oggetto contiene i metodi eseguibili 'fill' e 'compute'.
+    return callable(getattr(obj, 'fill', None)) and callable(getattr(obj, 'compute', None))
+     """"""","def is_fill_compute_el(obj):
+    """"""
+    Verifica se l'oggetto contiene i metodi eseguibili 'fill' e 'compute'.
+    
+    Args:
+        obj: Oggetto da verificare.
+    
+    Returns:
+        bool: True se l'oggetto ha i metodi 'fill' e 'compute' eseguibili, False altrimenti.
+    """"""
+    # Verifica se i metodi 'fill' e 'compute' sono eseguibili
+    return callable(getattr(obj, 'fill', None)) and callable(getattr(obj, 'compute', None))",i,e,n,
+62b87af09a0c4fa8b80b34f1,"def fill(self, coord, weight=1):
+""""""
+
+Riempie l'istogramma alla posizione *coord* con il peso specificato *weight*.
+""""""","def fill(self, coord, weight=1):
+    """"""
+    Riempie l'istogramma alla posizione *coord* con il peso specificato *weight*.
+    """"""
+    # Controlla se la coordinata è già presente nell'istogramma
+    if coord in self.istogramma:
+        # Aggiorna il peso sommando il nuovo valore
+        self.istogramma[coord] += weight
+    else:
+        # Aggiunge una nuova coordinata con il peso specificato
+        self.istogramma[coord] = weight",i,b,n,
+62b86a9eb4d922cb0e688d25,"def _get_resource_name_regex():`
+""""""
+Crea o restituisci le espressioni regolari utilizzate per convalidare il nome delle risorse Krake.
+
+**Restituisce:**  
+    `(re.Pattern)`: le espressioni regolari compilate, utilizzate per convalidare il nome della risorsa.
+""""""","import re
+
+def _get_resource_name_regex():
+    """"""
+    Crea o restituisci le espressioni regolari utilizzate per convalidare il nome delle risorse Krake.
+
+    **Restituisce:**  
+        `(re.Pattern)`: le espressioni regolari compilate, utilizzate per convalidare il nome della risorsa.
+    """"""
+    # Definisci il pattern per convalidare il nome della risorsa
+    # Il nome della risorsa deve iniziare con una lettera, può contenere lettere, numeri, trattini e underscore
+    # e deve avere una lunghezza compresa tra 1 e 63 caratteri
+    pattern = r'^[a-zA-Z][a-zA-Z0-9-_]{0,62}$'
+    
+    # Compila l'espressione regolare
+    regex = re.compile(pattern)
+    
+    return regex",i,e,n,
+62b86a4fb4d922cb0e688cf8,"
+def validate_value(value):
+""""""
+Convalida il valore fornito rispetto alla corrispondente espressione regolare.
+
+Argomenti:
+    value: la stringa da convalidare
+
+Eccezioni:
+    ValidationError: se il valore fornito non è conforme all'espressione regolare.
+""""""","import re
+
+def validate_value(value):
+    """"""
+    Convalida il valore fornito rispetto alla corrispondente espressione regolare.
+
+    Argomenti:
+        value: la stringa da convalidare
+
+    Eccezioni:
+        ValidationError: se il valore fornito non è conforme all'espressione regolare.
+    """"""
+    # Definisci l'espressione regolare per la convalida
+    espressione_regolare = r'^[A-Za-z0-9_]+$'  # Esempio: solo lettere, numeri e underscore
+    
+    # Verifica se il valore corrisponde all'espressione regolare
+    if not re.match(espressione_regolare, value):
+        raise ValidationError(f""Il valore '{value}' non è conforme all'espressione regolare."")
+    
+    return True
+
+class ValidationError(Exception):
+    """"""Eccezione sollevata quando la convalida fallisce.""""""
+    pass",i,b,i,
+62b86a01b4d922cb0e688ccc,"def generate_default_observer_schema_dict(manifest_dict, first_level=False):
+""""""
+Insieme alla funzione :func:`generate_default_observer_schema_list`, questa funzione viene chiamata ricorsivamente per generare una parte dello schema predefinito `observer_schema` a partire da una risorsa Kubernetes, definita rispettivamente da `manifest_dict` o `manifest_list`.
+
+### Argomenti:
+- **manifest_dict (dict)**: Risorse Kubernetes parziali.
+- **first_level (bool, opzionale)**: Se impostato su True, indica che il dizionario rappresenta l'intero schema `observer_schema` di una risorsa Kubernetes.
+
+### Ritorna:
+- **dict**: Lo schema parziale `observer_schema` generato.
+
+Questa funzione crea un nuovo dizionario a partire da `manifest_dict` e sostituisce tutti i valori che non sono liste o dizionari con `None`.
+
+Nel caso di un dizionario `first_level` (ovvero lo schema completo `observer_schema` per una risorsa), i valori dei campi identificativi vengono copiati dal file manifest.
+""""""","def generate_default_observer_schema_dict(manifest_dict, first_level=False):
+    """"""
+    Insieme alla funzione :func:`generate_default_observer_schema_list`, questa funzione viene chiamata ricorsivamente per generare una parte dello schema predefinito `observer_schema` a partire da una risorsa Kubernetes, definita rispettivamente da `manifest_dict` o `manifest_list`.
+
+    ### Argomenti:
+    - **manifest_dict (dict)**: Risorse Kubernetes parziali.
+    - **first_level (bool, opzionale)**: Se impostato su True, indica che il dizionario rappresenta l'intero schema `observer_schema` di una risorsa Kubernetes.
+
+    ### Ritorna:
+    - **dict**: Lo schema parziale `observer_schema` generato.
+
+    Questa funzione crea un nuovo dizionario a partire da `manifest_dict` e sostituisce tutti i valori che non sono liste o dizionari con `None`.
+
+    Nel caso di un dizionario `first_level` (ovvero lo schema completo `observer_schema` per una risorsa), i valori dei campi identificativi vengono copiati dal file manifest.
+    """"""
+    schema_dict = {}
+    
+    # Campi identificativi da copiare se siamo al primo livello
+    campi_identificativi = [""apiVersion"", ""kind"", ""metadata""]
+    
+    for chiave, valore in manifest_dict.items():
+        if isinstance(valore, dict):
+            # Se il valore è un dizionario, chiamata ricorsiva
+            schema_dict[chiave] = generate_default_observer_schema_dict(valore)
+        elif isinstance(valore, list):
+            # Se il valore è una lista, chiamata ricorsiva alla funzione per le liste
+            schema_dict[chiave] = generate_default_observer_schema_list(valore)
+        else:
+            # Se non è né un dizionario né una lista, impostiamo il valore a None
+            schema_dict[chiave] = None
+    
+    # Se siamo al primo livello, copiamo i campi identificativi
+    if first_level:
+        for campo in campi_identificativi:
+            if campo in manifest_dict:
+                schema_dict[campo] = manifest_dict[campo]
+    
+    return schema_dict
+
+def generate_default_observer_schema_list(manifest_list):
+    """"""
+    Funzione ausiliaria per gestire le liste all'interno del dizionario.
+    """"""
+    schema_list = []
+    
+    for elemento in manifest_list:
+        if isinstance(elemento, dict):
+            schema_list.append(generate_default_observer_schema_dict(elemento))
+        elif isinstance(elemento, list):
+            schema_list.append(generate_default_observer_schema_list(elemento))
+        else:
+            schema_list.append(None)
+    
+    return schema_list",i,b,n,
+62b869ebb4d922cb0e688cc6,"
+def update_last_applied_manifest_list_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+""""""
+Insieme alla funzione :func:``update_last_applied_manifest_dict_from_resp``, 
+questa funzione viene chiamata ricorsivamente per aggiornare un 
+``last_applied_manifest`` parziale a partire da una risposta parziale di Kubernetes.
+
+Argomenti:
+    last_applied_manifest (list): ``last_applied_manifest`` parziale in fase di aggiornamento.
+    observer_schema (list): ``observer_schema`` parziale.
+    response (list): risposta parziale dall'API di Kubernetes.
+
+Questa funzione attraversa tutti i campi osservati e inizializza il loro valore 
+in ``last_applied_manifest`` se non sono ancora presenti.
+""""""","def update_last_applied_manifest_list_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    Aggiorna una lista parziale di `last_applied_manifest` basata su una risposta parziale di Kubernetes.
+    
+    Argomenti:
+        last_applied_manifest (list): Lista parziale di `last_applied_manifest` da aggiornare.
+        observer_schema (list): Schema parziale dell'osservatore.
+        response (list): Risposta parziale dall'API di Kubernetes.
+    """"""
+    # Itera attraverso ogni elemento nello schema dell'osservatore
+    for indice, campo_osservato in enumerate(observer_schema):
+        # Se l'indice è fuori dai limiti di last_applied_manifest, aggiungi un nuovo elemento
+        if indice >= len(last_applied_manifest):
+            last_applied_manifest.append(None)
+        
+        # Se il campo osservato è un dizionario, chiama la funzione ricorsiva per i dizionari
+        if isinstance(campo_osservato, dict):
+            update_last_applied_manifest_dict_from_resp(
+                last_applied_manifest[indice], campo_osservato, response[indice]
+            )
+        # Se il campo osservato è una lista, chiama questa funzione ricorsivamente
+        elif isinstance(campo_osservato, list):
+            update_last_applied_manifest_list_from_resp(
+                last_applied_manifest[indice], campo_osservato, response[indice]
+            )
+        # Altrimenti, aggiorna direttamente il valore
+        else:
+            last_applied_manifest[indice] = response[indice]",i,b,n,
+62b869eab4d922cb0e688cc5,"def update_last_applied_manifest_dict_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+
+Insieme alla funzione :func:``update_last_applied_manifest_list_from_resp``, 
+questa funzione viene chiamata ricorsivamente per aggiornare un 
+``last_applied_manifest`` parziale a partire da una risposta parziale di Kubernetes.
+
+Argomenti:
+    last_applied_manifest (dict): ``last_applied_manifest`` parziale in fase di aggiornamento
+    observer_schema (dict): ``observer_schema`` parziale
+    response (dict): risposta parziale dall'API di Kubernetes.
+
+Eccezioni:
+    KeyError: Se il campo osservato non è presente nella risposta di Kubernetes.
+
+Questa funzione analizza tutti i campi osservati e inizializza il loro valore 
+in ``last_applied_manifest`` se non sono ancora presenti.
+```","def update_last_applied_manifest_dict_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    Aggiorna il dizionario `last_applied_manifest` con i valori dalla risposta di Kubernetes.
+
+    Argomenti:
+        last_applied_manifest (dict): Dizionario parziale da aggiornare.
+        observer_schema (dict): Schema parziale che definisce i campi da osservare.
+        response (dict): Risposta parziale dall'API di Kubernetes.
+
+    Eccezioni:
+        KeyError: Se un campo osservato non è presente nella risposta di Kubernetes.
+    """"""
+    for campo, schema in observer_schema.items():
+        if campo not in response:
+            raise KeyError(f""Il campo '{campo}' non è presente nella risposta di Kubernetes."")
+        
+        if isinstance(schema, dict):
+            # Se il campo è un dizionario, aggiorna ricorsivamente
+            if campo not in last_applied_manifest:
+                last_applied_manifest[campo] = {}
+            update_last_applied_manifest_dict_from_resp(
+                last_applied_manifest[campo], schema, response[campo]
+            )
+        elif isinstance(schema, list):
+            # Se il campo è una lista, chiama la funzione corrispondente per le liste
+            if campo not in last_applied_manifest:
+                last_applied_manifest[campo] = []
+            update_last_applied_manifest_list_from_resp(
+                last_applied_manifest[campo], schema, response[campo]
+            )
+        else:
+            # Se il campo è un valore semplice, aggiorna direttamente
+            last_applied_manifest[campo] = response[campo]",i,b,i,
+62b869eab4d922cb0e688cbf,"def generate_default_observer_schema(app):
+""""""
+
+Genera lo schema di osservazione predefinito per ogni risorsa Kubernetes presente in
+``spec.manifest`` per la quale non è stato specificato uno schema di osservazione personalizzato.
+
+Argomenti:
+    app (krake.data.kubernetes.Application): L'applicazione per la quale generare uno
+        schema di osservazione predefinito.
+""""""","def generate_default_observer_schema(app):
+    """"""
+    Genera lo schema di osservazione predefinito per ogni risorsa Kubernetes presente in
+    ``spec.manifest`` per la quale non è stato specificato uno schema di osservazione personalizzato.
+
+    Argomenti:
+        app (krake.data.kubernetes.Application): L'applicazione per la quale generare uno
+            schema di osservazione predefinito.
+    """"""
+    # Ottieni i manifesti dall'applicazione
+    manifesti = app.spec.manifest
+    
+    # Schema di osservazione predefinito
+    schema_predefinito = {
+        ""type"": ""object"",
+        ""properties"": {
+            ""status"": {
+                ""type"": ""object"",
+                ""properties"": {
+                    ""conditions"": {
+                        ""type"": ""array"",
+                        ""items"": {
+                            ""type"": ""object"",
+                            ""properties"": {
+                                ""type"": {""type"": ""string""},
+                                ""status"": {""type"": ""string""},
+                                ""lastTransitionTime"": {""type"": ""string""},
+                                ""reason"": {""type"": ""string""},
+                                ""message"": {""type"": ""string""}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    # Applica lo schema predefinito a ogni risorsa nel manifesto
+    for risorsa in manifesti:
+        if not hasattr(risorsa, 'observer_schema'):
+            risorsa.observer_schema = schema_predefinito
+    
+    return app",i,b,n,
+62b43428903eeb48555d3eaa,"def formatmany(
+                self,
+                sql: AnyStr,
+                many_params: Union[Iterable[Dict[Union[str, int], Any]], Iterable[Sequence[Any]]],
+        ) -> Tuple[AnyStr, Union[List[Dict[Union[str, int], Any]], List[Sequence[Any]]]]:
+```
+
+Converte la query SQL per utilizzare i parametri in stile ""out"" invece dei parametri in stile ""in"".
+
+- **sql** (:class:`str` o :class:`bytes`) è la query SQL.
+
+- **many_params** (:class:`~collections.abc.Iterable`) contiene ogni set di parametri in stile ""in"" (*params*).
+
+  - **params** (:class:`~collections.abc.Mapping` o :class:`~collections.abc.Sequence`) contiene il set di parametri in stile ""in"". Mappa ogni parametro (:class:`str` o :class:`int`) a un valore. Se :attr:`.SQLParams.in_style` è uno stile di parametro nominato, allora *params* deve essere un oggetto di tipo :class:`~collections.abc.Mapping`. Se :attr:`.SQLParams.in_style` è uno stile di parametro ordinale, allora *params* deve essere un oggetto di tipo :class:`~collections.abc.Sequence`.
+
+Restituisce una :class:`tuple` contenente:
+
+- La query SQL formattata (:class:`str` o :class:`bytes`).
+
+- Una :class:`list` contenente ogni set di parametri convertiti in stile ""out"" (:class:`dict` o :class:`list`).","def formatmany(
+        self,
+        sql: AnyStr,
+        many_params: Union[Iterable[Dict[Union[str, int], Any]], Iterable[Sequence[Any]]],
+) -> Tuple[AnyStr, Union[List[Dict[Union[str, int], Any]], List[Sequence[Any]]]]:
+    """"""
+    Converte la query SQL per utilizzare i parametri in stile ""out"" invece dei parametri in stile ""in"".
+
+    Args:
+        sql (AnyStr): La query SQL da formattare.
+        many_params (Union[Iterable[Dict[Union[str, int], Any]], Iterable[Sequence[Any]]]): 
+            Un iterabile contenente ogni set di parametri in stile ""in"".
+
+    Returns:
+        Tuple[AnyStr, Union[List[Dict[Union[str, int], Any]], List[Sequence[Any]]]: 
+            Una tupla contenente la query SQL formattata e una lista di parametri convertiti in stile ""out"".
+    """"""
+    
+    # Lista per memorizzare i parametri convertiti
+    parametri_convertiti = []
+    
+    # Itera su ogni set di parametri in many_params
+    for params in many_params:
+        if isinstance(params, dict):
+            # Se i parametri sono in formato dizionario (stile nominato)
+            parametri_out = {k: f"":{k}"" for k in params.keys()}
+        elif isinstance(params, (list, tuple)):
+            # Se i parametri sono in formato sequenza (stile ordinale)
+            parametri_out = [f"":{i}"" for i in range(len(params))]
+        else:
+            raise TypeError(""Tipo di parametri non supportato"")
+        
+        parametri_convertiti.append(parametri_out)
+    
+    # Restituisce la query SQL originale e i parametri convertiti
+    return sql, parametri_convertiti",i,b,i,
+62b45df05108cfac7f2109ce,"
+def validate(self, path):
+""""""
+
+Valida l'oggetto OCFL nel percorso specificato o nella radice di pyfs.
+""""""","def validate(self, path):
+    """"""
+    Valida l'oggetto OCFL nel percorso specificato o nella radice di pyfs.
+    
+    Args:
+        path (str): Il percorso del file system da validare.
+    
+    Returns:
+        bool: True se l'oggetto OCFL è valido, False altrimenti.
+    """"""
+    # Verifica se il percorso esiste
+    if not os.path.exists(path):
+        print(f""Il percorso {path} non esiste."")
+        return False
+    
+    # Verifica se il percorso è una directory
+    if not os.path.isdir(path):
+        print(f""Il percorso {path} non è una directory."")
+        return False
+    
+    # Verifica la presenza del file 'inventory.json'
+    inventory_path = os.path.join(path, 'inventory.json')
+    if not os.path.isfile(inventory_path):
+        print(f""File 'inventory.json' non trovato in {path}."")
+        return False
+    
+    # Leggi e valida il contenuto di 'inventory.json'
+    try:
+        with open(inventory_path, 'r') as file:
+            inventory = json.load(file)
+            # Qui potresti aggiungere ulteriori controlli sul contenuto di 'inventory'
+    except json.JSONDecodeError:
+        print(f""Errore nella decodifica del file 'inventory.json' in {path}."")
+        return False
+    
+    # Se tutte le verifiche sono superate, l'oggetto è valido
+    return True",i,e,i,
