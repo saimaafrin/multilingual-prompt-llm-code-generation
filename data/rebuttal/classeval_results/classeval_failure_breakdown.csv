@@ -1,0 +1,16 @@
+language,model,failed,ok,splice_failed,timeout
+chinese,claude,1901,2178,20,1
+chinese,deepseek,90,318,0,2
+chinese,gpt,108,300,0,2
+english,claude,1824,2260,16,0
+english,deepseek,93,315,0,2
+english,gpt,108,300,0,2
+hindi,claude,1887,2178,25,10
+hindi,deepseek,99,309,0,2
+hindi,gpt,108,300,0,2
+italian,claude,1924,2151,18,7
+italian,deepseek,100,308,0,2
+italian,gpt,114,294,0,2
+spanish,claude,1964,2105,25,6
+spanish,deepseek,103,305,0,2
+spanish,gpt,111,297,0,2

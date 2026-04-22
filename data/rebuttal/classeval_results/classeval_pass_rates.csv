@@ -1,0 +1,16 @@
+language,model,n_attempts,n_passed,pass_rate_pct
+chinese,claude,4100,2178,53.12
+chinese,deepseek,410,318,77.56
+chinese,gpt,410,300,73.17
+english,claude,4100,2260,55.12
+english,deepseek,410,315,76.83
+english,gpt,410,300,73.17
+hindi,claude,4100,2178,53.12
+hindi,deepseek,410,309,75.37
+hindi,gpt,410,300,73.17
+italian,claude,4100,2151,52.46
+italian,deepseek,410,308,75.12
+italian,gpt,410,294,71.71
+spanish,claude,4100,2105,51.34
+spanish,deepseek,410,305,74.39
+spanish,gpt,410,297,72.44

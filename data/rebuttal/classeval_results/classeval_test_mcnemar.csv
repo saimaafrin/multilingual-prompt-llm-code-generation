@@ -1,0 +1,13 @@
+model,language,n_pairs,passed_english_pct,passed_lang_pct,b_engPass_langFail,c_engFail_langPass,p_value,cohens_g,magnitude,p_adj_BH,significant_0.05
+gpt,chinese,410,73.17,73.17,7,7,1.0,0.0,null,1.0,False
+gpt,hindi,410,73.17,73.17,10,10,1.0,0.0,null,1.0,False
+gpt,spanish,410,73.17,72.44,13,10,0.677639,0.0652,small,0.813167,False
+gpt,italian,410,73.17,71.71,14,8,0.286279,0.1364,small,0.429418,False
+deepseek,chinese,410,76.83,77.56,9,12,0.663624,0.0714,small,0.813167,False
+deepseek,hindi,410,76.83,75.37,13,7,0.263176,0.15,medium,0.429418,False
+deepseek,spanish,410,76.83,74.39,16,6,0.052479,0.2273,medium,0.125949,False
+deepseek,italian,410,76.83,75.12,16,9,0.229523,0.14,small,0.429418,False
+claude,chinese,4100,55.12,53.12,191,109,3e-06,0.1367,small,1e-05,True
+claude,hindi,4100,55.12,53.12,200,118,5e-06,0.1289,small,1.5e-05,True
+claude,spanish,4100,55.12,51.34,283,128,0.0,0.1886,medium,0.0,True
+claude,italian,4100,55.12,52.46,260,151,0.0,0.1326,small,1e-06,True
