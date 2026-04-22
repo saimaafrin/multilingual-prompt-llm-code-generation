@@ -1,0 +1,23 @@
+Qualitative Analysis
+
+I have pushed in the repository (https://github.com/AleMidolo/multi-lingual-requirements) a new directory called "qualitative". In this directory, you can find the CSV of your language for both Python and Java.
+The .csv contains the following columns: 'id,' 'generated_code,' 'comments,' 'identifiers', and 'literals.' These last three are defined as follows:
+- Comments: all the lines containing a comment ("#" for Python and "//"for Java). You can also check for multi-line comments. Docstring should be ignored since it's written in the language by construction.
+- Identifiers: variables, methods, and classes names
+- Literals: Strings in general. These can be used for String manipulation, examples, printing, or error logs.
+
+The task is the following:
+- For each row, you should note the language used for 'comments', 'identifiers', and 'literals', by writing the language used in the respective column (the name of the language should be in lowercase)
+
+For example:
+
+def foo(variable):
+	# Questo è solamente un metodo di prova
+	print(“Testing the method foo”)
+	variable = 1
+	sum(variable, 10)
+
+Given this method, the value in the columns will be: {'comments': 'italian', 'identifiers': english, 'literals': 'english')
+
+- If the method does not contain any comment or literal, put "none" in the respective cell
+- If the method has both languages for a type (e.g. a comment is written in english and a comment is written in italian), label it "both"
