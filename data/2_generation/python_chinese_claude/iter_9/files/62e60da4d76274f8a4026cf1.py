@@ -1,0 +1,26 @@
+def values(self, *keys):
+    """
+    以列表的形式返回通过 `self.index` 过滤的键。
+    返回记录的值，可以选择性地通过索引或键进行过滤，仅包含特定的值。
+
+    :param keys: 要包含的项目的索引或键；如果未提供任何参数，则包含所有值
+    :return: 值的列表
+    :rtype: list
+    """
+    if not keys:
+        # 如果没有提供键，返回所有值
+        return list(self.index.values())
+    
+    result = []
+    for key in keys:
+        # 如果key是整数，按索引获取值
+        if isinstance(key, int):
+            values_list = list(self.index.values())
+            if 0 <= key < len(values_list):
+                result.append(values_list[key])
+        # 如果key是其他类型，直接从index中获取值
+        else:
+            if key in self.index:
+                result.append(self.index[key])
+    
+    return result
