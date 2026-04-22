@@ -1,0 +1,12 @@
+class _M:
+    def random_food_position(self):
+        """
+            यादृच्छिक रूप से एक नया खाद्य स्थान उत्पन्न करें, लेकिन इसे सांप पर न रखें।
+            :return: कुछ नहीं, खाद्य स्थान बदलें
+            """
+        while True:
+            x = random.randint(0, self.SCREEN_WIDTH // self.BLOCK_SIZE - 1) * self.BLOCK_SIZE
+            y = random.randint(0, self.SCREEN_HEIGHT // self.BLOCK_SIZE - 1) * self.BLOCK_SIZE
+            self.food_position = (x, y)
+            if self.food_position not in self.positions:
+                break

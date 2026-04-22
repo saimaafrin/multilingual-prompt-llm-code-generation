@@ -1,0 +1,14 @@
+class _M:
+    def insert_user(self, username, password):
+        """
+        "users" तालिका में एक नया उपयोगकर्ता डालता है।
+        :param username: str, उपयोगकर्ता का उपयोगकर्ता नाम।
+        :param password: str, उपयोगकर्ता का पासवर्ड।
+        :return: None
+        >>> user_db = UserLoginDB("user_database.db")
+        >>> user_db.create_table()
+        >>> user_db.insert_user('user1', 'pass1')
+        """
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        self.connection.commit()
