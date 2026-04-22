@@ -1,0 +1,43 @@
+from zope.interface import Invalid, providedBy
+from inspect import signature
+
+def _verify(iface, candidate, tentative=False, vtype=None):
+    errors = []
+    
+    # Step 1: Verify that the candidate claims to provide the interface
+    if not tentative:
+        if not providedBy(candidate, iface):
+            errors.append(f"Candidate {candidate} does not claim to provide interface {iface}.")
+    
+    # Step 2: Verify that the candidate defines all required methods
+    required_methods = iface.namesAndDescriptions(all=True)
+    for name, desc in required_methods:
+        if not hasattr(candidate, name):
+            errors.append(f"Candidate {candidate} is missing required method {name}.")
+        else:
+            # Step 3: Verify that the methods have the correct signatures (if possible)
+            candidate_method = getattr(candidate, name)
+            if callable(candidate_method):
+                try:
+                    sig = signature(candidate_method)
+                    iface_sig = signature(desc.getSignature())
+                    if sig != iface_sig:
+                        errors.append(f"Method {name} in candidate {candidate} has an incorrect signature.")
+                except ValueError:
+                    # If signature cannot be determined, skip this check
+                    pass
+    
+    # Step 4: Verify that the candidate defines all required attributes
+    required_attrs = iface.namesAndDescriptions(all=True)
+    for name, desc in required_attrs:
+        if not hasattr(candidate, name):
+            errors.append(f"Candidate {candidate} is missing required attribute {name}.")
+    
+    # Handle errors
+    if errors:
+        if len(errors) == 1:
+            raise Invalid(errors[0])
+        else:
+            raise Invalid("\n".join(errors))
+    
+    return True
