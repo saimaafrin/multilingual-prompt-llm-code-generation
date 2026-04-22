@@ -1,0 +1,16 @@
+model,language,compiled,total,compilation_rate
+gpt,english,1185,2300,51.52
+gpt,chinese,1245,2300,54.13
+gpt,hindi,1259,2300,54.74
+gpt,spanish,1163,2300,50.57
+gpt,italian,1210,2300,52.61
+deepseek,english,1045,2300,45.43
+deepseek,chinese,1043,2300,45.35
+deepseek,hindi,1025,2300,44.57
+deepseek,spanish,1018,2300,44.26
+deepseek,italian,1109,2300,48.22
+claude,english,1128,2300,49.04
+claude,chinese,1072,2300,46.61
+claude,hindi,780,2300,33.91
+claude,spanish,1084,2300,47.13
+claude,italian,1170,2300,50.87

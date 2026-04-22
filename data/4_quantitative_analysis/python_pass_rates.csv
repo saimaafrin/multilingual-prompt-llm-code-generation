@@ -1,0 +1,16 @@
+model,language,passed,total,pass_rate
+gpt,english,575,2299,25.01
+gpt,chinese,727,2300,31.61
+gpt,hindi,539,2300,23.43
+gpt,spanish,569,2300,24.74
+gpt,italian,587,2300,25.52
+deepseek,english,650,2300,28.26
+deepseek,chinese,737,2300,32.04
+deepseek,hindi,640,2300,27.83
+deepseek,spanish,618,2300,26.87
+deepseek,italian,627,2300,27.26
+claude,english,593,2300,25.78
+claude,chinese,738,2300,32.09
+claude,hindi,620,2300,26.96
+claude,spanish,599,2300,26.04
+claude,italian,601,2299,26.14

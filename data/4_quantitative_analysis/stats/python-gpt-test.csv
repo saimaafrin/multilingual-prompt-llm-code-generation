@@ -1,0 +1,5 @@
+language,passedEng,passedLang,p.value,signif,g,magnitude
+chinese,23.35,30,0,TRUE,0.2844,large
+hindi,23.35,22.35,0.1166,FALSE,0.0852,small
+spanish,23.35,24.09,0.1809,FALSE,0.0739,small
+italian,23.35,23.91,0.3088,FALSE,0.0468,very small
