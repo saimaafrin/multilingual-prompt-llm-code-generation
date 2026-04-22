@@ -1,0 +1,19 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class ConverterRegistry {
+    private Map<Class<?>, Converter> converterMap = new HashMap<>();
+
+    public Converter lookup(final Class<?> clazz) {
+        return converterMap.get(clazz);
+    }
+
+    public void registerConverter(Class<?> clazz, Converter converter) {
+        converterMap.put(clazz, converter);
+    }
+
+    public interface Converter {
+        // Define the methods that a Converter should implement
+        Object convert(Object source);
+    }
+}
