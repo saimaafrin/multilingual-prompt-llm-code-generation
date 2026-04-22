@@ -1,0 +1,14 @@
+def next_version(version):
+    """
+    दिए गए संस्करण पैटर्न के अनुसार अगला संस्करण पहचानकर्ता प्राप्त करें।
+
+    यह फ़ंक्शन शून्य-प्रिफिक्स (zero-prefixed) और गैर-शून्य-प्रिफिक्स (non-zero prefixed) दोनों प्रकार के संस्करणों को संभालने में सक्षम होना चाहिए।
+    """
+    # Split the version into its components
+    parts = version.split('.')
+    
+    # Convert the last part to an integer and increment it
+    parts[-1] = str(int(parts[-1]) + 1)
+    
+    # Join the parts back together to form the new version
+    return '.'.join(parts)

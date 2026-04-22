@@ -1,0 +1,23 @@
+def _convert_non_cli_args(self, parser_name, values_dict):
+    """
+    तर्कों को सही प्रकारों में परिवर्तित करता है और values_dict पैरामीटर को संशोधित करता है।
+
+    डिफ़ॉल्ट रूप से, सभी मान स्ट्रिंग्स के रूप में होते हैं।
+
+    :param parser_name: कमांड का नाम, जैसे main, virsh, ospd, आदि।
+    :param values_dict: तर्कों के साथ डिक्शनरी।
+    """
+    for key, value in values_dict.items():
+        if isinstance(value, str):
+            if value.isdigit():
+                values_dict[key] = int(value)
+            else:
+                try:
+                    # Attempt to convert to float
+                    values_dict[key] = float(value)
+                except ValueError:
+                    # Keep as string if conversion fails
+                    pass
+        elif isinstance(value, list):
+            # Convert list items if they are strings
+            values_dict[key] = [int(v) if v.isdigit() else v for v in value]

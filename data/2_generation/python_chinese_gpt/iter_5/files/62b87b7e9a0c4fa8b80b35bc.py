@@ -1,0 +1,26 @@
+def _update_context(self, context):
+    """
+    更新 *context*，使其包含此图的属性。
+
+    *context.error* 会附加错误的索引。
+    例如，对于一个具有字段 "E, t, error_E_low" 的图，其子上下文可能为：
+    {"error": {"x_low": {"index": 2}}}
+    请注意，错误名称被称为 "x"、"y" 和 "z"（这对应于前三个坐标，如果它们存在的话），这使得绘图更加简化。
+    现有的值不会从 *context.value* 及其子上下文中移除。
+
+    此方法在图的“销毁”过程中被调用（例如，在 :class:`.ToCSV` 中）。
+    这里的“销毁”是指在流程中将图转换为另一种结构（如文本）。
+    在此过程中，图对象实际上并未被真正销毁。
+    """
+    # 假设 self 有属性 error_indices 和 context.value
+    if not hasattr(context, 'error'):
+        context.error = {}
+    
+    # 更新错误索引
+    for i, error_index in enumerate(self.error_indices):
+        if i < 3:  # 只处理 x, y, z
+            error_key = ['x', 'y', 'z'][i]
+            context.error[error_key] = {'index': error_index}
+    
+    # 这里可以添加更多的图属性到 context
+    # 例如 context.value 的更新逻辑
