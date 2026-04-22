@@ -1,0 +1,961 @@
+fileName,rules,message,count
+src/main/java/org/6367667d1a6d9265ec017401/6367667d1a6d9265ec017401.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation",1
+src/main/java/org/6367667f1a6d9265ec017457/6367667f1a6d9265ec017457.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/6367667f1a6d9265ec01745c/6367667f1a6d9265ec01745c.java,"UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ","When doing a String.toLowerCase()/toUpperCase() call, use a Locale",1
+src/main/java/org/6367667f1a6d9265ec01745d/6367667f1a6d9265ec01745d.java,"EmptyCatchBlock: 
+Empty Catch Block finds instances where an exception is caught, but nothing is done.
+In most circumstances, this swallows an exception which should either be acted on
+or reported.
+        ",Avoid empty catch blocks,1
+src/main/java/org/636766801a6d9265ec017477/636766801a6d9265ec017477.java,"CloseResource: 
+Ensure that resources (like `java.sql.Connection`, `java.sql.Statement`, and `java.sql.ResultSet` objects
+and any subtype of `java.lang.AutoCloseable`) are always closed after use.
+Failing to do so might result in resource leaks.
+
+Note: It suffices to configure the super type, e.g. `java.lang.AutoCloseable`, so that this rule automatically triggers
+on any subtype (e.g. `java.io.FileInputStream`). Additionally specifying `java.sql.Connection` helps in detecting
+the types, if the type resolution / auxclasspath is not correctly setup.
+
+Note: Since PMD 6.16.0 the default value for the property `types` contains `java.lang.AutoCloseable` and detects
+now cases where the standard `java.io.*Stream` classes are involved. In order to restore the old behaviour,
+just remove ""AutoCloseable"" from the types.
+        ; CloseResource: 
+Ensure that resources (like `java.sql.Connection`, `java.sql.Statement`, and `java.sql.ResultSet` objects
+and any subtype of `java.lang.AutoCloseable`) are always closed after use.
+Failing to do so might result in resource leaks.
+
+Note: It suffices to configure the super type, e.g. `java.lang.AutoCloseable`, so that this rule automatically triggers
+on any subtype (e.g. `java.io.FileInputStream`). Additionally specifying `java.sql.Connection` helps in detecting
+the types, if the type resolution / auxclasspath is not correctly setup.
+
+Note: Since PMD 6.16.0 the default value for the property `types` contains `java.lang.AutoCloseable` and detects
+now cases where the standard `java.io.*Stream` classes are involved. In order to restore the old behaviour,
+just remove ""AutoCloseable"" from the types.
+        ",Ensure that resources like this InputStream object are closed after use; Ensure that resources like this InputStream object are closed after use,2
+src/main/java/org/636766801a6d9265ec017482/636766801a6d9265ec017482.java,"AssignmentInOperand: 
+Avoid assignments in operands; this can make code more complicated and harder to read.
+        ; AvoidInstantiatingObjectsInLoops: 
+New objects created within loops should be checked to see if they can created outside them and reused.
+        ",Avoid assignments in operands; Avoid instantiating new objects inside loops,2
+src/main/java/org/636766811a6d9265ec017496/636766811a6d9265ec017496.java,"AvoidFileStream: 
+The FileInputStream and FileOutputStream classes contains a finalizer method which will cause garbage
+collection pauses.
+See [JDK-8080225](https://bugs.openjdk.org/browse/JDK-8080225) for details.
+
+The FileReader and FileWriter constructors instantiate FileInputStream and FileOutputStream,
+again causing garbage collection issues while finalizer methods are called.
+
+* Use `Files.newInputStream(Paths.get(fileName))` instead of `new FileInputStream(fileName)`.
+* Use `Files.newOutputStream(Paths.get(fileName))` instead of `new FileOutputStream(fileName)`.
+* Use `Files.newBufferedReader(Paths.get(fileName))` instead of `new FileReader(fileName)`.
+* Use `Files.newBufferedWriter(Paths.get(fileName))` instead of `new FileWriter(fileName)`.
+
+Please note, that the `java.nio` API does not throw a `FileNotFoundException` anymore, instead
+it throws a `NoSuchFileException`. If your code dealt explicitly with a `FileNotFoundException`,
+then this needs to be adjusted. Both exceptions are subclasses of `IOException`, so catching
+that one covers both.
+        ","Avoid instantiating FileInputStream, FileOutputStream, FileReader, or FileWriter",1
+src/main/java/org/636766821a6d9265ec0174b6/636766821a6d9265ec0174b6.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ; ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ; ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ; ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation; Return an empty collection rather than null.; Return an empty collection rather than null.; Return an empty collection rather than null.",4
+src/main/java/org/636766821a6d9265ec0174c9/636766821a6d9265ec0174c9.java,"CloseResource: 
+Ensure that resources (like `java.sql.Connection`, `java.sql.Statement`, and `java.sql.ResultSet` objects
+and any subtype of `java.lang.AutoCloseable`) are always closed after use.
+Failing to do so might result in resource leaks.
+
+Note: It suffices to configure the super type, e.g. `java.lang.AutoCloseable`, so that this rule automatically triggers
+on any subtype (e.g. `java.io.FileInputStream`). Additionally specifying `java.sql.Connection` helps in detecting
+the types, if the type resolution / auxclasspath is not correctly setup.
+
+Note: Since PMD 6.16.0 the default value for the property `types` contains `java.lang.AutoCloseable` and detects
+now cases where the standard `java.io.*Stream` classes are involved. In order to restore the old behaviour,
+just remove ""AutoCloseable"" from the types.
+        ",Ensure that resources like this URLClassLoader object are closed after use,1
+src/main/java/org/636766831a6d9265ec0174eb/636766831a6d9265ec0174eb.java,"UseArraysAsList: 
+
+The `java.util.Arrays` class has a `asList()` method that should be used when you want to create a new List from
+an array of objects. It is faster than executing a loop to copy all the elements of the array one by one.
+
+Note that the result of `Arrays.asList()` is backed by the specified array,
+changes in the returned list will result in the array to be modified.
+For that reason, it is not possible to add new elements to the returned list of `Arrays.asList()`
+(UnsupportedOperationException).
+You must use `new ArrayList<>(Arrays.asList(...))` if that is inconvenient for you (e.g. because of concurrent access).
+
+        ",Use asList instead of tight loops,1
+src/main/java/org/636766a81a6d9265ec01758e/636766a81a6d9265ec01758e.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements; Avoid using literals in if statements; Avoid using literals in if statements,3
+src/main/java/org/636766a91a6d9265ec0175c2/636766a91a6d9265ec0175c2.java,"AvoidFieldNameMatchingTypeName: 
+It is somewhat confusing to have a field name matching the declaring type name.
+This probably means that type and/or field names should be chosen more carefully.
+        ",It is somewhat confusing to have a field name matching the declaring class name,1
+src/main/java/org/636766a91a6d9265ec0175c4/636766a91a6d9265ec0175c4.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/636766ae1a6d9265ec0175d8/636766ae1a6d9265ec0175d8.java,"ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ",StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.; Avoid appending characters as strings in StringBuffer.append.; Avoid appending characters as strings in StringBuffer.append.,3
+src/main/java/org/636766f01a6d9265ec01763e/636766f01a6d9265ec01763e.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ; UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation; When doing a String.toLowerCase()/toUpperCase() call, use a Locale",2
+src/main/java/org/636766f31a6d9265ec01768f/636766f31a6d9265ec01768f.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636766f81a6d9265ec017758/636766f81a6d9265ec017758.java,"OverrideBothEqualsAndHashcode: 
+Override both public boolean Object.equals(Object other), and public int Object.hashCode(), or override neither.  Even if you are inheriting a hashCode() from a parent class, consider implementing hashCode and explicitly delegating to your superclass.
+        ",Ensure you override both equals() and hashCode(),1
+src/main/java/org/636766fa1a6d9265ec017796/636766fa1a6d9265ec017796.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636766fa1a6d9265ec0177a4/636766fa1a6d9265ec0177a4.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636766fd1a6d9265ec017814/636766fd1a6d9265ec017814.java,"CompareObjectsWithEquals: 
+Use `equals()` to compare object references; avoid comparing them with `==`.
+
+Since comparing objects with named constants is useful in some cases (eg, when
+defining constants for sentinel values), the rule ignores comparisons against
+fields with all-caps name (eg `this == SENTINEL`), which is a common naming
+convention for constant fields.
+
+You may allow some types to be compared by reference by listing the exceptions
+in the `typesThatCompareByReference` property.
+        ",Use equals() to compare object references.,1
+src/main/java/org/636766fe1a6d9265ec01781c/636766fe1a6d9265ec01781c.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/636766fe1a6d9265ec017821/636766fe1a6d9265ec017821.java,"AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ",Avoid appending characters as strings in StringBuffer.append.; Avoid appending characters as strings in StringBuffer.append.,2
+src/main/java/org/636766fe1a6d9265ec01782a/636766fe1a6d9265ec01782a.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/636766fe1a6d9265ec017833/636766fe1a6d9265ec017833.java,"DoNotUseThreads: 
+The J2EE specification explicitly forbids the use of threads. Threads are resources, that should be managed and monitored by the J2EE server.
+If the application creates threads on its own or uses own custom thread pools, then these threads are not managed, which could lead to resource exhaustion.
+Also, EJBs might be moved between machines in a cluster and only managed resources can be moved along.
+        ; AvoidSynchronizedStatement: 
+      Synchronization will pin virtual threads and can cause performance problems.
+    ; AvoidSynchronizedStatement: 
+      Synchronization will pin virtual threads and can cause performance problems.
+    ","To be compliant to J2EE, a webapp should not use any thread.; Use ReentrantLock rather than synchronization; Use ReentrantLock rather than synchronization",3
+src/main/java/org/636766fe1a6d9265ec017838/636766fe1a6d9265ec017838.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636766ff1a6d9265ec017842/636766ff1a6d9265ec017842.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636767021a6d9265ec0178b2/636767021a6d9265ec0178b2.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements; Avoid using literals in if statements; Avoid using literals in if statements,3
+src/main/java/org/636767021a6d9265ec0178bf/636767021a6d9265ec0178bf.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/636767031a6d9265ec0178e6/636767031a6d9265ec0178e6.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636767041a6d9265ec0178f8/636767041a6d9265ec0178f8.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ; UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ","Return an empty collection rather than null.; Assigning an Object to null is a code smell.  Consider refactoring.; When doing a String.toLowerCase()/toUpperCase() call, use a Locale",3
+src/main/java/org/636767041a6d9265ec01790f/636767041a6d9265ec01790f.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636767081a6d9265ec017989/636767081a6d9265ec017989.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636767081a6d9265ec0179a2/636767081a6d9265ec0179a2.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/6367670a1a6d9265ec0179f1/6367670a1a6d9265ec0179f1.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/6367670b1a6d9265ec017a05/6367670b1a6d9265ec017a05.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/6367670b1a6d9265ec017a0f/6367670b1a6d9265ec017a0f.java,"UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ; UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ","When doing a String.toLowerCase()/toUpperCase() call, use a Locale; When doing a String.toLowerCase()/toUpperCase() call, use a Locale",2
+src/main/java/org/6367670c1a6d9265ec017a2a/6367670c1a6d9265ec017a2a.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/636767461a6d9265ec017d17/636767461a6d9265ec017d17.java,"ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ",StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.,1
+src/main/java/org/6367674a1a6d9265ec017da9/6367674a1a6d9265ec017da9.java,"CompareObjectsWithEquals: 
+Use `equals()` to compare object references; avoid comparing them with `==`.
+
+Since comparing objects with named constants is useful in some cases (eg, when
+defining constants for sentinel values), the rule ignores comparisons against
+fields with all-caps name (eg `this == SENTINEL`), which is a common naming
+convention for constant fields.
+
+You may allow some types to be compared by reference by listing the exceptions
+in the `typesThatCompareByReference` property.
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Use equals() to compare object references.; Assigning an Object to null is a code smell.  Consider refactoring.; Assigning an Object to null is a code smell.  Consider refactoring.,3
+src/main/java/org/6367674b1a6d9265ec017dc0/6367674b1a6d9265ec017dc0.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ; AvoidFieldNameMatchingTypeName: 
+It is somewhat confusing to have a field name matching the declaring type name.
+This probably means that type and/or field names should be chosen more carefully.
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation; It is somewhat confusing to have a field name matching the declaring class name",2
+src/main/java/org/6367674f1a6d9265ec017e74/6367674f1a6d9265ec017e74.java,"AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ",Avoid appending characters as strings in StringBuffer.append.; StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.; Avoid appending characters as strings in StringBuffer.append.,3
+src/main/java/org/636767501a6d9265ec017e86/636767501a6d9265ec017e86.java,"NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Assigning an Object to null is a code smell.  Consider refactoring.; Assigning an Object to null is a code smell.  Consider refactoring.,2
+src/main/java/org/636767511a6d9265ec017eb0/636767511a6d9265ec017eb0.java,"AvoidFieldNameMatchingTypeName: 
+It is somewhat confusing to have a field name matching the declaring type name.
+This probably means that type and/or field names should be chosen more carefully.
+        ",It is somewhat confusing to have a field name matching the declaring class name,1
+src/main/java/org/636767511a6d9265ec017eb6/636767511a6d9265ec017eb6.java,"SuspiciousEqualsMethodName: 
+The method name and parameter number are suspiciously close to `Object.equals`, which can denote an
+intention to override it. However, the method does not override `Object.equals`, but overloads it instead.
+Overloading `Object.equals` method is confusing for other programmers, error-prone and hard to maintain,
+especially when using inheritance, because `@Override` annotations used in subclasses can provide a false
+sense of security. For more information on `Object.equals` method, see Effective Java, 3rd Edition,
+Item 10: Obey the general contract when overriding equals.
+        ",The method name and parameter number are suspiciously close to equals(Object),1
+src/main/java/org/6367675a1a6d9265ec018010/6367675a1a6d9265ec018010.java,"NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Assigning an Object to null is a code smell.  Consider refactoring.,1
+src/main/java/org/6367675c1a6d9265ec01805b/6367675c1a6d9265ec01805b.java,"NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Assigning an Object to null is a code smell.  Consider refactoring.,1
+src/main/java/org/6367675d1a6d9265ec018082/6367675d1a6d9265ec018082.java,"CompareObjectsWithEquals: 
+Use `equals()` to compare object references; avoid comparing them with `==`.
+
+Since comparing objects with named constants is useful in some cases (eg, when
+defining constants for sentinel values), the rule ignores comparisons against
+fields with all-caps name (eg `this == SENTINEL`), which is a common naming
+convention for constant fields.
+
+You may allow some types to be compared by reference by listing the exceptions
+in the `typesThatCompareByReference` property.
+        ",Use equals() to compare object references.,1
+src/main/java/org/6367675f1a6d9265ec0180d3/6367675f1a6d9265ec0180d3.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ; UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation; If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation",2
+src/main/java/org/636767601a6d9265ec0180e2/636767601a6d9265ec0180e2.java,"AvoidInstantiatingObjectsInLoops: 
+New objects created within loops should be checked to see if they can created outside them and reused.
+        ; AvoidInstantiatingObjectsInLoops: 
+New objects created within loops should be checked to see if they can created outside them and reused.
+        ; AvoidInstantiatingObjectsInLoops: 
+New objects created within loops should be checked to see if they can created outside them and reused.
+        ",Avoid instantiating new objects inside loops; Avoid instantiating new objects inside loops; Avoid instantiating new objects inside loops,3
+src/main/java/org/636767631a6d9265ec018171/636767631a6d9265ec018171.java,"RedundantFieldInitializer: 
+Java will initialize fields with known default values so any explicit initialization of those same defaults
+is redundant and results in a larger class file (approximately three additional bytecode instructions per field).
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Avoid using redundant field initializer for 'size'; Assigning an Object to null is a code smell.  Consider refactoring.; Assigning an Object to null is a code smell.  Consider refactoring.; Assigning an Object to null is a code smell.  Consider refactoring.,4
+src/main/java/org/636767691a6d9265ec0181a6/636767691a6d9265ec0181a6.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ; ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.; Return an empty collection rather than null.,2
+src/main/java/org/636767691a6d9265ec0181ae/636767691a6d9265ec0181ae.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/6367676b1a6d9265ec0181dd/6367676b1a6d9265ec0181dd.java,"AssignmentInOperand: 
+Avoid assignments in operands; this can make code more complicated and harder to read.
+        ",Avoid assignments in operands,1
+src/main/java/org/6367676c1a6d9265ec018204/6367676c1a6d9265ec018204.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ",Return an empty collection rather than null.,1
+src/main/java/org/6367676c1a6d9265ec018223/6367676c1a6d9265ec018223.java,"CompareObjectsWithEquals: 
+Use `equals()` to compare object references; avoid comparing them with `==`.
+
+Since comparing objects with named constants is useful in some cases (eg, when
+defining constants for sentinel values), the rule ignores comparisons against
+fields with all-caps name (eg `this == SENTINEL`), which is a common naming
+convention for constant fields.
+
+You may allow some types to be compared by reference by listing the exceptions
+in the `typesThatCompareByReference` property.
+        ",Use equals() to compare object references.,1
+src/main/java/org/6367676d1a6d9265ec018229/6367676d1a6d9265ec018229.java,"ReturnEmptyCollectionRatherThanNull: 
+For any method that returns an collection (such as an array, Collection or Map), it is better to return
+an empty one rather than a null reference. This removes the need for null checking all results and avoids
+inadvertent NullPointerExceptions.
+
+See Effective Java, 3rd Edition, Item 54: Return empty collections or arrays instead of null
+        ; NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Return an empty collection rather than null.; Assigning an Object to null is a code smell.  Consider refactoring.,2
+src/main/java/org/636767781a6d9265ec01823e/636767781a6d9265ec01823e.java,"CloseResource: 
+Ensure that resources (like `java.sql.Connection`, `java.sql.Statement`, and `java.sql.ResultSet` objects
+and any subtype of `java.lang.AutoCloseable`) are always closed after use.
+Failing to do so might result in resource leaks.
+
+Note: It suffices to configure the super type, e.g. `java.lang.AutoCloseable`, so that this rule automatically triggers
+on any subtype (e.g. `java.io.FileInputStream`). Additionally specifying `java.sql.Connection` helps in detecting
+the types, if the type resolution / auxclasspath is not correctly setup.
+
+Note: Since PMD 6.16.0 the default value for the property `types` contains `java.lang.AutoCloseable` and detects
+now cases where the standard `java.io.*Stream` classes are involved. In order to restore the old behaviour,
+just remove ""AutoCloseable"" from the types.
+        ; EmptyCatchBlock: 
+Empty Catch Block finds instances where an exception is caught, but nothing is done.
+In most circumstances, this swallows an exception which should either be acted on
+or reported.
+        ; EmptyCatchBlock: 
+Empty Catch Block finds instances where an exception is caught, but nothing is done.
+In most circumstances, this swallows an exception which should either be acted on
+or reported.
+        ",Ensure that resources like this PrintWriter object are closed after use; Avoid empty catch blocks; Avoid empty catch blocks,3
+src/main/java/org/6367677b1a6d9265ec0182bd/6367677b1a6d9265ec0182bd.java,"SimpleDateFormatNeedsLocale: 
+Be sure to specify a Locale when creating SimpleDateFormat instances to ensure that locale-appropriate
+formatting is used.
+        ; ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ; UnsynchronizedStaticFormatter: 
+Instances of `java.text.Format` are generally not synchronized.
+Sun recommends using separate format instances for each thread.
+If multiple threads must access a static formatter, the formatter must be
+synchronized on block level.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; ConsecutiveLiteralAppends: 
+Consecutively calling StringBuffer/StringBuilder.append(...) with literals should be avoided.
+Since the literals are constants, they can already be combined into a single String literal and this String
+can be appended in a single method call.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; ConsecutiveLiteralAppends: 
+Consecutively calling StringBuffer/StringBuilder.append(...) with literals should be avoided.
+Since the literals are constants, they can already be combined into a single String literal and this String
+can be appended in a single method call.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ","When instantiating a SimpleDateFormat object, specify a Locale; StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.; Static Formatter objects should be accessed in a synchronized manner; Avoid appending characters as strings in StringBuffer.append.; StringBuffer (or StringBuilder).append is called 2 consecutive times with literals. Use a single append with a single combined String.; Avoid appending characters as strings in StringBuffer.append.; StringBuffer (or StringBuilder).append is called 2 consecutive times with literals. Use a single append with a single combined String.; Avoid appending characters as strings in StringBuffer.append.; Avoid appending characters as strings in StringBuffer.append.; Avoid appending characters as strings in StringBuffer.append.",10
+src/main/java/org/6367677d1a6d9265ec0182fd/6367677d1a6d9265ec0182fd.java,"UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ","When doing a String.toLowerCase()/toUpperCase() call, use a Locale",1
+src/main/java/org/6367677e1a6d9265ec01830f/6367677e1a6d9265ec01830f.java,"SimpleDateFormatNeedsLocale: 
+Be sure to specify a Locale when creating SimpleDateFormat instances to ensure that locale-appropriate
+formatting is used.
+        ; ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ; ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ; ConsecutiveLiteralAppends: 
+Consecutively calling StringBuffer/StringBuilder.append(...) with literals should be avoided.
+Since the literals are constants, they can already be combined into a single String literal and this String
+can be appended in a single method call.
+        ; AppendCharacterWithChar: 
+Avoid concatenating characters as strings in StringBuffer/StringBuilder.append methods.
+        ; ConsecutiveAppendsShouldReuse: 
+Consecutive calls to StringBuffer/StringBuilder .append should be chained, reusing the target object. This can improve the performance
+by producing a smaller bytecode, reducing overhead and improving inlining. A complete analysis can be found [here](https://github.com/pmd/pmd/issues/202#issuecomment-274349067)
+        ","When instantiating a SimpleDateFormat object, specify a Locale; StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.; Avoid appending characters as strings in StringBuffer.append.; StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.; StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.; StringBuffer (or StringBuilder).append is called 2 consecutive times with literals. Use a single append with a single combined String.; Avoid appending characters as strings in StringBuffer.append.; StringBuffer (or StringBuilder).append is called consecutively without reusing the target variable.",8
+src/main/java/org/6367677e1a6d9265ec018314/6367677e1a6d9265ec018314.java,"RedundantFieldInitializer: 
+Java will initialize fields with known default values so any explicit initialization of those same defaults
+is redundant and results in a larger class file (approximately three additional bytecode instructions per field).
+        ",Avoid using redundant field initializer for 'totalNodes',1
+src/main/java/org/6367677f1a6d9265ec018347/6367677f1a6d9265ec018347.java,"AvoidSynchronizedAtMethodLevel: 
+Method-level synchronization will pin virtual threads and can cause performance problems. Additionally, it can cause
+problems when new code is added to the method.  Block-level ReentrantLock helps to ensure that only the code that
+needs mutual exclusion will be locked.
+        ; CloseResource: 
+Ensure that resources (like `java.sql.Connection`, `java.sql.Statement`, and `java.sql.ResultSet` objects
+and any subtype of `java.lang.AutoCloseable`) are always closed after use.
+Failing to do so might result in resource leaks.
+
+Note: It suffices to configure the super type, e.g. `java.lang.AutoCloseable`, so that this rule automatically triggers
+on any subtype (e.g. `java.io.FileInputStream`). Additionally specifying `java.sql.Connection` helps in detecting
+the types, if the type resolution / auxclasspath is not correctly setup.
+
+Note: Since PMD 6.16.0 the default value for the property `types` contains `java.lang.AutoCloseable` and detects
+now cases where the standard `java.io.*Stream` classes are involved. In order to restore the old behaviour,
+just remove ""AutoCloseable"" from the types.
+        ; AvoidSynchronizedAtMethodLevel: 
+Method-level synchronization will pin virtual threads and can cause performance problems. Additionally, it can cause
+problems when new code is added to the method.  Block-level ReentrantLock helps to ensure that only the code that
+needs mutual exclusion will be locked.
+        ; AvoidSynchronizedAtMethodLevel: 
+Method-level synchronization will pin virtual threads and can cause performance problems. Additionally, it can cause
+problems when new code is added to the method.  Block-level ReentrantLock helps to ensure that only the code that
+needs mutual exclusion will be locked.
+        ",Use block level locking rather than method level synchronization; Ensure that resources like this PrintWriter object are closed after use; Use block level locking rather than method level synchronization; Use block level locking rather than method level synchronization,4
+src/main/java/org/636767821a6d9265ec0183ab/636767821a6d9265ec0183ab.java,"NullAssignment: 
+Assigning a ""null"" to a variable (outside of its declaration) is usually bad form.  Sometimes, this type
+of assignment is an indication that the programmer doesn't completely understand what is going on in the code.
+
+NOTE: This sort of assignment may used in some cases to dereference objects and encourage garbage collection.
+        ",Assigning an Object to null is a code smell.  Consider refactoring.,1
+src/main/java/org/636767861a6d9265ec018440/636767861a6d9265ec018440.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements,1
+src/main/java/org/636767871a6d9265ec01846d/636767871a6d9265ec01846d.java,"UseLocaleWithCaseConversions: 
+When doing `String::toLowerCase()/toUpperCase()` conversions, use an explicit locale argument to specify the case
+transformation rules.
+
+Using `String::toLowerCase()` without arguments implicitly uses `Locale::getDefault()`.
+The problem is that the default locale depends on the current JVM setup (and usually on the system in which
+it is running). Using the system default may be exactly what you want (e.g. if you are manipulating strings
+you got through standard input), but it may as well not be the case (e.g. if you are getting the string over
+the network or a file, and the encoding is well-defined and independent of the environment). In the latter case,
+using the default locale makes the case transformation brittle, as it may yield unexpected results on a machine
+whose locale has other case translation rules. For example, in Turkish, the uppercase form of `i` is `İ` (U+0130,
+not ASCII) and not `I` (U+0049) as in English.
+
+The rule is intended to *force* developers to think about locales when dealing with strings. By taking a
+conscious decision about the choice of locale at the time of writing, you reduce the risk of surprising
+behaviour down the line, and communicate your intent to future readers.
+        ","When doing a String.toLowerCase()/toUpperCase() call, use a Locale",1
+src/main/java/org/636767a41a6d9265ec01856c/636767a41a6d9265ec01856c.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ",Avoid using literals in if statements; Avoid using literals in if statements,2
+src/main/java/org/636767a81a6d9265ec0185fc/636767a81a6d9265ec0185fc.java,"RedundantFieldInitializer: 
+Java will initialize fields with known default values so any explicit initialization of those same defaults
+is redundant and results in a larger class file (approximately three additional bytecode instructions per field).
+        ; RedundantFieldInitializer: 
+Java will initialize fields with known default values so any explicit initialization of those same defaults
+is redundant and results in a larger class file (approximately three additional bytecode instructions per field).
+        ",Avoid using redundant field initializer for 'lastTag'; Avoid using redundant field initializer for 'pos',2
+src/main/java/org/636767ab1a6d9265ec01867b/636767ab1a6d9265ec01867b.java,"AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AvoidLiteralsInIfCondition: 
+Avoid using hard-coded literals in conditional statements. By declaring them as static variables
+or private members with descriptive names maintainability is enhanced. By default, the literals ""-1"" and ""0"" are ignored.
+More exceptions can be defined with the property ""ignoreMagicNumbers"".
+
+The rule doesn't consider deeper expressions by default, but this can be enabled via the property `ignoreExpressions`.
+With this property set to false, if-conditions like `i == 1 + 5` are reported as well. Note that in that case,
+the property ignoreMagicNumbers is not taken into account, if there are multiple literals involved in such an expression.
+        ; AssignmentInOperand: 
+Avoid assignments in operands; this can make code more complicated and harder to read.
+        ",Avoid using literals in if statements; Avoid using literals in if statements; Avoid assignments in operands,3
+src/main/java/org/636767dd1a6d9265ec0186f3/636767dd1a6d9265ec0186f3.java,"InefficientEmptyStringCheck: 
+
+String.trim().length() == 0 (or String.trim().isEmpty() for the same reason) is an inefficient
+way to check if a String is really blank, as it creates a new String object just to check its size.
+Consider creating a static function that loops through a string, checking Character.isWhitespace()
+on each character and returning false if a non-whitespace character is found. A Smarter code to
+check for an empty string would be:
+
+```java
+private boolean checkTrimEmpty(String str) {
+    for(int i = 0; i < str.length(); i++) {
+        if(!Character.isWhitespace(str.charAt(i))) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+You can refer to Apache's StringUtils#isBlank (in commons-lang),
+Spring's StringUtils#hasText (in the Spring framework) or Google's
+CharMatcher#whitespace (in Guava) for existing implementations (some might
+include the check for != null).
+
+        ; InefficientEmptyStringCheck: 
+
+String.trim().length() == 0 (or String.trim().isEmpty() for the same reason) is an inefficient
+way to check if a String is really blank, as it creates a new String object just to check its size.
+Consider creating a static function that loops through a string, checking Character.isWhitespace()
+on each character and returning false if a non-whitespace character is found. A Smarter code to
+check for an empty string would be:
+
+```java
+private boolean checkTrimEmpty(String str) {
+    for(int i = 0; i < str.length(); i++) {
+        if(!Character.isWhitespace(str.charAt(i))) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+You can refer to Apache's StringUtils#isBlank (in commons-lang),
+Spring's StringUtils#hasText (in the Spring framework) or Google's
+CharMatcher#whitespace (in Guava) for existing implementations (some might
+include the check for != null).
+
+        ",String.trim().length() == 0 / String.trim().isEmpty() is an inefficient way to validate a blank String.; String.trim().length() == 0 / String.trim().isEmpty() is an inefficient way to validate a blank String.,2
+src/main/java/org/636767de1a6d9265ec018706/636767de1a6d9265ec018706.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation",1
+src/main/java/org/636767de1a6d9265ec01871e/636767de1a6d9265ec01871e.java,"InefficientEmptyStringCheck: 
+
+String.trim().length() == 0 (or String.trim().isEmpty() for the same reason) is an inefficient
+way to check if a String is really blank, as it creates a new String object just to check its size.
+Consider creating a static function that loops through a string, checking Character.isWhitespace()
+on each character and returning false if a non-whitespace character is found. A Smarter code to
+check for an empty string would be:
+
+```java
+private boolean checkTrimEmpty(String str) {
+    for(int i = 0; i < str.length(); i++) {
+        if(!Character.isWhitespace(str.charAt(i))) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+You can refer to Apache's StringUtils#isBlank (in commons-lang),
+Spring's StringUtils#hasText (in the Spring framework) or Google's
+CharMatcher#whitespace (in Guava) for existing implementations (some might
+include the check for != null).
+
+        ",String.trim().length() == 0 / String.trim().isEmpty() is an inefficient way to validate a blank String.,1
+src/main/java/org/636767df1a6d9265ec01873c/636767df1a6d9265ec01873c.java,"InefficientEmptyStringCheck: 
+
+String.trim().length() == 0 (or String.trim().isEmpty() for the same reason) is an inefficient
+way to check if a String is really blank, as it creates a new String object just to check its size.
+Consider creating a static function that loops through a string, checking Character.isWhitespace()
+on each character and returning false if a non-whitespace character is found. A Smarter code to
+check for an empty string would be:
+
+```java
+private boolean checkTrimEmpty(String str) {
+    for(int i = 0; i < str.length(); i++) {
+        if(!Character.isWhitespace(str.charAt(i))) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+You can refer to Apache's StringUtils#isBlank (in commons-lang),
+Spring's StringUtils#hasText (in the Spring framework) or Google's
+CharMatcher#whitespace (in Guava) for existing implementations (some might
+include the check for != null).
+
+        ",String.trim().length() == 0 / String.trim().isEmpty() is an inefficient way to validate a blank String.,1
+src/main/java/org/636767e01a6d9265ec018755/636767e01a6d9265ec018755.java,"UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ; UseConcurrentHashMap: 
+Since Java5 brought a new implementation of the Map designed for multi-threaded access, you can
+perform efficient map reads without blocking other threads.
+        ; AvoidInstantiatingObjectsInLoops: 
+New objects created within loops should be checked to see if they can created outside them and reused.
+        ","If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation; If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation; Avoid instantiating new objects inside loops",3
+src/main/java/org/636767e11a6d9265ec018790/636767e11a6d9265ec018790.java,"AvoidFileStream: 
+The FileInputStream and FileOutputStream classes contains a finalizer method which will cause garbage
+collection pauses.
+See [JDK-8080225](https://bugs.openjdk.org/browse/JDK-8080225) for details.
+
+The FileReader and FileWriter constructors instantiate FileInputStream and FileOutputStream,
+again causing garbage collection issues while finalizer methods are called.
+
+* Use `Files.newInputStream(Paths.get(fileName))` instead of `new FileInputStream(fileName)`.
+* Use `Files.newOutputStream(Paths.get(fileName))` instead of `new FileOutputStream(fileName)`.
+* Use `Files.newBufferedReader(Paths.get(fileName))` instead of `new FileReader(fileName)`.
+* Use `Files.newBufferedWriter(Paths.get(fileName))` instead of `new FileWriter(fileName)`.
+
+Please note, that the `java.nio` API does not throw a `FileNotFoundException` anymore, instead
+it throws a `NoSuchFileException`. If your code dealt explicitly with a `FileNotFoundException`,
+then this needs to be adjusted. Both exceptions are subclasses of `IOException`, so catching
+that one covers both.
+        ; AssignmentInOperand: 
+Avoid assignments in operands; this can make code more complicated and harder to read.
+        ; InefficientEmptyStringCheck: 
+
+String.trim().length() == 0 (or String.trim().isEmpty() for the same reason) is an inefficient
+way to check if a String is really blank, as it creates a new String object just to check its size.
+Consider creating a static function that loops through a string, checking Character.isWhitespace()
+on each character and returning false if a non-whitespace character is found. A Smarter code to
+check for an empty string would be:
+
+```java
+private boolean checkTrimEmpty(String str) {
+    for(int i = 0; i < str.length(); i++) {
+        if(!Character.isWhitespace(str.charAt(i))) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+You can refer to Apache's StringUtils#isBlank (in commons-lang),
+Spring's StringUtils#hasText (in the Spring framework) or Google's
+CharMatcher#whitespace (in Guava) for existing implementations (some might
+include the check for != null).
+
+        ","Avoid instantiating FileInputStream, FileOutputStream, FileReader, or FileWriter; Avoid assignments in operands; String.trim().length() == 0 / String.trim().isEmpty() is an inefficient way to validate a blank String.",3
+src/main/java/org/636767e11a6d9265ec018795/636767e11a6d9265ec018795.java,"CompareObjectsWithEquals: 
+Use `equals()` to compare object references; avoid comparing them with `==`.
+
+Since comparing objects with named constants is useful in some cases (eg, when
+defining constants for sentinel values), the rule ignores comparisons against
+fields with all-caps name (eg `this == SENTINEL`), which is a common naming
+convention for constant fields.
+
+You may allow some types to be compared by reference by listing the exceptions
+in the `typesThatCompareByReference` property.
+        ",Use equals() to compare object references.,1

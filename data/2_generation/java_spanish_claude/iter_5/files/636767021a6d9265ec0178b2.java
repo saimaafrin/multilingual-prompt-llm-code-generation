@@ -1,0 +1,63 @@
+import java.util.Stack;
+
+public class FrameStack {
+    private Stack<Object> operandStack;
+
+    private void pop(final String descriptor) {
+        int index = 0;
+        
+        // Process array types
+        while (index < descriptor.length()) {
+            char c = descriptor.charAt(index);
+            
+            switch (c) {
+                case '(':
+                    // Skip opening parenthesis for method descriptors
+                    index++;
+                    continue;
+                    
+                case ')':
+                    // End of method arguments
+                    return;
+                    
+                case 'B': // byte
+                case 'C': // char 
+                case 'I': // int
+                case 'Z': // boolean
+                case 'S': // short
+                case 'F': // float
+                    operandStack.pop();
+                    index++;
+                    break;
+                    
+                case 'J': // long
+                case 'D': // double
+                    operandStack.pop();
+                    operandStack.pop(); // Pop twice for long/double
+                    index++;
+                    break;
+                    
+                case 'L': // Object reference
+                    operandStack.pop();
+                    index = descriptor.indexOf(';', index) + 1;
+                    break;
+                    
+                case '[': // Array
+                    // Skip array dimensions
+                    while (descriptor.charAt(index) == '[') {
+                        index++;
+                    }
+                    if (descriptor.charAt(index) == 'L') {
+                        index = descriptor.indexOf(';', index) + 1;
+                    } else {
+                        index++;
+                    }
+                    operandStack.pop();
+                    break;
+                    
+                default:
+                    throw new IllegalArgumentException("Invalid descriptor: " + descriptor);
+            }
+        }
+    }
+}

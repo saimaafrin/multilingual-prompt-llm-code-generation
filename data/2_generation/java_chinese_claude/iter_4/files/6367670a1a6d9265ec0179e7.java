@@ -1,0 +1,50 @@
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ConverterRegistry {
+    
+    // Map to store registered converters
+    private final Map<Class<?>, Converter> converters = new ConcurrentHashMap<>();
+    
+    /**
+     * 查找并返回指定目标类的任何注册的 {@link Converter}；如果没有注册的 Converter，则返回 <code>null</code>。
+     * @param clazz 要返回注册 Converter 的类
+     * @return 注册的 {@link Converter}，如果未找到则返回 <code>null</code>
+     */
+    public Converter lookup(final Class<?> clazz) {
+        if (clazz == null) {
+            return null;
+        }
+        
+        // Look for direct match
+        Converter converter = converters.get(clazz);
+        if (converter != null) {
+            return converter;
+        }
+        
+        // Look through superclasses
+        Class<?> superClass = clazz.getSuperclass();
+        while (superClass != null) {
+            converter = converters.get(superClass);
+            if (converter != null) {
+                return converter;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        
+        // Look through interfaces
+        for (Class<?> iface : clazz.getInterfaces()) {
+            converter = converters.get(iface);
+            if (converter != null) {
+                return converter;
+            }
+        }
+        
+        return null;
+    }
+}
+
+// Interface for type conversion
+interface Converter {
+    Object convert(Object value);
+}
