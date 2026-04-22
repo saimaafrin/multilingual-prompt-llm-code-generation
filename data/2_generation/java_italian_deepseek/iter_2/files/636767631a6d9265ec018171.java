@@ -1,0 +1,47 @@
+// Assuming ListNodeImpl is a class defined as follows:
+class ListNodeImpl<E> {
+    E value;
+    ListNodeImpl<E> next;
+
+    ListNodeImpl(E value) {
+        this.value = value;
+        this.next = null;
+    }
+}
+
+// Assuming the class containing the unlink method has a reference to the head of the list
+class LinkedList<E> {
+    private ListNodeImpl<E> head;
+
+    // Other methods of the LinkedList class...
+
+    /**
+     * Rimuove il nodo non nullo {@code node} dalla lista.
+     */
+    private boolean unlink(ListNodeImpl<E> node) {
+        if (node == null) {
+            return false;
+        }
+
+        // If the node to be removed is the head
+        if (node == head) {
+            head = head.next;
+            return true;
+        }
+
+        // Traverse the list to find the node before the one to be removed
+        ListNodeImpl<E> current = head;
+        while (current != null && current.next != node) {
+            current = current.next;
+        }
+
+        // If the node was found, unlink it
+        if (current != null) {
+            current.next = node.next;
+            return true;
+        }
+
+        // Node not found in the list
+        return false;
+    }
+}

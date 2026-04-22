@@ -1,0 +1,12 @@
+/**
+ * <p>एक ऐरे को क्लोन करता है और टाइपकास्ट परिणाम लौटाता है और <code>null</code> को संभालता है।</p> 
+ * <p>यह विधि <code>null</code> इनपुट ऐरे के लिए <code>null</code> लौटाती है।</p>
+ * @param array  क्लोन करने के लिए ऐरे, यह <code>null</code> हो सकता है
+ * @return क्लोन किया गया ऐरे, <code>null</code> यदि <code>null</code> इनपुट हो
+ */
+public static char[] clone(final char[] array) {
+    if (array == null) {
+        return null;
+    }
+    return array.clone();
+}

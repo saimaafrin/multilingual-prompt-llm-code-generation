@@ -1,0 +1,20 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class Graph<V, E> {
+    private Map<V, Map<V, E>> adjacencyMap;
+
+    public Graph() {
+        adjacencyMap = new HashMap<>();
+    }
+
+    /**
+     * अनुक्रमणिका में एक किनारा जोड़ें।
+     * @param sourceVertex स्रोत वर्टेक्स
+     * @param targetVertex लक्ष्य वर्टेक्स
+     * @param e किनारा
+     */
+    protected void addToIndex(V sourceVertex, V targetVertex, E e) {
+        adjacencyMap.computeIfAbsent(sourceVertex, k -> new HashMap<>()).put(targetVertex, e);
+    }
+}

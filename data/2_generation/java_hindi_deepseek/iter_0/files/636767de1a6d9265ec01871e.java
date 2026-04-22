@@ -1,0 +1,33 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class ShardingKeyChecker {
+
+    private Map<String, Integer> shardingKeySequence = new HashMap<>();
+
+    /**
+     * @param modelName एंटिटी का मॉडल नाम
+     * @throws IllegalStateException यदि शार्डिंग कुंजी अनुक्रमांक निरंतर नहीं हैं
+     */
+    private void check(String modelName) throws IllegalStateException {
+        if (!shardingKeySequence.containsKey(modelName)) {
+            shardingKeySequence.put(modelName, 0);
+        } else {
+            int currentSequence = shardingKeySequence.get(modelName);
+            if (currentSequence != shardingKeySequence.size() - 1) {
+                throw new IllegalStateException("शार्डिंग कुंजी अनुक्रमांक निरंतर नहीं हैं");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        ShardingKeyChecker checker = new ShardingKeyChecker();
+        try {
+            checker.check("Model1");
+            checker.check("Model2");
+            checker.check("Model3");
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}

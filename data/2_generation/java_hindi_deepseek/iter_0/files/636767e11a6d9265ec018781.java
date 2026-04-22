@@ -1,0 +1,35 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class Cache {
+    private Map<String, METRICS> cacheMap = new HashMap<>();
+
+    /**
+     * कैश में डेटा स्वीकार करें और मौजूदा मान के साथ विलय करें। यह विधि थ्रेड-सुरक्षित नहीं है, इसे समवर्ती कॉलिंग से बचना चाहिए।
+     * @param data जिसे संभावित रूप से जोड़ा जाना है।
+     */
+    @Override
+    public void accept(final METRICS data) {
+        String key = data.getKey(); // Assuming METRICS has a method getKey() to retrieve the key
+        if (cacheMap.containsKey(key)) {
+            METRICS existingData = cacheMap.get(key);
+            existingData.merge(data); // Assuming METRICS has a method merge() to merge with another METRICS object
+        } else {
+            cacheMap.put(key, data);
+        }
+    }
+}
+
+// Assuming METRICS class has the following methods
+class METRICS {
+    private String key;
+    private Map<String, Object> metricsData;
+
+    public String getKey() {
+        return key;
+    }
+
+    public void merge(METRICS other) {
+        this.metricsData.putAll(other.metricsData);
+    }
+}

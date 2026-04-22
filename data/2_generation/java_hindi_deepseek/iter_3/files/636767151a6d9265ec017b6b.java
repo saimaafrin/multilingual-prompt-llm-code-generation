@@ -1,0 +1,21 @@
+/**
+ * <p>जांचें कि एक String एक निर्दिष्ट उपसर्ग से शुरू होता है (वैकल्पिक रूप से केस-इंसेंसिटिव)।</p>
+ * @see String#startsWith(String)
+ * @param str  वह String जिसे जांचना है, यह null हो सकता है
+ * @param prefix वह उपसर्ग जिसे खोजना है, यह null हो सकता है
+ * @param ignoreCase यह दर्शाता है कि तुलना में केस को नजरअंदाज करना चाहिए या नहीं (केस-इंसेंसिटिव)।
+ * @return <code>true</code> यदि String उपसर्ग से शुरू होता है या दोनों <code>null</code> हैं
+ */
+private static boolean startsWith(final String str, final String prefix, final boolean ignoreCase) {
+    if (str == null && prefix == null) {
+        return true;
+    }
+    if (str == null || prefix == null) {
+        return false;
+    }
+    if (ignoreCase) {
+        return str.toLowerCase().startsWith(prefix.toLowerCase());
+    } else {
+        return str.startsWith(prefix);
+    }
+}

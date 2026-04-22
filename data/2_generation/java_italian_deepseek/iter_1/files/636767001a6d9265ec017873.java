@@ -1,0 +1,26 @@
+public class StringUtils {
+
+    /**
+     * Inverte una Stringa come per {@link StringBuilder#reverse()}.
+     * Una Stringa <code>null</code> restituisce <code>null</code>.
+     * <pre>
+     * StringUtils.reverse(null)  = null
+     * StringUtils.reverse("")    = ""
+     * StringUtils.reverse("bat") = "tab"
+     * </pre>
+     * @param str  la Stringa da invertire, può essere null
+     * @return la Stringa invertita, <code>null</code> se l'input è una Stringa null
+     */
+    public static String reverse(final String str) {
+        if (str == null) {
+            return null;
+        }
+        return new StringBuilder(str).reverse().toString();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(reverse(null));  // null
+        System.out.println(reverse(""));    // ""
+        System.out.println(reverse("bat")); // "tab"
+    }
+}

@@ -1,0 +1,29 @@
+public class StringUtils {
+
+    /**
+     * यदि दिया गया स्ट्रिंग निर्दिष्ट केस-इंसेंसिटिव प्रीफिक्स से शुरू होता है, तो {@code true} लौटाता है, अन्यथा {@code false}।
+     * @param str वह स्ट्रिंग जिसे जांचना है
+     * @param prefix वह प्रीफिक्स जिसे खोजना है
+     * @return {@code true} यदि दिया गया स्ट्रिंग निर्दिष्ट केस-इंसेंसिटिव प्रीफिक्स से शुरू होता है, अन्यथा {@code false}।
+     * @see java.lang.String#startsWith
+     */
+    public static boolean startsWithIgnoreCase(String str, String prefix) {
+        if (str == null || prefix == null) {
+            return false;
+        }
+        if (prefix.length() > str.length()) {
+            return false;
+        }
+        return str.regionMatches(true, 0, prefix, 0, prefix.length());
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        System.out.println(startsWithIgnoreCase("HelloWorld", "hello")); // true
+        System.out.println(startsWithIgnoreCase("HelloWorld", "world")); // false
+        System.out.println(startsWithIgnoreCase("HelloWorld", "HELLO")); // true
+        System.out.println(startsWithIgnoreCase("HelloWorld", "HELLO WORLD")); // false
+        System.out.println(startsWithIgnoreCase(null, "hello")); // false
+        System.out.println(startsWithIgnoreCase("HelloWorld", null)); // false
+    }
+}
