@@ -1,0 +1,60 @@
+class _M:
+    @staticmethod
+    def interpolate_2d(x, y, z, x_interp, y_interp):
+        """ 
+        Interpolazione lineare di dati bidimensionali
+        :param x: La coordinata x del punto dati, lista.
+        :param y: La coordinata y del punto dati, lista.
+        :param z: La coordinata z del punto dati, lista.
+        :param x_interp: La coordinata x del punto di interpolazione, lista.
+        :param y_interp: La coordinata y del punto di interpolazione, lista.
+        :return: La coordinata z del punto di interpolazione, lista.
+        >>> interpolation = Interpolation()
+        >>> interpolation.interpolate_2d([1, 2, 3], [1, 2, 3], [[1, 2, 3], [4, 5, 6], [7, 8, 9]], [1.5, 2.5], [1.5, 2.5])
+        [3.0, 7.0]
+    
+        """
+        result = []
+        
+        for xi, yi in zip(x_interp, y_interp):
+            # Find the bounding indices for x
+            x_idx = 0
+            for i in range(len(x) - 1):
+                if x[i] <= xi <= x[i + 1]:
+                    x_idx = i
+                    break
+            
+            # Find the bounding indices for y
+            y_idx = 0
+            for j in range(len(y) - 1):
+                if y[j] <= yi <= y[j + 1]:
+                    y_idx = j
+                    break
+            
+            # Get the four corner points
+            x1, x2 = x[x_idx], x[x_idx + 1]
+            y1, y2 = y[y_idx], y[y_idx + 1]
+            
+            z11 = z[x_idx][y_idx]
+            z12 = z[x_idx][y_idx + 1]
+            z21 = z[x_idx + 1][y_idx]
+            z22 = z[x_idx + 1][y_idx + 1]
+            
+            # Bilinear interpolation
+            # First interpolate in x direction
+            if x2 - x1 != 0:
+                z_y1 = z11 + (z21 - z11) * (xi - x1) / (x2 - x1)
+                z_y2 = z12 + (z22 - z12) * (xi - x1) / (x2 - x1)
+            else:
+                z_y1 = z11
+                z_y2 = z12
+            
+            # Then interpolate in y direction
+            if y2 - y1 != 0:
+                z_interp = z_y1 + (z_y2 - z_y1) * (yi - y1) / (y2 - y1)
+            else:
+                z_interp = z_y1
+            
+            result.append(z_interp)
+        
+        return result
