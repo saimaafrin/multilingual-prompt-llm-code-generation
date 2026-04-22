@@ -1,0 +1,6 @@
+class _M:
+    def view_balance(self):
+        """
+            Return the account balance.
+            """
+        return self.balance

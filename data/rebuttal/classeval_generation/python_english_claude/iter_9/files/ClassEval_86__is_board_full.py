@@ -1,0 +1,13 @@
+class _M:
+    def is_board_full(self):
+        """
+        Check if the game board is completely filled.
+        :return: bool, indicating whether the game board is full or not
+        >>> ttt.is_board_full()
+        False
+        """
+        for row in self.board:
+            for cell in row:
+                if cell is None or cell == '' or cell == ' ':
+                    return False
+        return True
