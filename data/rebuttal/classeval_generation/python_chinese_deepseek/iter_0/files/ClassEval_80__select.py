@@ -1,0 +1,20 @@
+class _M:
+    @staticmethod
+    def select(table, columns='*', where=None):
+        """
+            从给定参数生成 SELECT SQL 语句。
+            :param table: str，数据库中要查询的表。
+            :param columns: list of str，['col1', 'col2']。
+            :param where: dict，{key1: value1, key2: value2 ...}。查询条件。
+            return query: str，SQL 查询语句。
+            >>> SQLQueryBuilder.select('table1', columns = ["col1","col2"], where = {"age": 15})
+            "SELECT col1, col2 FROM table1 WHERE age='15'"
+            """
+        if columns == '*':
+            columns_str = '*'
+        else:
+            columns_str = ', '.join(columns)
+        query = f'SELECT {columns_str} FROM {table}'
+        if where:
+            query += ' WHERE ' + ' AND '.join((f"{k}='{v}'" for k, v in where.items()))
+        return query

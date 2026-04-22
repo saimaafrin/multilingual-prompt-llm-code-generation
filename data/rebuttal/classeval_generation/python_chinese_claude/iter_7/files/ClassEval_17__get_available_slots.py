@@ -1,0 +1,46 @@
+class _M:
+    def get_available_slots(self, date):
+        """
+        获取给定日期的所有可用时间段。
+        :param date: 要获取可用时间段的日期，datetime。
+        :return: 给定日期的可用时间段列表，list。
+        >>> calendar = CalendarUtil()
+        >>> calendar.events = [{'date': datetime(2023, 1, 1, 0, 0), 'start_time': datetime(2023, 1, 1, 0, 0), 'end_time': datetime(2023, 1, 1, 23, 0), 'description': '新年'}]
+        >>> calendar.get_available_slots(datetime(2023, 1, 1))
+        [(datetime.datetime(2023, 1, 1, 23, 0), datetime.datetime(2023, 1, 2, 0, 0))]
+    
+        """
+        from datetime import datetime, timedelta
+        
+        # 定义一天的开始和结束时间
+        day_start = datetime(date.year, date.month, date.day, 0, 0)
+        day_end = datetime(date.year, date.month, date.day, 23, 59, 59)
+        day_end = day_start + timedelta(days=1)
+        
+        # 获取当天的所有事件
+        day_events = []
+        for event in self.events:
+            event_date = event['date']
+            if event_date.year == date.year and event_date.month == date.month and event_date.day == date.day:
+                day_events.append((event['start_time'], event['end_time']))
+        
+        # 按开始时间排序
+        day_events.sort(key=lambda x: x[0])
+        
+        # 找出可用时间段
+        available_slots = []
+        current_time = day_start
+        
+        for start_time, end_time in day_events:
+            # 如果当前时间早于事件开始时间，则有可用时间段
+            if current_time < start_time:
+                available_slots.append((current_time, start_time))
+            # 更新当前时间为事件结束时间（如果事件结束时间更晚）
+            if end_time > current_time:
+                current_time = end_time
+        
+        # 检查最后一个事件之后到一天结束是否有可用时间
+        if current_time < day_end:
+            available_slots.append((current_time, day_end))
+        
+        return available_slots
