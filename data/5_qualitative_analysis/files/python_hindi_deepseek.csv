@@ -1,0 +1,4774 @@
+id,generated_code,comments,identifiers,literals,notes
+62e60f43d76274f8a4026e28,"from datetime import datetime, timezone, timedelta
+
+def hydrate_time(nanoseconds, tz=None):
+    """"""
+    `Time` और `LocalTime` मानों के लिए हाइड्रेटर।  
+
+    पैरामीटर (Parameters):
+    - nanoseconds: समय को नैनोसेकंड में दर्शाने वाला पूर्णांक
+    - tz: समय क्षेत्र (timezone) जिसमें समय को दर्शाना है (डिफ़ॉल्ट: None)
+
+    वापसी मान:
+    - समय (datetime.datetime ऑब्जेक्ट)
+    """"""
+    # Convert nanoseconds to seconds
+    seconds = nanoseconds / 1e9
+    
+    # Create a datetime object from the timestamp
+    dt = datetime.fromtimestamp(seconds, tz=timezone.utc)
+    
+    # If a timezone is provided, convert the datetime to that timezone
+    if tz is not None:
+        dt = dt.astimezone(tz)
+    
+    return dt",english,english,none,
+62e60f3bd76274f8a4026e10,"from datetime import timedelta
+
+def dehydrate_timedelta(value):
+    """"""
+    `timedelta` मानों के लिए डिहाइड्रेटर।  
+
+    :param value:  
+    :type value: timedelta  
+    :return:  
+    """"""
+    if not isinstance(value, timedelta):
+        raise TypeError(""Expected a timedelta object"")
+    
+    # Convert timedelta to total seconds and return as a float
+    return value.total_seconds()",english,english,english,
+62e60f37d76274f8a4026dfd,"from datetime import time
+
+def dehydrate_time(value):
+    """"""
+    `time` मानों के लिए डिहाइड्रेटर।  
+
+    :param value:  
+    :type value: Time  
+    :return:  
+    """"""
+    if not isinstance(value, time):
+        raise TypeError(""Expected a datetime.time object"")
+    
+    return value.isoformat()",none,english,english,
+62e60f33d76274f8a4026de9,"def dehydrate_point(value):
+    """"""
+    पॉइंट डेटा के लिए डिहाइड्रेटर।
+
+    :param value: पॉइंट ऑब्जेक्ट
+    :type value: Point
+    :return: पॉइंट ऑब्जेक्ट के निर्देशांक (x, y) का टपल
+    :rtype: tuple
+    """"""
+    if hasattr(value, 'x') and hasattr(value, 'y'):
+        return (value.x, value.y)
+    else:
+        raise ValueError(""Invalid Point object provided. Expected attributes 'x' and 'y'."")",none,english,english,
+62e60ed4d76274f8a4026da0,"def keys(self):
+    """"""
+    रिकॉर्ड की कुंजियों (keys) को लौटाता है।  
+
+    :return: कुंजी नामों (key names) की सूची (list)।
+    """"""
+    return list(self.__dict__.keys())",none,english,none,
+62e60ecfd76274f8a4026d6a,"def protocol_handlers(cls, protocol_version=None):
+    # Define the supported protocol handlers
+    supported_handlers = {
+        (3, 5): ""HandlerForV3_5"",
+        (4, 0): ""HandlerForV4_0"",
+        (4, 1): ""HandlerForV4_1"",
+        (4, 2): ""HandlerForV4_2"",
+    }
+
+    if protocol_version is not None:
+        if not isinstance(protocol_version, tuple):
+            raise TypeError(""protocol_version must be a tuple"")
+        if protocol_version in supported_handlers:
+            return {protocol_version: supported_handlers[protocol_version]}
+        else:
+            return {}
+    else:
+        return supported_handlers",none,english,none,
+62e60e49d76274f8a4026d25,"from functools import wraps
+
+def unit_of_work(metadata=None, timeout=None):
+    """"""
+    यह फ़ंक्शन ट्रांज़ेक्शन फ़ंक्शन्स के लिए एक डेकोरेटर है, जो यह नियंत्रित करने की अतिरिक्त सुविधा प्रदान करता है कि ट्रांज़ेक्शन कैसे निष्पादित किया जाए।
+
+    :param metadata: 
+        मेटाडेटा के साथ एक डिक्शनरी।  
+        निर्दिष्ट मेटाडेटा निष्पादित ट्रांज़ेक्शन से जुड़ा होगा और ``dbms.listQueries`` और ``dbms.listTransactions`` प्रक्रियाओं के आउटपुट में दिखाई देगा।  
+        यह ``query.log`` में भी लॉग किया जाएगा।  
+        यह सुविधा ट्रांज़ेक्शन्स को टैग करना आसान बनाती है और ``dbms.setTXMetaData`` प्रक्रिया के समकक्ष है।  
+        प्रक्रिया संदर्भ के लिए देखें: [https://neo4j.com/docs/operations-manual/current/reference/procedures/](https://neo4j.com/docs/operations-manual/current/reference/procedures/)।  
+    :type metadata: `dict`
+
+    :param timeout: 
+        ट्रांज़ेक्शन का टाइमआउट (सेकंड में)।  
+        जो ट्रांज़ेक्शन्स निर्दिष्ट टाइमआउट से अधिक समय तक चलते हैं, उन्हें डेटाबेस द्वारा समाप्त कर दिया जाएगा।  
+        यह सुविधा क्वेरी/ट्रांज़ेक्शन निष्पादन समय को सीमित करने की अनुमति देती है।  
+        निर्दिष्ट टाइमआउट डेटाबेस में कॉन्फ़िगर किए गए डिफ़ॉल्ट टाइमआउट (``dbms.transaction.timeout`` सेटिंग) को ओवरराइड करता है।  
+        मान नकारात्मक अवधि का प्रतिनिधित्व नहीं करना चाहिए।  
+        शून्य अवधि (0) ट्रांज़ेक्शन को अनिश्चित काल तक चलने देगी।  
+        `None` का उपयोग डेटाबेस में कॉन्फ़िगर किए गए डिफ़ॉल्ट टाइमआउट का उपयोग करेगा।  
+    :type timeout: `float` या `:const:None`
+    """"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # यहां ट्रांज़ेक्शन के लिए मेटाडेटा और टाइमआउट को सेट करने का कोड होगा
+            # उदाहरण के लिए, यह कोड Neo4j ड्राइवर के साथ इंटरैक्ट कर सकता है
+            # लेकिन यहां हम केवल एक सरल उदाहरण दिखा रहे हैं
+            if metadata is not None:
+                kwargs['metadata'] = metadata
+            if timeout is not None:
+                kwargs['timeout'] = timeout
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator",hindi,english,none,
+62e60e05d76274f8a4026cfd,"def index(self, key):
+    """"""
+    दिए गए आइटम का इंडेक्स (स्थान) लौटाता है।
+
+    :param key: एक कुंजी 
+    :return: इंडेक्स 
+    :rtype: int
+    """"""
+    try:
+        return self._items.index(key)
+    except ValueError:
+        return -1",none,english,none,
+62e60da4d76274f8a4026cf1,"def values(self, *keys):
+    """"""
+    रिकॉर्ड के मान (values) लौटाता है, और वैकल्पिक रूप से केवल कुछ विशिष्ट मानों को शामिल करने के लिए इंडेक्स या कुंजी द्वारा फ़िल्टर करता है।
+
+    पैरामीटर (Parameters): 
+    - keys: उन आइटम्स के इंडेक्स या कुंजियाँ (keys) जिन्हें शामिल करना है; यदि कोई कुंजी प्रदान नहीं की जाती है, तो सभी मान (values) शामिल किए जाएंगे।  
+
+    वापसी (Return):
+    - मानों (values) की सूची।  
+
+    वापसी प्रकार (Return Type):
+    - सूची (list)
+    """"""
+    if not keys:
+        return list(self.__dict__.values())
+    else:
+        return [self.__dict__[key] for key in keys if key in self.__dict__]",none,english,none,
+62e60b10d76274f8a4026ccd,"def data(self, *keys):
+    """"""
+    यह मेथड इस रिकॉर्ड की कुंजियों और मानों (keys and values) को एक डिक्शनरी (dictionary) के रूप में लौटाता है। आप वैकल्पिक रूप से केवल कुछ विशेष मानों को इंडेक्स (index) या कुंजी (key) के आधार पर शामिल कर सकते हैं। जो कुंजियाँ प्रदान की गई हैं लेकिन रिकॉर्ड में मौजूद नहीं हैं, उन्हें :const:`None` मान के साथ सम्मिलित किया जाएगा। यदि कोई इंडेक्स सीमा से बाहर है, तो :exc:`IndexError` उत्पन्न होगा।
+
+    पैरामीटर (Parameters): 
+    - keys: उन आइटम्स के इंडेक्स या कुंजियाँ जिन्हें शामिल करना है; यदि कोई कुंजी प्रदान नहीं की गई है, तो सभी मान शामिल किए जाएंगे।  
+
+    वापसी मान (Return): 
+    -मानों का शब्दकोश, फ़ील्ड नाम द्वारा कुंजीबद्ध
+
+    अपवाद (Raises): 
+    - :exc:`IndexError` यदि कोई सीमा से बाहर का इंडेक्स निर्दिष्ट किया गया है।
+    """"""
+    # Assuming self.record is a dictionary-like object that holds the data
+    if not keys:
+        return self.record.copy()
+    
+    result = {}
+    for key in keys:
+        if isinstance(key, int):
+            # Handle index-based access
+            if key < 0 or key >= len(self.record):
+                raise IndexError(""Index out of range"")
+            # Assuming self.record is a list or similar structure for index-based access
+            result[key] = self.record[key]
+        else:
+            # Handle key-based access
+            result[key] = self.record.get(key, None)
+    
+    return result",english,english,none,
+62e6087bd76274f8a4026bfa,"def pop_u16(self):
+    """"""
+    self.data के अंतिम दो बाइट्स को हटाएं और उन्हें एक बिग-एंडियन 16-बिट अनसाइनड इंटीजर के रूप में वापस करें।
+    """"""
+    if len(self.data) < 2:
+        raise ValueError(""Not enough bytes in self.data to pop a 16-bit integer."")
+    
+    # Extract the last two bytes
+    byte1 = self.data.pop()
+    byte2 = self.data.pop()
+    
+    # Combine the bytes in big-endian order
+    u16_value = (byte2 << 8) | byte1
+    
+    return u16_value",english,english,english,
+62e6087ad76274f8a4026bf2,"def discard(self, n=-1, qid=-1, dehydration_hooks=None,
+            hydration_hooks=None, **handlers):
+    """"""
+    आउटपुट कतार (output queue) में एक DISCARD संदेश जोड़ता है।
+
+    :param n: डिस्कार्ड करने के लिए रिकॉर्ड्स की संख्या, डिफ़ॉल्ट = -1 (सभी)
+    :param qid: उस क्वेरी ID के लिए डिस्कार्ड करना है, डिफ़ॉल्ट = -1 (अंतिम क्वेरी)
+    :param dehydration_hooks:
+        प्रकारों को डीहाइड्रेट (dehydrate) करने के लिए हुक्स (hooks) 
+        (क्लास से डीहाइड्रेशन फ़ंक्शन तक का डिक्शनरी)। 
+        डीहाइड्रेशन फ़ंक्शन वैल्यू प्राप्त करता है और 
+        पैकस्ट्रीम (packstream) द्वारा समझे जाने वाले प्रकार की 
+        ऑब्जेक्ट को लौटाता है।
+    :param hydration_hooks:
+        प्रकारों को हाइड्रेट (hydrate) करने के लिए हुक्स 
+        (क्लास से हाइड्रेशन फ़ंक्शन तक का मैपिंग)। 
+        हाइड्रेशन फ़ंक्शन पैकस्ट्रीम द्वारा समझे जाने वाले प्रकार 
+        की वैल्यू प्राप्त करता है और कुछ भी लौटाने के लिए स्वतंत्र है।
+    :param handlers: हैंडलर फ़ंक्शन जो लौटाए गए Response ऑब्जेक्ट में पास किए जाते हैं।
+    """"""
+    # Create the DISCARD message
+    discard_message = {
+        ""type"": ""DISCARD"",
+        ""n"": n,
+        ""qid"": qid,
+        ""dehydration_hooks"": dehydration_hooks,
+        ""hydration_hooks"": hydration_hooks,
+        **handlers
+    }
+    
+    # Add the DISCARD message to the output queue
+    self.output_queue.append(discard_message)",english,english,none,
+62e60879d76274f8a4026bec,"def begin(self, mode=None, bookmarks=None, metadata=None, timeout=None,
+          db=None, imp_user=None, dehydration_hooks=None,
+          hydration_hooks=None, **handlers):
+    """"""
+    आउटपुट कतार (output queue) में एक BEGIN संदेश जोड़ता है।
+
+    :param mode: रूटिंग के लिए एक्सेस मोड - ""READ"" या ""WRITE"" (डिफ़ॉल्ट)
+    :param bookmarks: बुकमार्क मानों का iterable, जिनके बाद यह ट्रांजेक्शन शुरू होना चाहिए
+    :param metadata: ट्रांजेक्शन से जोड़ने के लिए कस्टम मेटाडेटा डिक्शनरी
+    :param timeout: ट्रांजेक्शन निष्पादन के लिए समय सीमा (सेकंड में)
+    :param db: उस डेटाबेस का नाम जिसके खिलाफ ट्रांजेक्शन शुरू करना है
+        इसके लिए Bolt 4.0+ की आवश्यकता है।
+    :param imp_user: वह उपयोगकर्ता जिसे प्रतिरूपित (impersonate) करना है
+        इसके लिए Bolt 4.4+ की आवश्यकता है।
+    :param dehydration_hooks:
+        प्रकारों को डीहाइड्रेट (dehydrate) करने के लिए हुक्स (dict, जिसमें type (class) से dehydration
+        फ़ंक्शन तक मैपिंग हो)। डीहाइड्रेशन फ़ंक्शन मान (value) प्राप्त करता है और 
+        packstream द्वारा समझे जाने वाले प्रकार के ऑब्जेक्ट को लौटाता है।
+    :param hydration_hooks:
+        प्रकारों को हाइड्रेट (hydrate) करने के लिए हुक्स (type (class) से 
+        हाइड्रेशन फ़ंक्शन तक की मैपिंग)। हाइड्रेशन फ़ंक्शन packstream द्वारा समझे जाने वाले 
+        प्रकार के मान को प्राप्त करता है और कुछ भी लौटाने के लिए स्वतंत्र है।
+    :param handlers: हैंडलर फ़ंक्शन, जो लौटाए गए Response ऑब्जेक्ट में पास किए जाते हैं
+    :return: Response ऑब्जेक्ट
+    """"""
+    # Create the BEGIN message
+    begin_message = {
+        ""mode"": mode,
+        ""bookmarks"": bookmarks,
+        ""metadata"": metadata,
+        ""timeout"": timeout,
+        ""db"": db,
+        ""imp_user"": imp_user,
+        ""dehydration_hooks"": dehydration_hooks,
+        ""hydration_hooks"": hydration_hooks,
+        **handlers
+    }
+    
+    # Add the BEGIN message to the output queue
+    self.output_queue.append(begin_message)
+    
+    # Return a Response object
+    return Response(begin_message)",english,english,none,
+62e60723d76274f8a4026b75,"def round_half_to_even(n):
+    """"""
+    Rounds a number to the nearest integer, with ties (0.5) rounded to the nearest even integer.
+
+    >>> round_half_to_even(3)
+    3
+    >>> round_half_to_even(3.2)
+    3
+    >>> round_half_to_even(3.5)
+    4
+    >>> round_half_to_even(3.7)
+    4
+    >>> round_half_to_even(4)
+    4
+    >>> round_half_to_even(4.2)
+    4
+    >>> round_half_to_even(4.5)
+    4
+    >>> round_half_to_even(4.7)
+    5
+
+    :param n: The number to round.
+    :return: The rounded integer.
+    """"""
+    if n % 1 == 0.5:
+        if int(n) % 2 == 0:
+            return int(n)
+        else:
+            return int(n) + 1
+    else:
+        return round(n)",none,english,none,
+62e60707d76274f8a4026b69,"def point_type(name, fields, srid_map):
+    """"""
+    डायनामिक रूप से एक पॉइंट सबक्लास बनाएं।
+
+    :param name: सबक्लास का नाम
+    :param fields: सबक्लास में शामिल करने के लिए फ़ील्ड्स
+    :param srid_map: SRID मैपिंग
+    :return: डायनामिक रूप से बनाई गई पॉइंट सबक्लास
+    """"""
+    from django.contrib.gis.db.models import PointField
+    from django.db import models
+
+    class Meta:
+        app_label = 'dynamic_models'
+
+    attrs = {
+        '__module__': __name__,
+        'Meta': Meta,
+    }
+
+    for field_name, field_type in fields.items():
+        attrs[field_name] = field_type
+
+    attrs['geom'] = PointField(srid=srid_map.get(name, 4326))
+
+    return type(name, (models.Model,), attrs)",none,english,none,
+62e5dc9ed76274f8a4026b5b,"import warnings
+
+def deprecated(message):
+    """"""
+    फ़ंक्शन और विधियों को अप्रचलित घोषित करने के लिए डेकोरेटर।
+
+    ::
+
+        @deprecated(""'foo' को 'bar' के पक्ष में अप्रचलित घोषित किया गया है"")
+        def foo(x):
+            pass
+    """"""
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            warnings.warn(
+                f""{func.__name__} is deprecated: {message}"",
+                category=DeprecationWarning,
+                stacklevel=2
+            )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator",none,english,none,
+62e4fc3c85ea98643089041e,"def _inline_r_setup(code: str) -> str:
+    """"""
+    R के कुछ व्यवहारों को env वेरिएबल्स के माध्यम से कॉन्फ़िगर नहीं किया जा सकता है,
+    लेकिन केवल R शुरू होने के बाद R विकल्पों के माध्यम से कॉन्फ़िगर किया जा सकता है।
+    इन्हें यहां सेट किया गया है।
+    """"""
+    setup_code = """"""
+    options(repos = c(CRAN = ""https://cloud.r-project.org""))
+    options(warn = 1)
+    options(stringsAsFactors = FALSE)
+    """"""
+    return setup_code + code",none,english,none,
+62e4fbda85ea986430890405,"import subprocess
+import sys
+from typing import Sequence, Any, Tuple
+
+def xargs(
+        cmd: tuple[str, ...],
+        varargs: Sequence[str],
+        *,
+        color: bool = False,
+        target_concurrency: int = 1,
+        _max_length: int = _get_platform_max_length(),
+        **kwargs: Any,
+) -> tuple[int, bytes]:
+    """"""
+    Xargs का एक सरल कार्यान्वयन।
+
+    - color: यदि प्लेटफ़ॉर्म इसे सपोर्ट करता है, तो एक PTY (Pseudo Terminal) बनाएं।
+    - target_concurrency: एक साथ चलने वाले विभाजनों (partitions) की लक्षित संख्या।
+    """"""
+    if color and sys.platform != ""win32"":
+        import pty
+        import os
+
+        master_fd, slave_fd = pty.openpty()
+        process = subprocess.Popen(
+            cmd + tuple(varargs),
+            stdout=slave_fd,
+            stderr=slave_fd,
+            close_fds=True,
+            **kwargs
+        )
+        os.close(slave_fd)
+        output = b""""
+        while True:
+            try:
+                data = os.read(master_fd, 1024)
+                if not data:
+                    break
+                output += data
+            except OSError:
+                break
+        os.close(master_fd)
+        return_code = process.wait()
+        return (return_code, output)
+    else:
+        process = subprocess.Popen(
+            cmd + tuple(varargs),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            **kwargs
+        )
+        stdout, stderr = process.communicate()
+        return (process.returncode, stdout)",none,english,none,
+62e4fbda85ea986430890403,"import random
+
+def _shuffled(seq: Sequence[str]) -> list[str]:
+    """"""
+    निर्धारित (Deterministically) तरीके से शफल करें
+    """"""
+    # Use a fixed seed for deterministic shuffling
+    random.seed(42)
+    shuffled_seq = list(seq)
+    random.shuffle(shuffled_seq)
+    return shuffled_seq",english,english,none,
+62e4fb6585ea98643089032b,"def parse_version(s: str) -> tuple[int, ...]:
+    """"""
+    साधारण (poor man's) वर्शन तुलना।
+    """"""
+    return tuple(map(int, s.split('.')))",,,none,
+62e4fb4d85ea9864308902e7,"import os
+
+def normalize_cmd(cmd: tuple[str, ...]) -> tuple[str, ...]:
+    """"""
+    Normalizes a command tuple to handle Windows-specific issues with shebangs and deep paths.
+
+    Args:
+        cmd: A tuple of strings representing the command to be normalized.
+
+    Returns:
+        A tuple of strings representing the normalized command.
+    """"""
+    if not cmd:
+        return cmd
+
+    # Handle shebang on Windows
+    if os.name == 'nt' and len(cmd) > 0:
+        first_arg = cmd[0]
+        if first_arg.startswith('#!'):
+            # Extract the interpreter path from the shebang
+            interpreter_path = first_arg[2:].strip()
+            # Normalize the path to handle deep paths
+            interpreter_path = os.path.normpath(interpreter_path)
+            # Replace the shebang with the normalized interpreter path
+            normalized_cmd = (interpreter_path,) + cmd[1:]
+            return normalized_cmd
+
+    return cmd",english,english,none,
+62b8d27a48ba5a41d1c3f4c6,"def cached(cache, key=hashkey, lock=None):
+    """"""
+    यह एक डेकोरेटर है जो किसी फ़ंक्शन को एक मेमोराइज़िंग कॉल करने योग्य (memoizing callable) के साथ रैप करता है, जो परिणामों को कैश में सहेजता है।
+    """"""
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            cache_key = key(*args, **kwargs)
+            if cache_key in cache:
+                return cache[cache_key]
+            if lock:
+                with lock:
+                    if cache_key in cache:
+                        return cache[cache_key]
+                    result = func(*args, **kwargs)
+                    cache[cache_key] = result
+            else:
+                result = func(*args, **kwargs)
+                cache[cache_key] = result
+            return result
+        return wrapper
+    return decorator",none,english,none,
+62b8d24048ba5a41d1c3f49f,"import time
+from functools import wraps, lru_cache
+
+def ttl_cache(maxsize=128, ttl=600, timer=time.monotonic, typed=False):
+    """"""
+    एक डेकोरेटर जो एक फ़ंक्शन को एक मेमोराइज़िंग कॉलेबल के साथ रैप करता है,
+    जो `maxsize` तक के परिणामों को सेव करता है। यह एक Least Recently Used (LRU)
+    एल्गोरिदम पर आधारित होता है और प्रत्येक आइटम के लिए एक समय-सीमा (Time-To-Live, TTL) 
+    मान लागू करता है।
+    """"""
+    def decorator(func):
+        @lru_cache(maxsize=maxsize, typed=typed)
+        def cached_func(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            key = (args, frozenset(kwargs.items())) if typed else (args, tuple(kwargs.items()))
+            if key in wrapper._cache:
+                value, timestamp = wrapper._cache[key]
+                if timer() - timestamp < ttl:
+                    return value
+            result = cached_func(*args, **kwargs)
+            wrapper._cache[key] = (result, timer())
+            return result
+
+        wrapper._cache = {}
+        return wrapper
+
+    return decorator",none,english,none,
+62b8d23b48ba5a41d1c3f49a,"from functools import wraps
+from collections import OrderedDict
+
+def mru_cache(maxsize=128, typed=False):
+    def decorator(func):
+        cache = OrderedDict()
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if typed:
+                key = (args, tuple((k, type(v)) for k, v in sorted(kwargs.items())))
+            else:
+                key = (args, tuple(sorted(kwargs.items())))
+            
+            if key in cache:
+                # Move the accessed key to the end to mark it as most recently used
+                cache.move_to_end(key)
+                return cache[key]
+            
+            result = func(*args, **kwargs)
+            
+            if len(cache) >= maxsize:
+                # Remove the least recently used item
+                cache.popitem(last=False)
+            
+            cache[key] = result
+            return result
+        
+        return wrapper
+    
+    return decorator",english,english,none,
+62b8d23948ba5a41d1c3f498,"from functools import lru_cache as _lru_cache
+
+def lru_cache(maxsize=128, typed=False):
+    """"""
+    एक डेकोरेटर जो एक फ़ंक्शन को एक मेमोराइज़िंग कॉलेबल के साथ रैप करता है,
+    जो `maxsize` तक के परिणामों को सेव करता है। यह परिणामों को 
+    Least Recently Used (LRU) एल्गोरिदम के आधार पर प्रबंधित करता है।
+    """"""
+    return _lru_cache(maxsize=maxsize, typed=typed)",none,english,none,
+62b8d23748ba5a41d1c3f496,"from functools import wraps
+from collections import defaultdict, OrderedDict
+
+def lfu_cache(maxsize=128, typed=False):
+    def decorator(func):
+        cache = {}
+        frequency = defaultdict(int)
+        frequency_list = defaultdict(OrderedDict)
+        min_freq = 0
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if typed:
+                key = (args, tuple(sorted(kwargs.items())))
+            else:
+                key = args + tuple(sorted(kwargs.items()))
+
+            if key in cache:
+                # Increment frequency and update frequency list
+                freq = frequency[key]
+                frequency[key] += 1
+                del frequency_list[freq][key]
+                if not frequency_list[freq]:
+                    del frequency_list[freq]
+                    if freq == min_freq:
+                        min_freq += 1
+                frequency_list[freq + 1][key] = None
+                return cache[key]
+
+            # If cache is full, remove the least frequently used item
+            if len(cache) >= maxsize:
+                # Remove the least frequently used item
+                lfu_key = next(iter(frequency_list[min_freq]))
+                del cache[lfu_key]
+                del frequency[lfu_key]
+                del frequency_list[min_freq][lfu_key]
+                if not frequency_list[min_freq]:
+                    del frequency_list[min_freq]
+
+            # Add new item to cache
+            result = func(*args, **kwargs)
+            cache[key] = result
+            frequency[key] = 1
+            frequency_list[1][key] = None
+            min_freq = 1
+            return result
+
+        return wrapper
+
+    return decorator",english,english,none,
+62b8d22f48ba5a41d1c3f488,"def popitem(self):
+    """"""
+    पहले डाली गई `(key, value)` जोड़ी को हटाएं और लौटाएं।
+    """"""
+    if not self:
+        raise KeyError(""dictionary is empty"")
+    key = next(iter(self))
+    value = self[key]
+    del self[key]
+    return (key, value)",none,english,english,
+62b8d22a48ba5a41d1c3f47e,"def setdefault(self, key, default=None):
+    """"""
+    D.setdefault(k[, d]) -> D.get(k, d)
+    साथ ही, यदि `k` (कुंजी) `D` (डिक्शनरी) में मौजूद नहीं है, तो `D[k] = d` सेट कर दिया जाता है।
+    """"""
+    if key not in self:
+        self[key] = default
+    return self.get(key, default)",none,english,none,
+62b8d22948ba5a41d1c3f47c,"def get(self, key, default=None):
+    """"""
+    D.get(k[, d]) -> D[k] यदि k D में है, तो D[k] लौटाया जाएगा, अन्यथा d। d का डिफ़ॉल्ट मान None है।
+    """"""
+    if key in self:
+        return self[key]
+    else:
+        return default",none,english,none,
+62b8d22548ba5a41d1c3f472,"def cachedmethod(cache, key=hashkey, lock=None):
+    """"""
+    यह डेकोरेटर एक क्लास या इंस्टेंस मेथड को एक मेमोराइज़िंग कॉल करने योग्य फ़ंक्शन के साथ रैप करता है, जो परिणामों को कैश में सहेजता है।
+    """"""
+    def decorator(method):
+        def wrapper(self, *args, **kwargs):
+            cache_key = key(self, *args, **kwargs)
+            if cache_key in cache:
+                return cache[cache_key]
+            if lock:
+                with lock:
+                    if cache_key in cache:
+                        return cache[cache_key]
+                    result = method(self, *args, **kwargs)
+                    cache[cache_key] = result
+            else:
+                result = method(self, *args, **kwargs)
+                cache[cache_key] = result
+            return result
+        return wrapper
+    return decorator",none,english,none,
+62b8c517e0d34b282c18122e,"def extostr(cls, e, max_level=30, max_path_level=5):
+    """"""
+    अपवाद को स्वरूपित करें।  
+    :param e: कोई भी अपवाद उदाहरण।  
+    :type e: Exception  
+    :param max_level: अधिकतम कॉल स्टैक स्तर (डिफ़ॉल्ट 30)।  
+    :type max_level: int  
+    :param max_path_level: अधिकतम पथ स्तर (डिफ़ॉल्ट 5)।  
+    :type max_path_level: int  
+    :return: अपवाद को पढ़ने योग्य स्ट्रिंग।  
+    :rtype: str  
+    """"""
+    import traceback
+    
+    # Get the exception type and message
+    exception_type = type(e).__name__
+    exception_message = str(e)
+    
+    # Get the traceback
+    tb_list = traceback.format_tb(e.__traceback__)
+    
+    # Limit the traceback levels
+    if len(tb_list) > max_level:
+        tb_list = tb_list[:max_level]
+    
+    # Format the traceback
+    formatted_traceback = []
+    for level, tb in enumerate(tb_list):
+        if level >= max_path_level:
+            break
+        formatted_traceback.append(f""Level {level + 1}:\n{tb}"")
+    
+    # Combine the exception type, message, and traceback
+    formatted_exception = f""{exception_type}: {exception_message}\n""
+    formatted_exception += ""\n"".join(formatted_traceback)
+    
+    return formatted_exception",english,english,none,
+62b8bbbfe0d34b282c181210,"def append_text_to_file(file_name, text_buffer, encoding, overwrite=False):
+    """"""
+    दिए गए बाइनरी बफ़र को निर्दिष्ट फ़ाइल नाम में लिखें।  
+    आवश्यक होने पर फ़ाइल बनाएँ।  
+    :param file_name: फ़ाइल का नाम।  
+    :type file_name: str  
+    :param text_buffer: लिखने के लिए टेक्स्ट बफ़र।  
+    :type text_buffer: str  
+    :param encoding: उपयोग करने के लिए एन्कोडिंग।  
+    :type encoding: str  
+    :param overwrite: यदि सत्य है, तो फ़ाइल को ओवरराइट किया जाएगा।  
+    :type overwrite: bool  
+    :return: लिखे गए बाइट्स की संख्या या त्रुटि होने पर 0 से कम।  
+    :rtype int  
+    """"""
+    try:
+        mode = 'w' if overwrite else 'a'
+        with open(file_name, mode, encoding=encoding) as file:
+            bytes_written = file.write(text_buffer)
+        return bytes_written
+    except Exception as e:
+        print(f""Error: {e}"")
+        return -1",none,english,none,
+62b8bbbfe0d34b282c18120f,"def file_to_textbuffer(file_name, encoding):
+    """"""
+    एक फाइल को टेक्स्ट बफर (UTF-8) में लोड करें, पढ़ने के दौरान निर्दिष्ट एन्कोडिंग का उपयोग करें।
+    सावधानी: यह पूरी फाइल को मेमोरी में पढ़ेगा।
+    :param file_name: फाइल का नाम।
+    :type file_name: str
+    :param encoding: उपयोग करने के लिए एन्कोडिंग।
+    :type encoding: str
+    :return: एक टेक्स्ट बफर या त्रुटि की स्थिति में None।
+    :rtype: str
+    """"""
+    try:
+        with open(file_name, 'r', encoding=encoding) as file:
+            text_buffer = file.read()
+        return text_buffer
+    except Exception as e:
+        print(f""Error reading file: {e}"")
+        return None",none,english,english,
+62b8bbbce0d34b282c18120d,"import os
+
+def is_file_exist(file_name):
+    """"""
+    फ़ाइल नाम की जाँच करें कि वह मौजूद है या नहीं।  
+    :param file_name: फ़ाइल का नाम।  
+    :type file_name: str  
+    :return: true लौटाएगा (यदि फ़ाइल मौजूद है), false लौटाएगा (यदि फ़ाइल मौजूद नहीं है या फ़ाइल नाम अमान्य है)।  
+    :rtype: bool  
+    """"""
+    try:
+        return os.path.isfile(file_name)
+    except (TypeError, ValueError):
+        return False",none,english,none,
+62b8b99de0d34b282c1811f8,"def _reset_logging(cls):
+    """"""
+    Reset logging configuration to default settings.
+    """"""
+    import logging
+    logging.root.handlers = []
+    logging.basicConfig(level=logging.WARNING)",none,english,none,
+62b8b59feb7e40a82d2d1291,"def _getTargetClass(self):
+    """"""
+    इसका उपयोग उस कार्यान्वयन (implementation) को लौटाने के लिए करें,
+    जिसका उपयोग किया जा रहा है, बिना 'Py' या 'Fallback' प्रत्यय (suffix) के।
+    """"""
+    class_name = self.__class__.__name__
+    if class_name.endswith('Py') or class_name.endswith('Fallback'):
+        return class_name[:-2] if class_name.endswith('Py') else class_name[:-8]
+    return class_name",none,english,none,
+62b8b590eb7e40a82d2d1275,"def _legacy_mergeOrderings(orderings):
+    """"""
+    कई क्रमबद्ध सूचियों को इस प्रकार संयोजित करें कि प्रत्येक सूची के भीतर का क्रम संरक्षित रहे।
+
+    इन सूचियों पर यह प्रतिबंध है कि यदि कोई वस्तु दो या अधिक सूचियों में प्रकट होती है,
+    तो उस वस्तु से शुरू होने वाला उपसर्ग (suffix) सभी सूचियों में समान होना चाहिए।
+
+    उदाहरण के लिए:
+
+    >>> _mergeOrderings([
+    ... ['x', 'y', 'z'],
+    ... ['q', 'z'],
+    ... [1, 3, 5],
+    ... ['z']
+    ... ])
+    ['x', 'y', 'q', 1, 3, 5, 'z']
+    """"""
+    from collections import defaultdict, deque
+
+    # Build a graph and in-degree count
+    graph = defaultdict(set)
+    in_degree = defaultdict(int)
+    all_nodes = set()
+
+    for ordering in orderings:
+        for i in range(len(ordering) - 1):
+            u, v = ordering[i], ordering[i + 1]
+            if v not in graph[u]:
+                graph[u].add(v)
+                in_degree[v] += 1
+            all_nodes.add(u)
+            all_nodes.add(v)
+        if ordering:
+            all_nodes.add(ordering[-1])
+
+    # Initialize queue with nodes having zero in-degree
+    queue = deque([node for node in all_nodes if in_degree[node] == 0])
+
+    # Perform topological sort
+    result = []
+    while queue:
+        u = queue.popleft()
+        result.append(u)
+        for v in graph[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                queue.append(v)
+
+    return result",english,english,none,
+62b8b58deb7e40a82d2d1269,"def directlyProvidedBy(object):  # pylint:disable=redefined-builtin
+    """"""
+    दिए गए ऑब्जेक्ट द्वारा सीधे प्रदान किए गए इंटरफेस को लौटाएं
+
+    लौटाई गई वैल्यू `~zope.interface.interfaces.IDeclaration` है।
+    provides = getattr(object, ""__provides__"", None)
+    if (
+            provides is None # कोई स्पेसिफिकेशन नहीं
+            # हो सकता है कि हमें implements स्पेसिफिकेशन मिला हो, 
+            # एक ऑप्टिमाइज़ेशन के रूप में। यदि ऐसा है, तो यह ऐसा है 
+            # जैसे केवल एक बेस हो, जिसे हम क्लास-प्रदत्त घोषणाओं को 
+            # बाहर करने के लिए हटा देते हैं:
+
+    दिए गए ऑब्जेक्ट द्वारा सीधे प्रदान किए गए इंटरफ़ेस लौटाता है
+
+    लौटाया गया मान `~zope.interfaces.interfaces.ideclaration` है।
+    """"""
+    provides = getattr(object, ""__provides__"", None)
+    if provides is None:
+        return None
+    # Remove class-provided declarations
+    return provides.directlyProvidedBy(object)",english,english,none,
+62b8b559eb7e40a82d2d11f8,"def minimalBases(classes):
+    """"""
+    आधार कक्षाओं (base classes) की सूची को उसके क्रमबद्ध न्यूनतम समकक्ष (ordered minimum equivalent) में घटाएं।
+    """"""
+    minimal = []
+    for cls in classes:
+        if not any(issubclass(cls, base) for base in minimal):
+            minimal.append(cls)
+    return minimal",none,english,none,
+62b8b4b9eb7e40a82d2d1134,"def namesAndDescriptions(self, all=False):  # pylint:disable=redefined-builtin
+    """"""
+    इंटरफेस द्वारा परिभाषित एट्रिब्यूट नाम और विवरण लौटाएं।
+    if not all:
+        return self._get_attributes()
+    else:
+        return self._get_all_attributes()",none,english,none,
+62b8b416eb7e40a82d2d1129,"def names(self, all=False):  # pylint:disable=redefined-builtin
+    """"""
+    इंटरफेस द्वारा परिभाषित एट्रिब्यूट नाम लौटाएं।
+    if not all:
+        return [name for name in dir(self) if not name.startswith('_')]
+    else:
+        return dir(self)",none,english,none,
+62b8b3d6eb7e40a82d2d111c,"def _normalizeargs(sequence, output=None):
+    """"""
+    घोषणा तर्कों को सामान्यीकृत करें
+
+    सामान्यीकरण तर्कों में घोषणाएँ, ट्यूपल, या एकल इंटरफेस हो सकते हैं।
+
+    व्यक्तिगत इंटरफेस या लागू विनिर्देशों को छोड़कर अन्य सभी का विस्तार किया जाएगा।
+    """"""
+    if output is None:
+        output = []
+    
+    for item in sequence:
+        if isinstance(item, (list, tuple)):
+            _normalizeargs(item, output)
+        else:
+            output.append(item)
+    
+    return output",none,english,none,
+62b8b3d5eb7e40a82d2d1110,"def _c_optimizations_available():
+    """"""
+    C ऑप्टिमाइज़ेशन मॉड्यूल लौटाएं, यदि उपलब्ध हो, अन्यथा एक झूठा मान।  
+
+    यदि ऑप्टिमाइज़ेशन आवश्यक हैं लेकिन उपलब्ध नहीं हैं, तो यह `ImportError` उत्पन्न करता है।  
+
+    यह यह नहीं बताता कि इन्हें उपयोग करना चाहिए या नहीं।  
+    """"""
+    try:
+        import _c_optimizations
+        return _c_optimizations
+    except ImportError:
+        return False",none,english,none,
+62b8b3d4eb7e40a82d2d110f,"import os
+import sys
+
+def _should_attempt_c_optimizations():
+    """"""
+    यदि हमें C अनुकूलन का प्रयास करना चाहिए, तो एक सत्य मान लौटाएं।  
+
+    यह इस बात को ध्यान में रखता है कि क्या हम PyPy पर हैं और `_use_c_impl` में परिभाषित ``PURE_PYTHON`` पर्यावरण चर का मान क्या है।
+    """"""
+    # Check if we are running on PyPy
+    is_pypy = hasattr(sys, 'pypy_version_info')
+    
+    # Check if PURE_PYTHON environment variable is set to a truthy value
+    pure_python = os.getenv('PURE_PYTHON', '').lower() in ('1', 'true', 'yes')
+    
+    # Attempt C optimizations if not on PyPy and PURE_PYTHON is not set
+    return not is_pypy and not pure_python",english,english,none,
+62b8b3d4eb7e40a82d2d110e,"def _c_optimizations_ignored():
+    """"""
+    `_c_optimizations_required` का विपरीत।
+    """"""
+    return not _c_optimizations_required()",none,english,none,
+62b8b3d4eb7e40a82d2d110d,"def _c_optimizations_required():
+    """"""
+    C अनुकूलन (optimizations) की आवश्यकता है या नहीं, यह सत्य मान (true value) लौटाता है।
+
+    यह `_use_c_impl` में दस्तावेज़ित `PURE_PYTHON` वेरिएबल का उपयोग करता है।
+    """"""
+    from _use_c_impl import PURE_PYTHON
+    return not PURE_PYTHON",none,english,none,
+62b87b989a0c4fa8b80b35ee,"def reset(self):
+    """"""
+    हिस्टोग्राम को रीसेट करें।  
+
+    - वर्तमान संदर्भ को एक खाली डिक्शनरी में रीसेट कर दिया गया है।  
+    - बिन्स को *initial_value* या *make_bins()* (प्रारंभिक सेटअप के आधार पर) के साथ पुनः प्रारंभ किया गया है।  
+    """"""
+    self.context = {}
+    if hasattr(self, 'initial_value'):
+        self.bins = self.initial_value
+    else:
+        self.bins = self.make_bins()",none,english,none,
+62b87b859a0c4fa8b80b35d7,"def to_csv(self, separator="","", header=None):
+    """"""
+    .. deprecated:: 0.5 Lena 0.5 में to_csv का उपयोग नहीं किया जाता है।
+          Iterables को तालिकाओं (tables) में परिवर्तित किया जाता है।
+
+    ग्राफ़ के बिंदुओं (points) को CSV में परिवर्तित करें।
+
+    *separator* मानों को अलग करता है, डिफ़ॉल्ट रूप से यह कॉमा (comma) है।
+
+    *header*, यदि ``None`` नहीं है, तो यह आउटपुट की पहली स्ट्रिंग होगी
+    (नई पंक्ति स्वचालित रूप से जोड़ी जाती है)।
+
+    चूंकि एक ग्राफ़ बहुआयामी (multidimensional) हो सकता है,
+    प्रत्येक बिंदु के लिए पहले उसके निर्देशांक (coordinate) को स्ट्रिंग में परिवर्तित किया जाता है
+    (*separator* द्वारा अलग किया गया), और फिर उसके मान (value) के प्रत्येक भाग को।
+
+    :class:`Graph` को CSV में परिवर्तित करने के लिए, Lena अनुक्रम (sequence) के अंदर
+    :class:`lena.output.ToCSV` का उपयोग करें।
+    """"""
+    csv_lines = []
+    
+    # Add header if provided
+    if header is not None:
+        csv_lines.append(header)
+    
+    # Iterate over the points in the graph
+    for point in self.points:
+        # Convert coordinates to string separated by the separator
+        coords_str = separator.join(map(str, point.coordinates))
+        # Convert values to string separated by the separator
+        values_str = separator.join(map(str, point.values))
+        # Combine coordinates and values into a single CSV line
+        csv_line = f""{coords_str}{separator}{values_str}""
+        csv_lines.append(csv_line)
+    
+    # Join all lines with newline characters
+    return ""\n"".join(csv_lines)",english,english,none,
+62b87b839a0c4fa8b80b35cb,"def _get_err_indices(self, coord_name):
+    """"""
+    एक समन्वय (coordinate) से संबंधित त्रुटि सूचकांक (error indices) प्राप्त करें।
+    """"""
+    # Assuming self.errors is a dictionary where keys are coordinate names
+    # and values are lists of error indices.
+    if coord_name in self.errors:
+        return self.errors[coord_name]
+    else:
+        return []",english,english,none,
+62b87b7e9a0c4fa8b80b35bc,"def _update_context(self, context):
+    """"""
+    इस फ़ंक्शन का उपयोग *context* को इस ग्राफ़ की विशेषताओं के साथ अपडेट करने के लिए किया जाता है।
+
+    - *context.error* में त्रुटियों (errors) के इंडेक्स जोड़े जाते हैं।  
+    उदाहरण के लिए, यदि ग्राफ़ में ""E, t, error_E_low"" नामक फ़ील्ड्स हैं, तो एक उप-संदर्भ (subcontext) इस प्रकार हो सकता है:",none,english,none,
+62b87b4f9a0c4fa8b80b3580,"def integral(bins, edges):
+    """"""
+    हिस्टोग्राम के लिए इंटीग्रल (स्केल) की गणना करें।
+
+    *bins* में मान (values) होते हैं, और *edges* इंटीग्रेशन के लिए जाल (mesh) बनाते हैं।  
+    इनका प्रारूप (format) :class:`.histogram` विवरण में परिभाषित है।
+    """"""
+    integral_value = 0.0
+    for i in range(len(bins)):
+        bin_width = edges[i+1] - edges[i]
+        integral_value += bins[i] * bin_width
+    return integral_value",none,english,none,
+62b87b199a0c4fa8b80b354e,"def is_fill_request_seq(seq):
+    """"""
+    जाँच करें कि *seq* को FillRequestSeq में बदला जा सकता है।  
+
+    यह True तभी लौटाएगा जब:  
+    - यह एक FillRequest तत्व हो,  
+    - या इसमें कम से कम एक FillRequest तत्व हो,  
+    - और यह Source अनुक्रम (Source sequence) न हो।
+    """"""
+    # Assuming FillRequest is a class or type that we can check against
+    # Assuming Source sequence is a type or class that we can check against
+    
+    # Check if seq is a single FillRequest element
+    if isinstance(seq, FillRequest):
+        return True
+    
+    # Check if seq is a sequence and contains at least one FillRequest element
+    if isinstance(seq, (list, tuple)) and any(isinstance(item, FillRequest) for item in seq):
+        # Check if seq is not a Source sequence
+        if not isinstance(seq, SourceSequence):
+            return True
+    
+    return False",english,english,none,
+62b87b099a0c4fa8b80b3538,"def is_fill_request_el(obj):
+    """"""
+    `Object` में निष्पादन योग्य मेथड्स `fill` और `request` मौजूद हैं।
+    """"""
+    return callable(getattr(obj, 'fill', None)) and callable(getattr(obj, 'request', None))",none,english,none,
+62b87af99a0c4fa8b80b3524,"def is_run_el(obj):
+    """"""
+    ऑब्जेक्ट में 'run' नामक निष्पादन योग्य (executable) मेथड मौजूद है।
+    """"""
+    return callable(getattr(obj, 'run', None))",none,english,none,
+62b87af69a0c4fa8b80b351a,"def is_fill_compute_el(obj):
+    """"""
+    यह फ़ंक्शन यह जांचता है कि दिए गए ऑब्जेक्ट में 'fill' और 'compute' नामक मेथड्स मौजूद हैं और वे निष्पादन योग्य (callable) हैं या नहीं।
+    """"""
+    return all(callable(getattr(obj, method, None)) for method in ['fill', 'compute'])",none,english,none,
+62b87af19a0c4fa8b80b34f7,"def difference(d1, d2, level=-1):
+    """"""
+    यह फ़ंक्शन एक डिक्शनरी लौटाता है जिसमें *d1* के वे आइटम्स शामिल होते हैं जो *d2* में नहीं हैं।
+    
+    *level* पुनरावृत्ति की अधिकतम गहराई निर्धारित करता है। अनंत पुनरावृत्ति के लिए,
+    इसे -1 पर सेट करें। स्तर 1 के लिए,
+    यदि कोई कुंजी *d1* और *d2* दोनों में मौजूद है, लेकिन उसके मान अलग-अलग हैं,
+    तो उसे अंतर में शामिल किया जाता है।
+    अधिक जानकारी के लिए :func:`intersection` देखें।
+
+    *d1* और *d2* अपरिवर्तित रहते हैं। हालाँकि, *d1* या इसके कुछ
+    उपशब्दकोश सीधे लौटाए जा सकते हैं।
+    जब उचित हो तो परिणाम की एक गहरी प्रतिलिपि बनाएँ।
+
+    ..versionadded::0.5
+    कीवर्ड तर्क *level* जोड़ें।
+    """"""
+    if level == 0:
+        return {}
+    
+    diff = {}
+    for key in d1:
+        if key not in d2:
+            diff[key] = d1[key]
+        elif isinstance(d1[key], dict) and isinstance(d2[key], dict):
+            if level != 1:
+                sub_diff = difference(d1[key], d2[key], level - 1 if level != -1 else -1)
+                if sub_diff:
+                    diff[key] = sub_diff
+        elif d1[key] != d2[key]:
+            diff[key] = d1[key]
+    
+    return diff","english, none",english,none,
+62b87af09a0c4fa8b80b34f1,"def fill(self, coord, weight=1):
+    """"""
+    *coord* पर दिए गए *weight* के साथ हिस्टोग्राम को भरें।
+
+    यदि *coord* हिस्टोग्राम की सीमाओं के बाहर है, तो उसे अनदेखा कर दिया जाएगा।
+    """"""
+    if self.is_within_bounds(coord):
+        self.histogram[coord] += weight",none,english,none,
+62b86aa3b4d922cb0e688d36,"import re
+from typing import Dict, List, Union
+
+class ValidationError(Exception):
+    def __init__(self, messages: List[Dict[str, str]]):
+        self.messages = messages
+        super().__init__(""Validation failed for labels."")
+
+def _validate_labels(labels: Dict[Union[str, bool], Union[str, List, bool]]) -> None:
+    """"""
+    Validate the keys and values in the given labels against their respective regular expressions.
+
+    Args:
+        labels (dict): A dictionary of labels to validate.
+
+    Raises:
+        ValidationError: If any key or value does not match its respective regular expression.
+                        The error contains a list of all errors that occurred in the labels.
+                        Each element in the list is a dictionary with a key-value pair:
+                        - key: The label key or value that caused the error, as a string.
+                        - value: The error message.
+    """"""
+    errors = []
+    
+    # Define regex patterns for keys and values
+    key_pattern = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+    value_pattern = re.compile(r'^[a-zA-Z0-9_]+$')
+    
+    for key, value in labels.items():
+        # Validate key
+        if not isinstance(key, str):
+            errors.append({str(key): 'expected string or bytes-like object'})
+        elif not key_pattern.match(key):
+            errors.append({key: f""Label key '{key}' does not match the regex {key_pattern.pattern}""})
+        
+        # Validate value
+        if not isinstance(value, str):
+            errors.append({str(value): 'expected string or bytes-like object'})
+        elif not value_pattern.match(value):
+            errors.append({value: f""Label value '{value}' does not match the regex {value_pattern.pattern}""})
+    
+    if errors:
+        raise ValidationError(errors)",english,english,english,
+62b86a9eb4d922cb0e688d25,"import re
+
+def _get_resource_name_regex():
+    """"""
+    क्रैके संसाधनों के नाम को मान्य करने के लिए उपयोग किए जाने वाले नियमित अभिव्यक्तियों का निर्माण करें या उन्हें लौटाएं।
+
+    रिटर्न करता है:
+    - (re.Pattern): संकलित नियमित अभिव्यक्तियां, जो संसाधन नाम को मान्य करने के लिए उपयोग की जाती हैं।
+    """"""
+    # यहां एक उदाहरण के रूप में एक सरल नियमित अभिव्यक्ति दी गई है।
+    # आप इसे अपनी आवश्यकताओं के अनुसार संशोधित कर सकते हैं।
+    pattern = r'^[a-zA-Z0-9_-]+$'
+    return re.compile(pattern)",hindi,english,none,
+62b86a4fb4d922cb0e688cf8,"import re
+
+def validate_value(value):
+    """"""
+    दिए गए मान को संबंधित नियमित अभिव्यक्ति (Regular Expression) के अनुसार सत्यापित करें।
+
+    आर्ग्युमेंट्स (Args):
+        value: सत्यापन के लिए स्ट्रिंग
+
+    त्रुटि (Raises):
+        ValidationError: यदि दिया गया मान नियमित अभिव्यक्ति के अनुरूप नहीं है।
+    """"""
+    # यहां एक उदाहरण के रूप में एक नियमित अभिव्यक्ति है जो केवल अल्फ़ान्यूमेरिक वर्णों को स्वीकार करती है।
+    pattern = r'^[a-zA-Z0-9]+$'
+    
+    if not re.match(pattern, value):
+        raise ValidationError(""दिया गया मान नियमित अभिव्यक्ति के अनुरूप नहीं है।"")
+
+class ValidationError(Exception):
+    pass",hindi,english,hindi,
+62b86a4fb4d922cb0e688cf7,"import re
+
+def validate_key(key):
+    """"""
+    दिए गए कुंजी (key) को संबंधित नियमित अभिव्यक्ति (regular expression) के खिलाफ सत्यापित करें।
+
+    आर्ग्युमेंट्स (Args):
+        key: सत्यापन के लिए स्ट्रिंग (string)
+
+    त्रुटि (Raises):
+        ValidationError: यदि दी गई कुंजी नियमित अभिव्यक्ति के अनुरूप नहीं है।
+    """"""
+    # Define the regular expression pattern for the key
+    pattern = r'^[A-Za-z0-9_]+$'  # Example pattern: alphanumeric and underscore
+    
+    if not re.match(pattern, key):
+        raise ValueError(""ValidationError: दी गई कुंजी नियमित अभिव्यक्ति के अनुरूप नहीं है।"")
+    
+    return True",english,english,hindi,
+62b86a01b4d922cb0e688ccc,"def generate_default_observer_schema_dict(manifest_dict, first_level=False):
+    """"""
+    यह फ़ंक्शन :func:``generate_default_observer_schema_list`` के साथ मिलकर पुनरावृत्त रूप से (recursively) कॉल किया जाता है ताकि किसी Kubernetes संसाधन (resource) के एक भाग से डिफ़ॉल्ट ``observer_schema`` का हिस्सा उत्पन्न किया जा सके, जिसे क्रमशः ``manifest_dict`` या ``manifest_list`` द्वारा परिभाषित किया गया है।
+
+    आर्ग्युमेंट्स (Args):
+    - manifest_dict (dict): आंशिक Kubernetes संसाधन (Partial Kubernetes resources)।
+    - first_level (bool, optional): यदि True है, तो यह इंगित करता है कि डिक्शनरी Kubernetes संसाधन के पूरे observer schema का प्रतिनिधित्व करती है।
+
+    रिटर्न्स (Returns):
+    - dict: उत्पन्न आंशिक observer_schema (Generated partial observer_schema)।
+
+    यह फ़ंक्शन ``manifest_dict`` से एक नई डिक्शनरी बनाता है और सभी non-list और non-dict मानों को ``None`` से बदल देता है।
+
+    यदि यह ``first_level`` डिक्शनरी है (यानी किसी संसाधन के लिए पूरा ``observer_schema``), तो पहचानने वाले फ़ील्ड्स (identifying fields) के मान ``manifest`` फ़ाइल से कॉपी किए जाते हैं।
+    """"""
+    observer_schema = {}
+    
+    for key, value in manifest_dict.items():
+        if isinstance(value, dict):
+            observer_schema[key] = generate_default_observer_schema_dict(value)
+        elif isinstance(value, list):
+            observer_schema[key] = []
+            for item in value:
+                if isinstance(item, dict):
+                    observer_schema[key].append(generate_default_observer_schema_dict(item))
+                else:
+                    observer_schema[key].append(None)
+        else:
+            if first_level and key in ['apiVersion', 'kind', 'metadata']:
+                observer_schema[key] = value
+            else:
+                observer_schema[key] = None
+    
+    return observer_schema",none,english,none,
+62b869ebb4d922cb0e688cc6,"def update_last_applied_manifest_list_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    साथ में :func:``update_last_applied_manifest_dict_from_resp``, यह फ़ंक्शन 
+    पुनरावृत्त रूप से कॉल किया जाता है ताकि आंशिक ``last_applied_manifest`` को 
+    आंशिक Kubernetes प्रतिक्रिया से अपडेट किया जा सके।
+
+    आर्ग्युमेंट्स (Args):
+        last_applied_manifest (list): आंशिक ``last_applied_manifest`` जो 
+            अपडेट किया जा रहा है।
+        observer_schema (list): आंशिक ``observer_schema``।
+        response (list): Kubernetes API से प्राप्त आंशिक प्रतिक्रिया।
+
+    यह फ़ंक्शन सभी देखे गए फ़ील्ड्स (observed fields) के माध्यम से जाता है और 
+    यदि वे पहले से मौजूद नहीं हैं तो उनके मान को ``last_applied_manifest`` में 
+    आरंभ (initialize) करता है।
+    """"""
+    for i, (schema_item, resp_item) in enumerate(zip(observer_schema, response)):
+        if isinstance(schema_item, dict) and isinstance(resp_item, dict):
+            if i >= len(last_applied_manifest):
+                last_applied_manifest.append({})
+            update_last_applied_manifest_dict_from_resp(
+                last_applied_manifest[i], schema_item, resp_item
+            )
+        elif isinstance(schema_item, list) and isinstance(resp_item, list):
+            if i >= len(last_applied_manifest):
+                last_applied_manifest.append([])
+            update_last_applied_manifest_list_from_resp(
+                last_applied_manifest[i], schema_item, resp_item
+            )
+        else:
+            if i >= len(last_applied_manifest):
+                last_applied_manifest.append(resp_item)
+            else:
+                last_applied_manifest[i] = resp_item",none,english,none,
+62b869eab4d922cb0e688cc5,"def update_last_applied_manifest_dict_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    Updates the partial `last_applied_manifest` with values from the partial Kubernetes response.
+
+    Args:
+        last_applied_manifest (dict): The partial `last_applied_manifest` being updated.
+        observer_schema (dict): The partial `observer_schema`.
+        response (dict): The partial response from the Kubernetes API.
+
+    Raises:
+        KeyError: If the observed fields are not present in the Kubernetes response.
+
+    This function iterates through all observed fields and initializes their values if they are not already present in `last_applied_manifest`.
+    """"""
+    for key, value in observer_schema.items():
+        if key not in response:
+            raise KeyError(f""Key '{key}' not found in the Kubernetes response."")
+        
+        if isinstance(value, dict):
+            if key not in last_applied_manifest:
+                last_applied_manifest[key] = {}
+            update_last_applied_manifest_dict_from_resp(
+                last_applied_manifest[key], value, response[key]
+            )
+        else:
+            last_applied_manifest[key] = response[key]",none,english,none,
+62b869eab4d922cb0e688cbf,"def generate_default_observer_schema(app):
+    """"""
+    प्रत्येक Kubernetes संसाधन के लिए डिफ़ॉल्ट ऑब्ज़र्वर स्कीमा उत्पन्न करें जो ``spec.manifest`` में मौजूद है और जिसके लिए कोई कस्टम ऑब्ज़र्वर स्कीमा निर्दिष्ट नहीं किया गया है।
+
+    आर्ग्युमेंट्स:
+        app (krake.data.kubernetes.Application): वह एप्लिकेशन जिसके लिए डिफ़ॉल्ट ऑब्ज़र्वर स्कीमा उत्पन्न करना है।
+    """"""
+    default_schema = {
+        ""type"": ""object"",
+        ""properties"": {
+            ""status"": {
+                ""type"": ""object"",
+                ""properties"": {
+                    ""conditions"": {
+                        ""type"": ""array"",
+                        ""items"": {
+                            ""type"": ""object"",
+                            ""properties"": {
+                                ""type"": {""type"": ""string""},
+                                ""status"": {""type"": ""string""},
+                                ""lastTransitionTime"": {""type"": ""string""},
+                                ""reason"": {""type"": ""string""},
+                                ""message"": {""type"": ""string""}
+                            },
+                            ""required"": [""type"", ""status""]
+                        }
+                    }
+                },
+                ""required"": [""conditions""]
+            }
+        },
+        ""required"": [""status""]
+    }
+
+    # Iterate over all resources in the application's manifest
+    for resource in app.spec.manifest:
+        if not hasattr(resource, 'observer_schema'):
+            resource.observer_schema = default_schema
+
+    return app",english,english,none,
+62b43427903eeb48555d3ea5,"def format(
+        self,
+        sql: AnyStr,
+        params: Union[Dict[Union[str, int], Any], Sequence[Any]],
+) -> Tuple[AnyStr, Union[Dict[Union[str, int], Any], Sequence[Any]]]:
+    if isinstance(params, dict):
+        # Convert named parameters to out-style
+        out_params = {}
+        for key, value in params.items():
+            if isinstance(key, str):
+                out_params[f"":{key}""] = value
+            else:
+                out_params[f"":{key}""] = value
+        formatted_sql = sql
+        for key, value in params.items():
+            if isinstance(key, str):
+                formatted_sql = formatted_sql.replace(f"":{key}"", ""?"")
+            else:
+                formatted_sql = formatted_sql.replace(f"":{key}"", ""?"")
+        return formatted_sql, out_params
+    elif isinstance(params, (list, tuple)):
+        # Convert positional parameters to out-style
+        out_params = list(params)
+        formatted_sql = sql
+        for i in range(len(params)):
+            formatted_sql = formatted_sql.replace(f""?"", ""?"", 1)
+        return formatted_sql, out_params
+    else:
+        raise TypeError(""params must be a dict, list, or tuple"")",english,english,english,
+62b43428903eeb48555d3eaa,"def formatmany(
+        self,
+        sql: AnyStr,
+        many_params: Union[Iterable[Dict[Union[str, int], Any]], Iterable[Sequence[Any]]],
+) -> Tuple[AnyStr, Union[List[Dict[Union[str, int], Any]], List[Sequence[Any]]]]:
+    formatted_sql = sql
+    formatted_params = []
+
+    for params in many_params:
+        if isinstance(params, dict):
+            # Handle named parameters
+            formatted_params.append(params)
+        elif isinstance(params, (list, tuple)):
+            # Handle ordinal parameters
+            formatted_params.append(list(params))
+        else:
+            raise TypeError(""Parameters must be either a dictionary or a sequence."")
+
+    return formatted_sql, formatted_params",english,english,english,
+62b45df05108cfac7f2109ce,"import os
+import re
+
+class OCFLValidator:
+    def validate(self, path):
+        """"""
+        पथ या pyfs रूट पर OCFL ऑब्जेक्ट को मान्य करें।
+
+        यदि मान्य है (चेतावनियाँ स्वीकार्य हैं), तो True लौटाता है, अन्यथा False।
+        """"""
+        if not os.path.exists(path):
+            return False
+        
+        # Check for the presence of required OCFL files and directories
+        required_files = ['inventory.json', 'inventory.json.sha512']
+        required_dirs = ['v1']
+        
+        for file in required_files:
+            if not os.path.isfile(os.path.join(path, file)):
+                return False
+        
+        for dir in required_dirs:
+            if not os.path.isdir(os.path.join(path, dir)):
+                return False
+        
+        # Validate the inventory.json file
+        inventory_path = os.path.join(path, 'inventory.json')
+        if not self._validate_inventory(inventory_path):
+            return False
+        
+        return True
+    
+    def _validate_inventory(self, inventory_path):
+        """"""
+        Validate the inventory.json file.
+        """"""
+        try:
+            with open(inventory_path, 'r') as f:
+                inventory = json.load(f)
+                
+            # Check for required fields in inventory.json
+            required_fields = ['id', 'type', 'digestAlgorithm', 'head', 'manifest', 'versions']
+            for field in required_fields:
+                if field not in inventory:
+                    return False
+                
+            # Validate the digestAlgorithm
+            if inventory['digestAlgorithm'] != 'sha512':
+                return False
+                
+            # Validate the manifest
+            if not isinstance(inventory['manifest'], dict):
+                return False
+                
+            # Validate the versions
+            if not isinstance(inventory['versions'], dict):
+                return False
+                
+            return True
+        except Exception as e:
+            return False",english,english,none,
+62b45df15108cfac7f2109dc,"def status_str(self, prefix=''):
+    """"""
+    वैलिडेटर की स्थिति की स्ट्रिंग लौटाएं, जिसमें वैकल्पिक `prefix` जोड़ा जा सकता है।
+    """"""
+    # Assuming the validator has a status attribute
+    return f""{prefix}{self.status}""",english,english,none,
+62b45df15108cfac7f2109dd,"def status_str(self, prefix=''):
+    """"""
+    सत्यापन लॉग (validation log) का स्ट्रिंग प्रतिनिधित्व लौटाएं, वैकल्पिक प्रीफिक्स के साथ।
+    """"""
+    log_str = """"
+    for log_entry in self.validation_log:
+        log_str += f""{prefix}{log_entry}\n""
+    return log_str.strip()",none,english,none,
+62b45e135108cfac7f2109f4,"def is_valid(self, identifier):
+    """""" 
+    पहचानकर्ता मान्य है तो सत्य लौटाएं। इस बेस इम्प्लीमेंटेशन में, हमेशा सत्य लौटाया जाता है।
+    """"""
+    return True",none,english,none,
+62b45e145108cfac7f210a07,"def validate(self, inventory, extract_spec_version=False):
+    """"""
+    दिए गए इन्वेंटरी को सत्यापित करें।
+
+    यदि `extract_spec_version` का मान `True` है, तो यह `type` मान को देखकर 
+    स्पेसिफिकेशन वर्जन निर्धारित करेगा। यदि `type` मान मौजूद नहीं है या यह 
+    मान्य नहीं है, तो अन्य परीक्षण `self.spec_version` में दिए गए वर्जन के 
+    आधार पर किए जाएंगे।
+    """"""
+    if extract_spec_version:
+        if 'type' in inventory:
+            spec_version = inventory['type']
+            if not self.is_valid_spec_version(spec_version):
+                spec_version = self.spec_version
+        else:
+            spec_version = self.spec_version
+    else:
+        spec_version = self.spec_version
+
+    # Perform validation based on the determined spec_version
+    if spec_version == 'v1':
+        return self.validate_v1(inventory)
+    elif spec_version == 'v2':
+        return self.validate_v2(inventory)
+    else:
+        raise ValueError(f""Unsupported specification version: {spec_version}"")
+
+def is_valid_spec_version(self, spec_version):
+    """"""
+    Check if the given specification version is valid.
+    """"""
+    return spec_version in ['v1', 'v2']
+
+def validate_v1(self, inventory):
+    """"""
+    Validate inventory against v1 specification.
+    """"""
+    # Implementation for v1 validation
+    pass
+
+def validate_v2(self, inventory):
+    """"""
+    Validate inventory against v2 specification.
+    """"""
+    # Implementation for v2 validation
+    pass",english,english,english,
+62b45e145108cfac7f210a09,"def check_digests_present_and_used(self, manifest_files, digests_used):
+    """"""
+    मैनिफेस्ट में सभी आवश्यक डाइजेस्ट्स की जांच करें कि वे मौजूद हैं और उपयोग हो रहे हैं।
+    
+    Args:
+        manifest_files (list): मैनिफेस्ट फाइलों की सूची।
+        digests_used (set): उपयोग किए गए डाइजेस्ट्स का सेट।
+    
+    Returns:
+        bool: True अगर सभी डाइजेस्ट्स मौजूद हैं और उपयोग हो रहे हैं, अन्यथा False।
+    """"""
+    # मैनिफेस्ट फाइलों से सभी डाइजेस्ट्स को इकट्ठा करें
+    all_digests = set()
+    for manifest_file in manifest_files:
+        with open(manifest_file, 'r') as file:
+            for line in file:
+                if 'digest' in line:
+                    digest = line.split('digest:')[1].strip()
+                    all_digests.add(digest)
+    
+    # सभी डाइजेस्ट्स की जांच करें कि वे मौजूद हैं और उपयोग हो रहे हैं
+    for digest in all_digests:
+        if digest not in digests_used:
+            return False
+    
+    return True",hindi,english,none,
+62b45e165108cfac7f210a16,"def validate_as_prior_version(self, prior):
+    """"""
+    वर्तमान इन्वेंटरी ऑब्जेक्ट के लिए यह जांचें कि prior एक मान्य पूर्व संस्करण है।
+
+    इनपुट वैरिएबल प्रायर को भी एक इन्वेंटरी वैलिडेटर ऑब्जेक्ट माना जाता है और माना जाता है कि स्व और प्रायर दोनों इन्वेंटरी को आंतरिक संगतता के लिए जाँच लिया गया है।
+    """"""
+    if not isinstance(prior, type(self)):
+        return False
+    
+    # Check if the prior version is indeed a previous version
+    # Assuming that the inventory objects have a version attribute
+    if not hasattr(self, 'version') or not hasattr(prior, 'version'):
+        return False
+    
+    if self.version <= prior.version:
+        return False
+    
+    # Additional checks can be added here based on specific requirements
+    # For example, checking if the prior version's data is a subset of the current version's data
+    
+    return True",english,english,none,
+62b45e165108cfac7f210a17,"def get_logical_path_map(inventory, version):
+    """"""
+    इन्वेंटरी में दिए गए संस्करण (version) के लिए स्थिति (state) में लॉजिकल पथों और डिस्क पर फ़ाइलों के बीच का मैप प्राप्त करें।
+
+    रिटर्न करता है एक डिक्शनरी: 
+    `logical_path_in_state -> set(content_files)`
+
+    `content_files` का सेट उन डुप्लिकेट फ़ाइलों के संदर्भ भी शामिल कर सकता है जो उस संस्करण के बाद के संस्करणों में मौजूद हैं जिसे वर्णित किया जा रहा है।
+    """"""
+    logical_path_map = {}
+    
+    for logical_path, file_versions in inventory.items():
+        if version in file_versions:
+            content_files = set()
+            for v, content_file in file_versions.items():
+                if v >= version:
+                    content_files.add(content_file)
+            logical_path_map[logical_path] = content_files
+    
+    return logical_path_map",none,english,none,
+62b45e175108cfac7f210a19,"def validate_fixity(self, fixity, manifest_files):
+    """"""
+    इन्वेंटरी में फिक्सिटी ब्लॉक को सत्यापित करें।
+    फिक्सिटी ब्लॉक की संरचना की जांच करें और सुनिश्चित करें कि केवल वे फाइलें
+    जो मैनिफेस्ट में सूचीबद्ध हैं, वही संदर्भित की गई हैं।
+    """"""
+    if not isinstance(fixity, dict):
+        raise ValueError(""फिक्सिटी ब्लॉक एक डिक्शनरी होना चाहिए।"")
+    
+    if not isinstance(manifest_files, list):
+        raise ValueError(""मैनिफेस्ट फाइल्स एक लिस्ट होनी चाहिए।"")
+    
+    # फिक्सिटी ब्लॉक में सभी फाइलें मैनिफेस्ट में होनी चाहिए
+    for file_name in fixity.keys():
+        if file_name not in manifest_files:
+            raise ValueError(f""फाइल '{file_name}' मैनिफेस्ट में सूचीबद्ध नहीं है।"")
+    
+    # मैनिफेस्ट में सभी फाइलें फिक्सिटी ब्लॉक में होनी चाहिए
+    for file_name in manifest_files:
+        if file_name not in fixity:
+            raise ValueError(f""फाइल '{file_name}' फिक्सिटी ब्लॉक में सूचीबद्ध नहीं है।"")
+    
+    return True",hindi,english,hindi,
+62b463153879012d19481498,"import os
+
+def files_list(path):
+    """"""
+    `path` में फ़ाइलों को वापस करें।
+    """"""
+    if not os.path.exists(path):
+        return []
+    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]",none,english,none,
+62b463153879012d1948149a,"import os
+
+def _group_files_by_xml_filename(source, xmls, files):
+    """"""
+    XML फ़ाइलों के बेस नाम के आधार पर फ़ाइलों को समूहित करें
+
+    यह फ़ंक्शन XML फ़ाइलों के बेस नाम के आधार पर फ़ाइलों को समूहित करता है और डेटा को डिक्शनरी प्रारूप में लौटाता है।
+
+    पैरामीटर्स (Parameters)
+    ----------
+    source : `str`
+        स्रोत फ़ोल्डर या ज़िप फ़ाइल का पथ।
+    
+    xmls : `list`
+        XML फ़ाइलों की सूची।
+    
+    files : `list`
+        फ़ोल्डर या ज़िप फ़ाइल में मौजूद फ़ाइलों की सूची।
+
+    रिटर्न्स (Returns)
+    -------
+    dict
+        - key: XML फ़ाइलों के नाम।
+        - value: पैकेज (Package)।
+    """"""
+    grouped_files = {}
+    
+    for xml in xmls:
+        xml_basename = os.path.splitext(os.path.basename(xml))[0]
+        grouped_files[xml_basename] = []
+        
+        for file in files:
+            if xml_basename in file:
+                grouped_files[xml_basename].append(file)
+    
+    return grouped_files",none,english,none,
+62b463153879012d1948149b,"import os
+
+def match_file_by_prefix(prefix, file_path):
+    """"""
+    पहचानें कि क्या `file_path` किसी दिए गए `prefix` द्वारा दस्तावेज़ पैकेज से संबंधित है
+
+    एक पैकेज से संबंधित दस्तावेज़ों के लिए `True` लौटाएँ।
+
+    पैरामीटर
+    ----------
+    prefix : str
+        फ़ाइलनाम उपसर्ग
+    file_path : str
+        फ़ाइल पथ
+    रिटर्न
+    -------
+    bool
+        सत्य - फ़ाइल पैकेज से संबंधित है
+    """"""
+    # Get the filename from the file path
+    filename = os.path.basename(file_path)
+    
+    # Check if the filename starts with the given prefix
+    return filename.startswith(prefix)",english,english,none,
+62b463153879012d1948149c,"import os
+
+def select_filenames_by_prefix(prefix, files):
+    """"""
+    दस्तावेज़ पैकेज से संबंधित फ़ाइलें प्राप्त करें।
+
+    `files` सूची में से उन फ़ाइलों को लौटाएं जिनके नाम `prefix` से शुरू होते हैं।
+
+    पैरामीटर्स (Parameters)
+    ----------
+    `prefix` : str  
+        फ़ाइल नाम का प्रीफ़िक्स (Prefix)  
+
+    `files` : str list  
+        फ़ाइल पथों (File paths) की सूची  
+
+    रिटर्न्स (Returns)
+    -------
+    list  
+        उन फ़ाइल पथों की सूची, जिनके बेसनाम (basename) फ़ाइलें दिए गए प्रीफ़िक्स से मेल खाती हैं।  
+    """"""
+    return [file for file in files if os.path.basename(file).startswith(prefix)]",none,english,none,
+62b463153879012d1948149d,"import os
+import xml.etree.ElementTree as ET
+
+def _explore_folder(folder):
+    """"""
+    फ़ोल्डर से पैकेज का डेटा प्राप्त करें।  
+
+    फ़ाइलों को उनके XML बेसनाम के आधार पर समूहित करता है और डेटा को डिक्शनरी (dict) प्रारूप में लौटाता है।  
+
+    पैरामीटर  
+    folder : str
+        पैकेज का फ़ोल्डर।  
+
+    रिटर्न्स  
+    dict
+    """"""
+    data_dict = {}
+    
+    for root, dirs, files in os.walk(folder):
+        for file in files:
+            if file.endswith('.xml'):
+                file_path = os.path.join(root, file)
+                base_name = os.path.splitext(file)[0]
+                
+                try:
+                    tree = ET.parse(file_path)
+                    root_element = tree.getroot()
+                    
+                    if base_name not in data_dict:
+                        data_dict[base_name] = []
+                    
+                    data_dict[base_name].append(root_element)
+                except ET.ParseError as e:
+                    print(f""Error parsing {file_path}: {e}"")
+    
+    return data_dict",none,english,none,
+62b463153879012d1948149f,"def _eval_file(prefix, file_path):
+    """"""
+    पैकेज के फ़ाइल प्रकार की पहचान करें: `asset` या `rendition`।
+
+    पैकेज के फ़ाइल प्रकार की पहचान करें और `packages` को फ़ाइल के प्रकार और पते के साथ अपडेट करें जो विश्लेषण में है।
+
+    पैरामीटर्स
+    ----------
+    prefix : str
+        XML फ़ाइल का नाम बिना एक्सटेंशन के
+    file_path : str
+        फ़ाइल का पूरा पथ
+
+    रिटर्न्स
+    -------
+    dict
+        फ़ाइल प्रकार और पते के साथ एक डिक्शनरी
+    """"""
+    import os
+
+    # फ़ाइल प्रकार की पहचान करें
+    if prefix.startswith(""asset""):
+        file_type = ""asset""
+    elif prefix.startswith(""rendition""):
+        file_type = ""rendition""
+    else:
+        file_type = ""unknown""
+
+    # फ़ाइल का पूरा पथ
+    full_path = os.path.abspath(file_path)
+
+    # रिटर्न डिक्शनरी
+    return {
+        ""file_type"": file_type,
+        ""file_path"": full_path
+    }",hindi,english,none,
+62b463153879012d194814a1,"def add_rendition(self, lang, file_path):
+    """"""
+    Adds a new rendition of the document in a specified language.
+
+    Args:
+        lang (str): The language code for the rendition (e.g., 'en' for English).
+        file_path (str): The file path to the rendition document.
+
+    Returns:
+        None
+    """"""
+    if not hasattr(self, 'renditions'):
+        self.renditions = {}
+    self.renditions[lang] = file_path",none,english,none,
+62b463163879012d194814a2,"def add_asset(self, basename, file_path):
+    """"""
+    Adds an asset to the internal dictionary with the given basename and file path.
+    
+    Args:
+        basename (str): The base name of the asset (e.g., ""artigo02-gf03"").
+        file_path (str): The full path to the asset file.
+    
+    Returns:
+        None
+    """"""
+    if not hasattr(self, 'assets'):
+        self.assets = {}
+    
+    # Generate keys for different file extensions
+    self.assets[f""{basename}.tiff""] = file_path.replace("".tiff"", "".tiff"")
+    self.assets[f""{basename}.jpg""] = file_path.replace("".tiff"", "".jpg"")
+    self.assets[f""{basename}.png""] = file_path.replace("".tiff"", "".png"")",english,english,none,
+62b463163879012d194814a4,"import zipfile
+import os
+from xml.etree import ElementTree as ET
+
+def _explore_zipfile(zip_path):
+    """"""
+    ज़िप पथ से पैकेजों का डेटा प्राप्त करता है।  
+
+    फ़ाइलों को उनके XML बेसनाम (basename) के आधार पर समूहित करता है और डेटा को डिक्शनरी (dict) प्रारूप में लौटाता है।  
+
+    पैरामीटर (Parameters)
+    ----------
+    zip_path : str  
+        ज़िप फ़ाइल का पथ।  
+
+    रिटर्न्स (Returns)
+    -------
+    dict
+        XML फ़ाइलों के डेटा को समूहित करके एक डिक्शनरी में लौटाता है।
+    """"""
+    data_dict = {}
+    
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        for file_name in zip_ref.namelist():
+            if file_name.endswith('.xml'):
+                base_name = os.path.basename(file_name)
+                with zip_ref.open(file_name) as xml_file:
+                    tree = ET.parse(xml_file)
+                    root = tree.getroot()
+                    data_dict[base_name] = root
+    
+    return data_dict",none,english,none,
+62b463163879012d194814a6,"import zipfile
+
+def files_list_from_zipfile(zip_path):
+    """"""
+    `zip_path` में फ़ाइलें लौटाएँ
+
+    उदाहरण:
+
+    [
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200069.pdf',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200069.xml',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071.pdf',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071.xml',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf01.tif',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf02.tif',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf03.tif',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf04.tif',
+    ]
+    """"""
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        return zip_ref.namelist()",none,english,none,
+62b4631b3879012d194814dd,"def fix_namespace_prefix_w(content):
+    """"""
+    ऐसा कोड लिखें जो उस टेक्स्ट को परिवर्तित करे जो डिफ़ॉल्ट रूप से 'w:st=""' है, उसे 'w-st=""' में बदल दे।
+    """"""
+    return content.replace('w:st=""', 'w-st=""')",none,english,none,
+62b463283879012d1948153d,"def match_pubdate(node, pubdate_xpaths):
+    """"""
+    `pubdate_xpaths` सूची में पहला मेलित मान (match) लौटाता है।
+    """"""
+    for xpath in pubdate_xpaths:
+        result = node.xpath(xpath)
+        if result:
+            return result[0]
+    return None",none,english,none,
+62b463303879012d19481579,"def _extract_number_and_supplment_from_issue_element(issue):
+    """"""
+    समस्या (issue) की सामग्री से number और suppl के संभावित मानों को निकालें।
+    """"""
+    number = None
+    suppl = None
+    
+    # Assuming 'issue' is a string or a dictionary-like object
+    if isinstance(issue, str):
+        # Example logic to extract number and suppl from a string
+        # This is a placeholder and should be replaced with actual logic
+        parts = issue.split()
+        for part in parts:
+            if part.isdigit():
+                number = int(part)
+            elif part.lower().startswith('suppl'):
+                suppl = part
+    
+    elif isinstance(issue, dict):
+        # Example logic to extract number and suppl from a dictionary
+        number = issue.get('number')
+        suppl = issue.get('suppl')
+    
+    return number, suppl",english,english,none,
+62b46740d2f69a53b466171a,"def pretty(self, indent=0, debug=False):
+    """"""
+    स्वयं का एक सुंदर स्वरूपित प्रतिनिधित्व लौटाएँ।
+    """"""
+    indent_str = ' ' * indent
+    result = f""{indent_str}{self.__class__.__name__}(\n""
+    
+    for key, value in self.__dict__.items():
+        if debug:
+            result += f""{indent_str}  {key}: {repr(value)}\n""
+        else:
+            result += f""{indent_str}  {key}: {value}\n""
+    
+    result += f""{indent_str})""
+    return result",none,english,none,
+62b46746d2f69a53b4661722,"def absorb(self, args):
+    """"""
+    `args` अभिव्यक्तियों के अनुक्रम को दिया गया है, एक नई सूची लौटाएं जिसमें अवशोषण और नकारात्मक अवशोषण लागू किया गया हो।
+
+    अधिक जानकारी के लिए देखें: [https://en.wikipedia.org/wiki/Absorption_law](https://en.wikipedia.org/wiki/Absorption_law)
+
+    **अवशोषण (Absorption):**
+
+    A & (A | B) = A, A | (A & B) = A
+
+    **नकारात्मक अवशोषण (Negative Absorption):**
+
+    A & (~A | B) = A & B, A | (~A & B) = A | B
+    """"""
+    result = []
+    for expr in args:
+        if isinstance(expr, tuple):
+            if len(expr) == 3:
+                op, left, right = expr
+                if op == '&':
+                    if left == right:
+                        result.append(left)
+                    elif isinstance(right, tuple) and len(right) == 3 and right[0] == '|':
+                        if left == right[1]:
+                            result.append(left)
+                        elif left == right[2]:
+                            result.append(left)
+                        else:
+                            result.append(expr)
+                    elif isinstance(right, tuple) and len(right) == 3 and right[0] == '|' and right[1] == ('~', left):
+                        result.append(('&', left, right[2]))
+                    else:
+                        result.append(expr)
+                elif op == '|':
+                    if left == right:
+                        result.append(left)
+                    elif isinstance(right, tuple) and len(right) == 3 and right[0] == '&':
+                        if left == right[1]:
+                            result.append(left)
+                        elif left == right[2]:
+                            result.append(left)
+                        else:
+                            result.append(expr)
+                    elif isinstance(right, tuple) and len(right) == 3 and right[0] == '&' and right[1] == ('~', left):
+                        result.append(('|', left, right[2]))
+                    else:
+                        result.append(expr)
+                else:
+                    result.append(expr)
+            else:
+                result.append(expr)
+        else:
+            result.append(expr)
+    return result",none,english,none,
+62b86707b4d922cb0e688c2a,"def on(self, hook):
+    """"""
+    रजिस्ट्री में एक नया हैंडलर जोड़ने के लिए डेकोरेटर फ़ंक्शन।
+
+    पैरामीटर (Args):
+    - hook (HookType): वह हुक विशेषता जिसके लिए हैंडलर को पंजीकृत (register) करना है।
+
+    रिटर्न (Returns):
+    - callable: निर्दिष्ट हुक के लिए श्रोताओं (listeners) को पंजीकृत करने के लिए डेकोरेटर।
+    """"""
+    def decorator(func):
+        if not hasattr(self, '_listeners'):
+            self._listeners = {}
+        if hook not in self._listeners:
+            self._listeners[hook] = []
+        self._listeners[hook].append(func)
+        return func
+    return decorator",none,english,none,
+62b86729b4d922cb0e688c2f,"def base_config(user, etcd_host=""localhost"", etcd_port=2379):
+    """"""
+    यह फ़ंक्शन कुछ सरल पैरामीटरों के साथ एक कॉन्फ़िगरेशन बनाता है, जिनके लिए डिफ़ॉल्ट मान सेट किया जा सकता है।  
+
+    पैरामीटर (Args):
+    - user (str): स्थिर प्रमाणीकरण (static authentication) के लिए उपयोगकर्ता का नाम।  
+    - etcd_host (str): डेटाबेस के लिए होस्ट।  
+    - etcd_port (int): डेटाबेस के लिए पोर्ट। 
+
+    रिटर्न (Returns):
+    - dict: बनाया गया कॉन्फ़िगरेशन।  
+    """"""
+    config = {
+        ""user"": user,
+        ""etcd_host"": etcd_host,
+        ""etcd_port"": etcd_port
+    }
+    return config",none,english,none,
+62b8a4a4755ee91dce50a3d2,"def _fromutc(self, dt):
+    """"""
+    यह वह स्थिति है जब हमें *पक्का* पता होता है कि हमारे पास एक अस्पष्टता रहित (unambiguous) डेटटाइम ऑब्जेक्ट है। इस मौके का उपयोग करते हुए, हम यह निर्धारित करते हैं कि क्या यह डेटटाइम अस्पष्ट (ambiguous) है और ""फोल्ड"" स्थिति में है (उदाहरण के लिए, यदि यह अस्पष्ट डेटटाइम का पहला कालानुक्रमिक (chronological) उदाहरण है)।
+
+    पैरामीटर:
+    - `dt`:  
+      एक टाइमज़ोन-अवेयर :class:`datetime.datetime` ऑब्जेक्ट।
+    """"""
+    if dt.tzinfo is not self:
+        raise ValueError(""dt.tzinfo is not self"")
+    
+    # Convert to local time
+    local_dt = dt.astimezone(self)
+    
+    # Check if the local time is ambiguous
+    if self._is_ambiguous(local_dt):
+        # If it's ambiguous, return the first occurrence
+        return self._fold_first(local_dt)
+    else:
+        return local_dt
+
+def _is_ambiguous(self, dt):
+    """"""
+    Check if the given datetime is ambiguous in the current timezone.
+    
+    Parameters:
+    - `dt`: A timezone-aware datetime object.
+    
+    Returns:
+    - `bool`: True if the datetime is ambiguous, False otherwise.
+    """"""
+    # This is a placeholder implementation. The actual logic will depend on the timezone rules.
+    # For example, in a timezone that observes DST, a datetime might be ambiguous during the fall transition.
+    return False
+
+def _fold_first(self, dt):
+    """"""
+    Return the first occurrence of an ambiguous datetime.
+    
+    Parameters:
+    - `dt`: A timezone-aware datetime object that is ambiguous.
+    
+    Returns:
+    - `datetime`: The first occurrence of the ambiguous datetime.
+    """"""
+    # This is a placeholder implementation. The actual logic will depend on the timezone rules.
+    return dt",english,english,none,
+62b8982f755ee91dce50a241,"from dateutil.relativedelta import relativedelta
+
+def normalized(self):
+    """"""
+    यह फ़ंक्शन इस ऑब्जेक्ट का एक ऐसा संस्करण लौटाता है, जिसमें सभी सापेक्ष गुण (relative attributes) पूरी तरह से पूर्णांक मानों (integer values) में दर्शाए गए हों।
+
+    उदाहरण:
+
+    >>> relativedelta(days=1.5, hours=2).normalized()
+    relativedelta(days=+1, hours=+14)
+
+    :वापसी मान (Return):
+    यह एक `dateutil.relativedelta.relativedelta` क्लास का ऑब्जेक्ट लौटाता है।
+    """"""
+    # Convert all relative attributes to integer values
+    days = int(self.days)
+    hours = int(self.hours)
+    minutes = int(self.minutes)
+    seconds = int(self.seconds)
+    microseconds = int(self.microseconds)
+    
+    # Calculate the remaining hours, minutes, seconds, and microseconds
+    remaining_hours = int((self.days - days) * 24)
+    remaining_minutes = int((self.hours - hours) * 60)
+    remaining_seconds = int((self.minutes - minutes) * 60)
+    remaining_microseconds = int((self.seconds - seconds) * 1e6)
+    
+    # Add the remaining values to the respective attributes
+    hours += remaining_hours
+    minutes += remaining_minutes
+    seconds += remaining_seconds
+    microseconds += remaining_microseconds
+    
+    # Normalize the values
+    minutes += seconds // 60
+    seconds = seconds % 60
+    hours += minutes // 60
+    minutes = minutes % 60
+    days += hours // 24
+    hours = hours % 24
+    
+    # Return the normalized relativedelta object
+    return relativedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, microseconds=microseconds)",english,english,none,
+62b89640755ee91dce50a114,"def tzname_in_python2(namefunc):
+    """"""
+    Python 2 में यूनिकोड आउटपुट को बाइटस्ट्रिंग्स में बदलें।
+
+    tzname() API ने Python 3 में बदलाव किया। पहले यह बाइट्स लौटाता था, 
+    लेकिन इसे यूनिकोड स्ट्रिंग्स में बदल दिया गया।
+    """"""
+    def wrapper(*args, **kwargs):
+        result = namefunc(*args, **kwargs)
+        if isinstance(result, unicode):
+            return result.encode('utf-8')
+        return result
+    return wrapper",none,english,none,
+62b87d24d292efb640a55670,"def get_versions():
+    """"""
+    संस्करण जानकारी प्राप्त करें या यदि ऐसा करने में असमर्थ हैं तो डिफ़ॉल्ट मान लौटाएं।
+    """"""
+    try:
+        import pkg_resources
+        versions = {}
+        for package in ['numpy', 'pandas', 'scipy', 'matplotlib']:
+            try:
+                versions[package] = pkg_resources.get_distribution(package).version
+            except pkg_resources.DistributionNotFound:
+                versions[package] = 'Not Installed'
+        return versions
+    except ImportError:
+        return {
+            'numpy': '1.21.0',
+            'pandas': '1.3.0',
+            'scipy': '1.7.0',
+            'matplotlib': '3.4.0'
+        }",none,english,none,
+62b87d24d292efb640a5566f,"def render(pieces, style):
+    """"""
+    दिए गए संस्करण टुकड़ों को निर्दिष्ट शैली में प्रस्तुत करें।
+    
+    :param pieces: संस्करण टुकड़ों की सूची
+    :param style: प्रस्तुति शैली
+    :return: शैली के अनुसार प्रस्तुत संस्करण
+    """"""
+    if style == ""simple"":
+        return ""\n"".join(pieces)
+    elif style == ""detailed"":
+        return ""\n"".join([f""- {piece}"" for piece in pieces])
+    elif style == ""json"":
+        import json
+        return json.dumps(pieces, indent=4)
+    else:
+        raise ValueError(""असमर्थित शैली"")",none,english,hindi,
+62b87d24d292efb640a5566d,"def plus_or_dot(pieces):
+    """"""
+     यदि हमारे पास पहले से ""+"" है, तो ""."" लौटाएं, अन्यथा ""+"" लौटाएं।
+    """"""
+    if '+' in pieces:
+        return '.'
+    else:
+        return '+'",none,english,none,
+62b87d23d292efb640a5566b,"import subprocess
+
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):
+    """"""
+    दिए गए कमांड(s) को चलाएं।
+    """"""
+    command_list = commands if isinstance(commands, list) else [commands]
+    command_list.extend(args)
+    
+    stderr = subprocess.DEVNULL if hide_stderr else None
+    
+    if verbose:
+        print(f""Running command: {' '.join(command_list)}"")
+    
+    result = subprocess.run(
+        command_list,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        text=True
+    )
+    
+    if verbose:
+        print(f""Command output: {result.stdout}"")
+    
+    return result",none,english,none,
+62b87d23d292efb640a55668,"def get_config():
+    """"""
+    VersioneerConfig() ऑब्जेक्ट बनाएं, इसे डेटा से भरें और इसे लौटाएं।
+    """"""
+    class VersioneerConfig:
+        def __init__(self):
+            self.data = {}
+
+        def fill_data(self, key, value):
+            self.data[key] = value
+
+        def get_data(self):
+            return self.data
+
+    config = VersioneerConfig()
+    # यहां आप डेटा को भर सकते हैं, उदाहरण के लिए:
+    config.fill_data('version', '1.0.0')
+    config.fill_data('author', 'Your Name')
+    
+    return config",hindi,english,none,
+62b87d23d292efb640a55667,"def register_vcs_handler(vcs, method):  # डेकोरेटर
+    """"""
+    एक डेकोरेटर बनाएं जो किसी विधि को VCS के हैंडलर के रूप में चिह्नित करे।
+
+    def decorate(f):
+        यह आंतरिक फ़ंक्शन डेकोरेटर के रूप में कार्य करता है।    
+    """"""
+    def decorate(f):
+        if not hasattr(f, '_vcs_handlers'):
+            f._vcs_handlers = {}
+        f._vcs_handlers[vcs] = method
+        return f
+    return decorate",none,english,none,
+62b45e945108cfac7f210a4a,"def validate_hierarchy(self, validate_objects=True, check_digests=True, show_warnings=False):
+    """"""
+    स्टोरेज रूट हाइरार्की को मान्य करें।
+
+    रिटर्न करता है:
+        num_objects - जांचे गए ऑब्जेक्ट्स की संख्या
+        good_objects - जांचे गए ऑब्जेक्ट्स की संख्या जो मान्य पाए गए
+    """"""
+    num_objects = 0
+    good_objects = 0
+    
+    # Placeholder logic for validating the hierarchy
+    # This should be replaced with actual implementation
+    if validate_objects:
+        # Simulate checking objects
+        num_objects = 100  # Example: 100 objects checked
+        good_objects = 95  # Example: 95 objects are valid
+    
+    if check_digests:
+        # Simulate checking digests
+        pass  # Add actual digest checking logic here
+    
+    if show_warnings:
+        # Simulate showing warnings
+        pass  # Add actual warning logic here
+    
+    return num_objects, good_objects",english,english,none,
+62b45e515108cfac7f210a3c,"def initialize(self):
+    """"""
+    एक नया OCFL स्टोरेज रूट बनाएँ और प्रारंभ करें।
+    """"""
+    import os
+    import json
+
+    # OCFL storage root directory structure
+    ocfl_structure = {
+        ""0=ocfl_object_1.0"": """",
+        ""inventory.json"": """",
+        ""inventory.json.sha512"": """",
+        ""v1"": {
+            ""content"": """",
+            ""inventory.json"": """",
+            ""inventory.json.sha512"": """"
+        }
+    }
+
+    # Create the OCFL storage root directory
+    if not os.path.exists(""ocfl_root""):
+        os.makedirs(""ocfl_root"")
+
+    # Create the necessary files and directories
+    for path, content in ocfl_structure.items():
+        full_path = os.path.join(""ocfl_root"", path)
+        if isinstance(content, dict):
+            os.makedirs(full_path)
+        else:
+            with open(full_path, 'w') as f:
+                f.write(content)
+
+    # Create the inventory.json file with basic metadata
+    inventory = {
+        ""id"": ""urn:uuid:12345678-1234-5678-1234-567812345678"",
+        ""type"": ""Object"",
+        ""digestAlgorithm"": ""sha512"",
+        ""head"": ""v1"",
+        ""versions"": {
+            ""v1"": {
+                ""created"": ""2023-10-01T00:00:00Z"",
+                ""state"": {}
+            }
+        }
+    }
+
+    inventory_path = os.path.join(""ocfl_root"", ""v1"", ""inventory.json"")
+    with open(inventory_path, 'w') as f:
+        json.dump(inventory, f, indent=4)
+
+    # Create the inventory.json.sha512 file
+    import hashlib
+    with open(inventory_path, 'rb') as f:
+        sha512_hash = hashlib.sha512(f.read()).hexdigest()
+
+    sha512_path = os.path.join(""ocfl_root"", ""v1"", ""inventory.json.sha512"")
+    with open(sha512_path, 'w') as f:
+        f.write(sha512_hash)",english,english,none,
+62b45e2eb89c9fd354170232,"def next_version(version):
+    """"""
+    दिए गए संस्करण पैटर्न के अनुसार अगला संस्करण पहचानकर्ता प्राप्त करें।
+
+    यह फ़ंक्शन शून्य-प्रिफिक्स (zero-prefixed) और गैर-शून्य-प्रिफिक्स (non-zero prefixed) दोनों प्रकार के संस्करणों को संभालने में सक्षम होना चाहिए।
+    """"""
+    # Split the version string into parts
+    parts = version.split('.')
+    
+    # Convert each part to an integer
+    parts = [int(part) for part in parts]
+    
+    # Increment the last part
+    parts[-1] += 1
+    
+    # Handle carry-over for parts
+    for i in range(len(parts) - 1, 0, -1):
+        if parts[i] > 9:
+            parts[i] = 0
+            parts[i - 1] += 1
+    
+    # Convert back to string
+    next_version_str = '.'.join(map(str, parts))
+    
+    return next_version_str",english,english,none,
+62b45e23e0d4551b0392c90a,"def validate_version_inventories(self, version_dirs):
+    """"""
+    प्रत्येक संस्करण के पास उस बिंदु तक एक इन्वेंटरी होनी चाहिए।
+
+    साथ ही, किसी भी सामग्री डाइजेस्ट का रिकॉर्ड रखें जो रूट इन्वेंटरी में मौजूद डाइजेस्ट से अलग हो,
+    ताकि सामग्री को सत्यापित करते समय हम उन्हें भी जांच सकें।
+
+    version_dirs एक संस्करण डायरेक्टरी नामों की सूची है और इसे संस्करण अनुक्रम (1, 2, 3...) में माना जाता है।
+    """"""
+    for version_dir in version_dirs:
+        inventory_path = os.path.join(version_dir, ""inventory.json"")
+        if not os.path.exists(inventory_path):
+            raise FileNotFoundError(f""Inventory not found for version: {version_dir}"")
+        
+        with open(inventory_path, 'r') as f:
+            inventory = json.load(f)
+        
+        # Check for discrepancies in content digests
+        root_inventory_path = os.path.join(version_dirs[0], ""inventory.json"")
+        with open(root_inventory_path, 'r') as f:
+            root_inventory = json.load(f)
+        
+        for content_id, digest in inventory.items():
+            if content_id in root_inventory and root_inventory[content_id] != digest:
+                print(f""Content digest mismatch for {content_id} in version {version_dir}"")",english,english,none,
+62b45e21e0d4551b0392c8ed,"import os
+
+def find_path_type(path):
+    """"""
+    दिए गए पथ पर मौजूद वस्तु के प्रकार को इंगित करने वाला एक स्ट्रिंग लौटाता है।
+
+    लौटाए जाने वाले मान:
+        'root' - ऐसा लगता है कि यह OCFL स्टोरेज रूट है
+        'object' - ऐसा लगता है कि यह OCFL ऑब्जेक्ट है
+        'file' - यह एक फ़ाइल है, जो शायद एक इन्वेंटरी हो सकती है
+        अन्य स्ट्रिंग - त्रुटि विवरण को समझाती है
+
+    यह केवल ""0=*"" नमस्ते फ़ाइलों को देखकर निर्देशिका के प्रकार का निर्धारण करता है।
+    """"""
+    if not os.path.exists(path):
+        return ""त्रुटि: पथ मौजूद नहीं है""
+    
+    if os.path.isfile(path):
+        return ""file""
+    
+    if os.path.isdir(path):
+        # Check if it's an OCFL storage root
+        if os.path.exists(os.path.join(path, ""0=ocfl_1.0"")):
+            return ""root""
+        
+        # Check if it's an OCFL object
+        if os.path.exists(os.path.join(path, ""0=ocfl_object_1.0"")):
+            return ""object""
+        
+        # Check for any ""0=*"" file
+        for item in os.listdir(path):
+            if item.startswith(""0=""):
+                return ""object""
+        
+        return ""त्रुटि: पथ OCFL रूट या ऑब्जेक्ट नहीं है""
+    
+    return ""त्रुटि: अज्ञात पथ प्रकार""",english,english,hindi,
+62b45b396decaeff903e1001,"def amend_bzparams(self, params, bug_ids):
+    """"""
+    बगज़िला पैरामीटर्स को संशोधित करें
+    """"""
+    # Assuming params is a dictionary and bug_ids is a list of bug IDs
+    for bug_id in bug_ids:
+        # Modify the params for each bug_id
+        # Example: Adding a comment to each bug
+        params['comment'] = f""Updated parameters for bug {bug_id}""
+        # You can add more modifications here as needed
+        # Example: Updating the status of the bug
+        params['status'] = 'RESOLVED'
+        # Example: Setting the resolution
+        params['resolution'] = 'FIXED'
+        # You can also add more complex logic here
+        # For example, checking if the bug is already resolved
+        if params.get('status') == 'RESOLVED':
+            params['comment'] = f""Bug {bug_id} is already resolved.""
+        # You can also log the changes or perform other actions
+        print(f""Parameters amended for bug {bug_id}: {params}"")
+    return params",english,english,none,
+62b4567ed7d32e5b55cc83d9,"from ruamel.yaml.nodes import ScalarNode, MappingNode
+
+def deep_merge_nodes(nodes):
+    merged_nodes = {}
+    
+    for key_node, value_node in nodes:
+        key = key_node.value
+        
+        if key in merged_nodes:
+            existing_value_node = merged_nodes[key]
+            
+            if isinstance(existing_value_node, MappingNode) and isinstance(value_node, MappingNode):
+                # Merge the MappingNodes
+                existing_mapping = dict(existing_value_node.value)
+                new_mapping = dict(value_node.value)
+                
+                for new_key_node, new_value_node in new_mapping.items():
+                    existing_mapping[new_key_node] = new_value_node
+                
+                merged_nodes[key] = MappingNode(
+                    tag=existing_value_node.tag,
+                    value=list(existing_mapping.items()),
+                )
+            else:
+                # If not both MappingNodes, overwrite with the new value
+                merged_nodes[key] = value_node
+        else:
+            merged_nodes[key] = value_node
+    
+    return [(ScalarNode(tag='tag:yaml.org,2002:str', value=key), value_node) for key, value_node in merged_nodes.items()]",english,english,none,
+62b4567ad7d32e5b55cc83af,"import argparse
+
+def parse_arguments(*arguments):
+    """"""
+    इस फ़ंक्शन का उद्देश्य दिए गए कमांड-लाइन आर्ग्युमेंट्स को पार्स करना है और उन्हें एक 
+    ArgumentParser इंस्टेंस के रूप में लौटाना है।
+    """"""
+    parser = argparse.ArgumentParser(description=""Parse command-line arguments."")
+    
+    # Add arguments to the parser
+    for arg in arguments:
+        parser.add_argument(arg)
+    
+    # Parse the arguments
+    args = parser.parse_args()
+    
+    return args",english,english,none,
+62b45679d7d32e5b55cc83a9,"def parser_flags(parser):
+    """"""
+    दिए गए argparse.ArgumentParser इंस्टेंस के लिए, इसके आर्गुमेंट फ्लैग्स को एक स्पेस-सेपरेटेड 
+    स्ट्रिंग के रूप में रिटर्न करें।
+    """"""
+    flags = []
+    for action in parser._actions:
+        if action.option_strings:
+            flags.extend(action.option_strings)
+    return ' '.join(flags)",none,english,none,
+62b45665d7d32e5b55cc8365,"import argparse
+
+def parse_arguments(*unparsed_arguments):
+    """"""
+    इस स्क्रिप्ट को जिन कमांड-लाइन आर्ग्युमेंट्स के साथ चलाया गया है, उन आर्ग्युमेंट्स को पार्स करें और उन्हें एक डिक्ट (dict) के रूप में लौटाएं। यह डिक्ट सबपार्सर के नाम (या ""global"") को `argparse.Namespace` इंस्टेंस के साथ मैप करता है।
+    """"""
+    parser = argparse.ArgumentParser(description=""Parse command-line arguments."")
+    subparsers = parser.add_subparsers(dest=""subparser_name"", help=""Sub-command help"")
+
+    # Example subparser for 'command1'
+    parser_command1 = subparsers.add_parser('command1', help='Command1 help')
+    parser_command1.add_argument('--arg1', type=str, help='Argument 1 for command1')
+
+    # Example subparser for 'command2'
+    parser_command2 = subparsers.add_parser('command2', help='Command2 help')
+    parser_command2.add_argument('--arg2', type=int, help='Argument 2 for command2')
+
+    # Parse the arguments
+    args = parser.parse_args(unparsed_arguments)
+
+    # Create a dictionary to map subparser names to their respective Namespace objects
+    parsed_args = {}
+    if hasattr(args, 'subparser_name'):
+        parsed_args[args.subparser_name] = args
+    else:
+        parsed_args['global'] = args
+
+    return parsed_args",english,english,none,
+62b45665d7d32e5b55cc8364,"def parse_subparser_arguments(unparsed_arguments, subparsers):
+    """"""
+    दिए गए तर्कों (arguments) की एक श्रृंखला और एक डिक्शनरी जो सबपार्सर (subparser) के नाम को 
+    argparse.ArgumentParser इंस्टेंस से मैप करती है, के आधार पर, प्रत्येक अनुरोधित क्रिया के 
+    सबपार्सर को सभी तर्कों को पार्स (parse) करने का मौका दें। 
+
+    यह प्रक्रिया सामान्य तर्कों जैसे ""--repository"" को कई सबपार्सरों के बीच साझा करने की अनुमति देती है।
+
+    परिणाम को एक ट्यूपल (tuple) के रूप में लौटाएं, जिसमें शामिल हैं:
+    1. एक डिक्शनरी जो सबपार्सर के नाम को पार्स किए गए तर्कों के नेमस्पेस (namespace) से मैप करती है।
+    2. उन तर्कों की सूची जो किसी भी सबपार्सर द्वारा दावा नहीं किए गए हैं।
+    """"""
+    import argparse
+
+    # Initialize the main parser
+    main_parser = argparse.ArgumentParser()
+    subparsers_dict = {}
+
+    # Add subparsers to the main parser
+    for name, parser in subparsers.items():
+        subparser = main_parser.add_subparsers().add_parser(name)
+        subparsers_dict[name] = subparser
+
+    # Parse the arguments using the main parser
+    parsed_args, remaining_args = main_parser.parse_known_args(unparsed_arguments)
+
+    # Create a dictionary to store the parsed arguments for each subparser
+    parsed_subparser_args = {}
+
+    # Iterate through the subparsers and parse the arguments
+    for name, subparser in subparsers_dict.items():
+        subparser_args, remaining_args = subparser.parse_known_args(remaining_args)
+        parsed_subparser_args[name] = subparser_args
+
+    return parsed_subparser_args, remaining_args",english,english,english,
+62b45665d7d32e5b55cc8363,"import argparse
+
+def make_parsers():
+    """"""
+    एक शीर्ष-स्तरीय (top-level) पार्सर और उसके सबपार्सर बनाएं और उन्हें एक ट्यूपल के रूप में लौटाएं।
+    """"""
+    # शीर्ष-स्तरीय पार्सर बनाएं
+    top_parser = argparse.ArgumentParser(description=""शीर्ष-स्तरीय पार्सर"")
+    
+    # सबपार्सर बनाएं
+    subparsers = top_parser.add_subparsers(title=""सबपार्सर"", dest=""subcommand"")
+    
+    # पहला सबपार्सर
+    parser_a = subparsers.add_parser('command_a', help='कमांड ए के लिए सहायता')
+    parser_a.add_argument('--option_a', type=str, help='कमांड ए के लिए विकल्प')
+    
+    # दूसरा सबपार्सर
+    parser_b = subparsers.add_parser('command_b', help='कमांड बी के लिए सहायता')
+    parser_b.add_argument('--option_b', type=int, help='कमांड बी के लिए विकल्प')
+    
+    return top_parser, subparsers",hindi,english,"english, hindi",
+62b438ba66fea644fe22cca2,"def deep_merge_nodes(nodes):
+    merged = {}
+    
+    for key_node, value_node in nodes:
+        key = key_node.value
+        
+        if key in merged:
+            existing_value_node = merged[key]
+            
+            if isinstance(existing_value_node, ruamel.yaml.nodes.MappingNode) and isinstance(value_node, ruamel.yaml.nodes.MappingNode):
+                # Deep merge the MappingNodes
+                existing_value = existing_value_node.value
+                new_value = value_node.value
+                
+                # Convert the list of tuples to a dictionary for easier merging
+                existing_dict = {k.value: v for k, v in existing_value}
+                new_dict = {k.value: v for k, v in new_value}
+                
+                # Merge the dictionaries, with new values overwriting existing ones
+                merged_dict = {**existing_dict, **new_dict}
+                
+                # Convert the merged dictionary back to a list of tuples
+                merged_value = [(ruamel.yaml.nodes.ScalarNode(tag='tag:yaml.org,2002:str', value=k), v) for k, v in merged_dict.items()]
+                
+                # Create a new MappingNode with the merged value
+                merged[key] = ruamel.yaml.nodes.MappingNode(tag='tag:yaml.org,2002:map', value=merged_value)
+            else:
+                # If either value is not a MappingNode, the new value overwrites the existing one
+                merged[key] = value_node
+        else:
+            # If the key is not in the merged dictionary, just add it
+            merged[key] = value_node
+    
+    # Convert the merged dictionary back to a list of tuples
+    result = [(ruamel.yaml.nodes.ScalarNode(tag='tag:yaml.org,2002:str', value=k), v) for k, v in merged.items()]
+    
+    return result",english,english,none,
+62b438b666fea644fe22cc78,"import argparse
+
+def parse_arguments(*arguments):
+    """"""
+    इस फ़ंक्शन का उद्देश्य दिए गए कमांड-लाइन आर्ग्युमेंट्स को पार्स करना है और उन्हें एक 
+    ArgumentParser इंस्टेंस के रूप में लौटाना है।
+    """"""
+    parser = argparse.ArgumentParser(description=""कमांड-लाइन आर्ग्युमेंट्स को पार्स करें।"")
+    
+    # यहां आप अपने आर्ग्युमेंट्स को जोड़ सकते हैं
+    # उदाहरण के लिए:
+    # parser.add_argument('--example', type=str, help='एक उदाहरण आर्ग्युमेंट')
+    
+    # आर्ग्युमेंट्स को पार्स करें
+    args = parser.parse_args(arguments)
+    
+    return args",hindi,english,hindi,
+62b438b666fea644fe22cc72,"def parser_flags(parser):
+    """"""
+    दिए गए argparse.ArgumentParser इंस्टेंस के लिए, इसके आर्गुमेंट फ्लैग्स को एक स्पेस-सेपरेटेड 
+    स्ट्रिंग के रूप में रिटर्न करें।
+
+    return "" "".join([action.option_strings[0] for action in parser._actions if action.option_strings])
+    """"""
+    return "" "".join([action.option_strings[0] for action in parser._actions if action.option_strings])",none,english,none,
+62b438b566fea644fe22cc70,"def bash_completion():
+    """"""
+    बॉर्गमैटिक कमांड के लिए बाश कम्प्लीशन स्क्रिप्ट लौटाएं।  
+    यह स्क्रिप्ट बॉर्गमैटिक के कमांड-लाइन आर्ग्युमेंट पार्सर्स का निरीक्षण करके उत्पन्न की जाती है।
+    """"""
+    completion_script = """"""
+_borgmatic_completion() {
+    local cur prev words cword
+    _init_completion || return
+
+    if [[ ${cur} == -* ]]; then
+        COMPREPLY=($(compgen -W '--help --version --verbosity --config --list --create --prune --check --extract --info --init --stats --umask --lock-wait --override --json --dry-run --progress --remote-path --remote-ratelimit --remote-buffer --remote-ssh' -- ${cur}))
+    else
+        COMPREPLY=($(compgen -f -- ${cur}))
+    fi
+}
+
+complete -F _borgmatic_completion borgmatic
+""""""
+    return completion_script",none,english,none,
+62b438a266fea644fe22cc2e,"import argparse
+
+def parse_arguments(*unparsed_arguments):
+    """"""
+    इस स्क्रिप्ट को जिन कमांड-लाइन आर्ग्युमेंट्स के साथ चलाया गया है, उन आर्ग्युमेंट्स को पार्स (parse) करें और उन्हें एक डिक्शनरी (dict) के रूप में लौटाएं। यह डिक्शनरी सबपार्सर (subparser) के नाम (या ""global"") को `argparse.Namespace` इंस्टेंस से मैप करती है।
+    """"""
+    parser = argparse.ArgumentParser(description=""Parse command-line arguments."")
+    subparsers = parser.add_subparsers(dest=""command"", help=""Sub-command help"")
+
+    # Add subparsers here as needed
+    # Example:
+    # subparser_example = subparsers.add_parser('example', help='Example subparser')
+    # subparser_example.add_argument('--example_arg', type=str, help='Example argument')
+
+    # Parse the arguments
+    args = parser.parse_args(unparsed_arguments)
+
+    # Create a dictionary to map subparser names to their respective Namespace objects
+    parsed_arguments = {}
+    if hasattr(args, 'command'):
+        parsed_arguments[args.command] = args
+    else:
+        parsed_arguments['global'] = args
+
+    return parsed_arguments",english,english,none,
+62b438a266fea644fe22cc2d,"import argparse
+
+def parse_subparser_arguments(unparsed_arguments, subparsers):
+    """"""
+    दिए गए तर्कों (arguments) की एक श्रृंखला और एक डिक्शनरी जो सबपार्सर (subparser) के नाम को 
+    argparse.ArgumentParser इंस्टेंस से मैप करती है, के आधार पर, प्रत्येक अनुरोधित क्रिया के 
+    सबपार्सर को सभी तर्कों को पार्स (parse) करने का मौका दें। 
+
+    यह प्रक्रिया सामान्य तर्कों जैसे ""--repository"" को कई सबपार्सरों के बीच साझा करने की अनुमति देती है।
+
+    परिणाम को एक ट्यूपल (tuple) के रूप में लौटाएं, जिसमें शामिल हैं:
+    1. एक डिक्शनरी जो सबपार्सर के नाम को पार्स किए गए तर्कों के नेमस्पेस (namespace) से मैप करती है।
+    2. उन तर्कों की एक सूची जो किसी भी सबपार्सर द्वारा दावा नहीं किए गए हैं।
+    """"""
+    parsed_args = {}
+    remaining_args = list(unparsed_arguments)
+    
+    for subparser_name, parser in subparsers.items():
+        try:
+            args, remaining = parser.parse_known_args(remaining_args)
+            parsed_args[subparser_name] = args
+            remaining_args = remaining
+        except argparse.ArgumentError:
+            continue
+    
+    return parsed_args, remaining_args",none,english,none,
+62b438a266fea644fe22cc2c,"import argparse
+
+def make_parsers():
+    """"""
+    शीर्ष-स्तरीय पार्सर और इसके उप-पार्सर बनाएं और उन्हें एक ट्यूपल के रूप में लौटाएं।
+    """"""
+    # शीर्ष-स्तरीय पार्सर बनाएं
+    parser = argparse.ArgumentParser(description=""शीर्षक स्तर का पार्सर"")
+    
+    # उप-पार्सर बनाएं
+    subparsers = parser.add_subparsers(dest=""command"", help=""उप-कमांड"")
+    
+    # उप-पार्सर 1
+    parser_a = subparsers.add_parser('command_a', help='कमांड ए के लिए मदद')
+    parser_a.add_argument('--option_a', type=str, help='कमांड ए के लिए विकल्प')
+    
+    # उप-पार्सर 2
+    parser_b = subparsers.add_parser('command_b', help='कमांड बी के लिए मदद')
+    parser_b.add_argument('--option_b', type=int, help='कमांड बी के लिए विकल्प')
+    
+    return parser, subparsers",hindi,english,hindi,
+62ece4982e6aefcf4aabbd5f,"def paging(response, max_results):
+    """"""
+    WAPI प्रतिक्रिया को पेज दर पेज लौटाता है।
+
+    आर्ग्युमेंट्स:
+        response (list): WAPI प्रतिक्रिया।
+        max_results (int): एक पेज में लौटाए जाने वाले ऑब्जेक्ट्स की अधिकतम संख्या।
+    
+    रिटर्न्स:
+        Generator object: WAPI प्रतिक्रिया को पेज दर पेज विभाजित करके लौटाता है।
+    """"""
+    for i in range(0, len(response), max_results):
+        yield response[i:i + max_results]",none,english,none,
+62ece4982e6aefcf4aabbd60,"def size_to_bytes(size: str) -> int:
+    """"""
+    मानव-पठनीय फ़ाइल आकार को बाइट्स में परिवर्तित करें।
+
+    परिणामी मान एक अनुमान है क्योंकि इनपुट मान अधिकांश मामलों में राउंड किया गया होता है।
+
+    तर्क (Args):
+        आकार (size): एक स्ट्रिंग जो मानव-पठनीय फ़ाइल आकार का प्रतिनिधित्व करती है (उदा: '500K')
+
+    रिटर्न (Returns):
+        फ़ाइल आकार का दशमलव (decimal) प्रतिनिधित्व
+
+    उदाहरण (Examples)::
+
+        >>> size_to_bytes(""500"")
+        500
+        >>> size_to_bytes(""1K"")
+        1000
+    """"""
+    size = size.strip().upper()
+    if size[-1] == 'K':
+        return int(size[:-1]) * 1000
+    elif size[-1] == 'M':
+        return int(size[:-1]) * 1000 * 1000
+    elif size[-1] == 'G':
+        return int(size[:-1]) * 1000 * 1000 * 1000
+    elif size[-1] == 'T':
+        return int(size[:-1]) * 1000 * 1000 * 1000 * 1000
+    else:
+        return int(size)",none,english,none,
+62ece4982e6aefcf4aabbd61,"def _dictsum(dicts):
+    """"""
+    पुनरावृत्तीय dicts द्वारा प्रदान किए गए शब्दकोशों के मानों को संयोजित करें।
+
+    >>> _dictsum([{'a': 1, 'b': 2}, {'a': 5, 'b': 0}])
+    {'a': 6, 'b': 2}
+    """"""
+    result = {}
+    for d in dicts:
+        for key, value in d.items():
+            if key in result:
+                result[key] += value
+            else:
+                result[key] = value
+    return result",none,english,none,
+62ece4982e6aefcf4aabbd62,"def _replace_url_args(url, url_args):
+    """"""
+    किसी भी कस्टम स्ट्रिंग URL आइटम को `args` में दिए गए मानों से बदलें।
+    """"""
+    for key, value in url_args.items():
+        url = url.replace(f'{{{key}}}', str(value))
+    return url",none,english,none,
+62ece4982e6aefcf4aabbd63,"def is_none_string(val: any) -> bool:
+    """"""
+    यह फ़ंक्शन जांचता है कि दी गई स्ट्रिंग None मान का प्रतिनिधित्व करती है या नहीं।
+    """"""
+    if isinstance(val, str):
+        return val.lower() in ['none', 'null', 'nil', 'nan']
+    return False",none,english,none,
+62ece4982e6aefcf4aabbd65,"def parser_flags(parser):
+    """"""
+    एक argparse.ArgumentParser उदाहरण के लिए, इसके आर्गुमेंट फ्लैग्स को एक स्पेस से अलग किए गए स्ट्रिंग के रूप में लौटाएं।
+    """"""
+    flags = []
+    for action in parser._actions:
+        if action.option_strings:
+            flags.extend(action.option_strings)
+    return ' '.join(flags)",none,english,none,
+62ece4982e6aefcf4aabbd66,"def was_processed(processed, path_name, verbose):
+    """"""
+    यहाँ फ़ंक्शन का कार्यान्वयन होगा
+    """"""
+    if path_name in processed:
+        if verbose:
+            print(f""'{path_name}' has already been processed."")
+        return True
+    else:
+        processed.add(path_name)
+        if verbose:
+            print(f""'{path_name}' is being processed for the first time."")
+        return False",none,english,english,
+62ece4982e6aefcf4aabbd67,"def vertex3tuple(vertices):
+    """"""
+    प्रत्येक वर्टेक्स के लिए 3 पॉइंट्स लौटाएगा।  
+    यह वर्टेक्स और उसके दोनों ओर के 2 पॉइंट्स को शामिल करेगा।  
+
+    उदाहरण के लिए:  
+    यदि पॉलीगॉन के वर्टेक्स ABCD हैं, तो यह निम्नलिखित 3-ट्यूपल्स लौटाएगा:  
+    `DAB, ABC, BCD, CDA`  
+    वर्टेक्स का क्रम:
+
+    # A    B    C    D  -> वर्टेक्स का क्रम
+    """"""
+    n = len(vertices)
+    result = []
+    for i in range(n):
+        # Get the current vertex and its two neighbors
+        current = vertices[i]
+        prev = vertices[(i - 1) % n]
+        next_ = vertices[(i + 1) % n]
+        # Create the 3-tuple and add it to the result
+        result.append((prev, current, next_))
+    return result",english,english,none,
+62ece4982e6aefcf4aabbd68,"from typing import List, Optional
+
+def int_to_string(number: int, alphabet: List[str], padding: Optional[int] = None) -> str:
+    """"""
+    Convert a number to a string using the given alphabet.
+    The most significant digit will be first in the output.
+    """"""
+    if number < 0:
+        raise ValueError(""Number must be non-negative."")
+    
+    base = len(alphabet)
+    if base == 0:
+        raise ValueError(""Alphabet must not be empty."")
+    
+    result = []
+    while number > 0:
+        remainder = number % base
+        result.append(alphabet[remainder])
+        number = number // base
+    
+    if not result:
+        result.append(alphabet[0])
+    
+    result.reverse()
+    
+    if padding is not None:
+        while len(result) < padding:
+            result.insert(0, alphabet[0])
+    
+    return ''.join(result)",none,english,english,
+62ece4982e6aefcf4aabbd69,"def _replace_register(flow_params, register_number, register_value):
+    """"""
+    दिए गए रजिस्टर नंबर में फ्लो से मान को बदलें  
+
+    डिक्शनरी में 'register_value' कुंजी को 'register_number' द्वारा दिए गए रजिस्टर नंबर से बदल दिया जाएगा  
+
+    पैरामीटर विवरण:
+    - flow_params: एक डिक्शनरी जिसमें परिभाषित फ्लो शामिल हैं  
+    - register_number: वह रजिस्टर नंबर जिसमें मान संग्रहीत किया जाएगा  
+    - register_value: वह कुंजी जिसे रजिस्टर नंबर द्वारा बदल दिया जाएगा  
+    """"""
+    flow_params[register_number] = register_value
+    return flow_params",none,english,none,
+62ece4982e6aefcf4aabbd6a,"def replace_dots(value, arg):
+    """"""
+    दिए गए स्ट्रिंग में सभी '.' को `arg` से बदलता है।  
+    आर्ग्युमेंट्स (Args):  
+    - `value`: पुराना स्ट्रिंग  
+    - `arg`: नया स्ट्रिंग, जो '.' को बदलने के लिए उपयोग किया जाएगा  
+
+    रिटर्न्स (Returns):  
+    - `str`: बदला हुआ स्ट्रिंग
+    """"""
+    return value.replace('.', arg)",none,english,none,
+62ece4982e6aefcf4aabbd6b,"def subclasses(cls):
+    """"""
+    किसी क्लास के सभी सबक्लासेस को पुनरावृत्त रूप से (recursively) प्राप्त करें।
+    """"""
+    for subclass in cls.__subclasses__():
+        yield subclass
+        yield from subclasses(subclass)",none,english,none,
+62ece4982e6aefcf4aabbd6d,"from typing import List
+
+def string_to_int(string: str, alphabet: List[str]) -> int:
+    """"""
+    एक स्ट्रिंग को एक संख्या में बदलने का कार्य करता है, दिए गए वर्णमाला का उपयोग करके।
+
+    इनपुट यह मानता है कि सबसे महत्वपूर्ण अंक (most significant digit) पहले है।
+    """"""
+    base = len(alphabet)
+    num = 0
+    for char in string:
+        num = num * base + alphabet.index(char)
+    return num",none,english,none,
+62ece4982e6aefcf4aabbd6f,"import requests
+import tarfile
+from pathlib import Path
+import os
+
+def get_repo_archive(url: str, destination_path: Path) -> Path:
+    """"""
+    दिए गए URL और गंतव्य पथ के आधार पर, `.tar.gz` संग्रह को प्राप्त करें और निकालें,
+    जिसमें प्रत्येक पैकेज के लिए 'desc' फ़ाइल होती है।
+    प्रत्येक `.tar.gz` संग्रह एक Arch Linux रिपॉजिटरी ('core', 'extra', 'community') से संबंधित होता है।
+
+    तर्क (Args):
+        url: `.tar.gz` संग्रह को डाउनलोड करने का URL।
+        destination_path: वह पथ (डिस्क पर) जहाँ संग्रह को निकाला जाएगा।
+
+    वापसी मान (Returns):
+        वह डायरेक्टरी पथ (Path) जहाँ संग्रह को निकाला गया है।
+    """"""
+    # Ensure the destination directory exists
+    destination_path.mkdir(parents=True, exist_ok=True)
+
+    # Download the .tar.gz file
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+
+    # Save the downloaded file temporarily
+    temp_file = destination_path / ""temp_archive.tar.gz""
+    with open(temp_file, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+
+    # Extract the .tar.gz file
+    with tarfile.open(temp_file, 'r:gz') as tar:
+        tar.extractall(path=destination_path)
+
+    # Remove the temporary .tar.gz file
+    os.remove(temp_file)
+
+    # Return the directory where the archive was extracted
+    return destination_path",english,english,none,
+62ece4982e6aefcf4aabbd70,"import platform
+
+def os_is_mac():
+    """"""
+    जाँच करता है कि ऑपरेटिंग सिस्टम macOS है या नहीं।
+
+    :return: यदि macOS है तो True
+    :rtype: bool
+    """"""
+    return platform.system() == 'Darwin'",none,english,none,
+62ece4982e6aefcf4aabbd71,"import re
+
+def regex_dict(item):
+    """"""
+    *.cpp कुंजियों को regex कुंजियों में बदलें
+
+    एक dict दिया गया है जिसमें सभी कुंजियाँ वाइल्डकार्ड के साथ फ़ाइल नाम हैं,
+    केवल कुंजियों को उनके समकक्ष regex में बदलें और मानों को वैसा ही छोड़ दें।
+
+    उदाहरण:
+
+    नियम (rules) = {
+        '*.cpp':
+            {'a': 'arf', 'b': 'bark', 'c': 'coo'},
+        '*.h':
+           {'h': 'help'}
+    }
+    regex_keys = regex_dict(rules)
+
+    आर्ग्युमेंट्स:
+        item: वह dict जिसे बदलना है
+    रिटर्न करता है:
+        एक dict जिसमें कुंजियाँ regex में परिवर्तित होती हैं
+    """"""
+    regex_item = {}
+    for key, value in item.items():
+        # Replace '*' with '.*' to match any sequence of characters
+        regex_key = re.escape(key).replace('\\*', '.*')
+        regex_item[regex_key] = value
+    return regex_item",english,english,none,
+62ece4982e6aefcf4aabbd72,"def unquote(name):
+    """"""
+    दिए गए नाम से उद्धरण (quotes) को हटाने के लिए फ़ंक्शन।
+    """"""
+    if name.startswith('""') and name.endswith('""'):
+        return name[1:-1]
+    elif name.startswith(""'"") and name.endswith(""'""):
+        return name[1:-1]
+    return name",none,english,none,
+62ece4982e6aefcf4aabbd73,"import re
+import shlex
+import sys
+
+def split(s, platform='this'):
+    """"""
+    यह `shlex.split()` का मल्टी-प्लेटफ़ॉर्म संस्करण है, जिसका उपयोग कमांड-लाइन विभाजन के लिए किया जाता है।  
+    इसे `subprocess` के साथ उपयोग किया जा सकता है, जैसे `argv` इंजेक्शन आदि के लिए।  
+    यह तेज़ REGEX का उपयोग करता है।  
+
+    प्लेटफ़ॉर्म विकल्प:
+    - `'this'`: वर्तमान प्लेटफ़ॉर्म से स्वतः-पहचान  
+    - `1`: POSIX शैली  
+    - `0`: Windows/CMD शैली  
+    - (अन्य मान भविष्य के लिए आरक्षित हैं)
+    """"""
+    if platform == 'this':
+        platform = 1 if sys.platform != 'win32' else 0
+    
+    if platform == 1:
+        return shlex.split(s, posix=True)
+    elif platform == 0:
+        return shlex.split(s, posix=False)
+    else:
+        raise ValueError(""Invalid platform option. Use 'this', 1 (POSIX), or 0 (Windows)."")",none,english,none,
+62ece4982e6aefcf4aabbd74,"import os
+import shutil
+import tempfile
+from pathlib import Path
+from typing import Optional, Union
+from zipfile import ZipFile
+from tarfile import TarFile
+
+def prepare_repository_from_archive(
+    archive_path: str,
+    filename: Optional[str] = None,
+    tmp_path: Union[PosixPath, str] = ""/tmp"",
+) -> str:
+    # Convert tmp_path to Path object if it's a string
+    tmp_path = Path(tmp_path) if isinstance(tmp_path, str) else tmp_path
+    
+    # Ensure the temporary directory exists
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    
+    # Create a temporary directory to extract the archive
+    extract_dir = tempfile.mkdtemp(dir=tmp_path)
+    
+    # Determine the archive type based on the file extension
+    if archive_path.endswith('.zip'):
+        with ZipFile(archive_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+    elif archive_path.endswith('.tar.gz') or archive_path.endswith('.tgz'):
+        with TarFile.open(archive_path, 'r:gz') as tar_ref:
+            tar_ref.extractall(extract_dir)
+    elif archive_path.endswith('.tar.bz2') or archive_path.endswith('.tbz'):
+        with TarFile.open(archive_path, 'r:bz2') as tar_ref:
+            tar_ref.extractall(extract_dir)
+    elif archive_path.endswith('.tar'):
+        with TarFile.open(archive_path, 'r:') as tar_ref:
+            tar_ref.extractall(extract_dir)
+    else:
+        raise ValueError(""Unsupported archive format"")
+    
+    # If a specific filename is provided, return the path to that file
+    if filename:
+        return str(Path(extract_dir) / filename)
+    
+    # Otherwise, return the path to the extracted directory
+    return extract_dir",english,english,none,
+62ece4982e6aefcf4aabbd75,"import subprocess
+
+def addignored(ignored):
+    # Step 1: Get all file names using git command
+    result = subprocess.run(['git', 'ls-files'], stdout=subprocess.PIPE)
+    all_files = result.stdout.decode('utf-8').splitlines()
+    
+    # Step 2: Convert the file names into a list
+    file_list = list(all_files)
+    
+    # Step 3: Filter the list to only include files that are ignored in .gitignore
+    ignored_files = [file for file in file_list if file in ignored]
+    
+    # Step 4: Convert the file names into a string separated by commas
+    ignored_files_str = ','.join(ignored_files)
+    
+    # Step 5: Return the final result
+    return ignored_files_str",english,english,none,
+62ece4982e6aefcf4aabbd76,"def match(filename):
+    """"""
+    तर्क (Args):
+    - `filename`: वह फ़ाइल नाम जिसे मिलाना है।
+
+    रिटर्न (Returns):
+    - यदि फ़ाइल प्रकार समर्थित नहीं है, तो `False` लौटाएगा। यदि समर्थित है, तो `True` लौटाएगा।
+    """"""
+    supported_extensions = ['.txt', '.csv', '.json', '.xml']
+    return any(filename.endswith(ext) for ext in supported_extensions)",none,english,none,
+62ece4982e6aefcf4aabbd77,"import re
+from datetime import timedelta
+
+def parse_frequency(frequency):
+    if frequency is None or frequency.lower() == ""हमेशा"":
+        return None
+    
+    pattern = re.compile(r'(\d+)\s*(सप्ताह|दिन|घंटे|मिनट|सेकंड)')
+    match = pattern.match(frequency)
+    
+    if not match:
+        raise ValueError(""Invalid frequency format"")
+    
+    value = int(match.group(1))
+    unit = match.group(2)
+    
+    if unit == ""सप्ताह"":
+        return timedelta(weeks=value)
+    elif unit == ""दिन"":
+        return timedelta(days=value)
+    elif unit == ""घंटे"":
+        return timedelta(hours=value)
+    elif unit == ""मिनट"":
+        return timedelta(minutes=value)
+    elif unit == ""सेकंड"":
+        return timedelta(seconds=value)
+    else:
+        raise ValueError(""Unsupported time unit"")",none,english,english,
+62ece4992e6aefcf4aabbd78,"def is_local(host):
+    """"""
+    होस्ट की जाँच करता है कि क्या यह लोकलहोस्ट है।
+
+    :param host: होस्टनाम या IP एड्रेस।
+    :return: True यदि होस्ट लोकलहोस्ट है, अन्यथा False।
+    """"""
+    local_hosts = {'localhost', '127.0.0.1', '::1'}
+    return host in local_hosts",none,english,none,
+62ece4992e6aefcf4aabbd79,"def make_find_paths(find_paths):
+    """"""
+    `--find` के लिए पास किए गए पथ खंडों (path fragments) या पैटर्न के अनुक्रम को लें और सभी पथ खंडों को ग्लोब पैटर्न में बदलें। मौजूदा पैटर्न को बिना बदले पास करें।
+
+    उदाहरण के लिए, यदि `find_paths` है:
+
+    ['foo.txt', 'pp:root/somedir']
+
+    ... तो इसे इस प्रकार बदलें:
+
+    ['sh:**/*foo.txt*/**', 'pp:root/somedir']
+    """"""
+    result = []
+    for path in find_paths:
+        if path.startswith('pp:'):
+            result.append(path)
+        else:
+            result.append(f'sh:**/*{path}*/**')
+    return result",none,english,none,
+62ece4992e6aefcf4aabbd7a,"import os
+
+def is_gitbash():
+    """"""
+    यदि आप Windows के Gitbash में प्रोग्राम चला रहे हैं तो True रिटर्न करता है।
+
+    :return: यदि Gitbash है तो True
+    """"""
+    return 'GITBASH' in os.environ.get('TERM_PROGRAM', '').upper()",none,english,none,
+62ece4992e6aefcf4aabbd7b,"import os
+import yaml
+
+def write_configuration(config_filename, rendered_config, mode=0o600, overwrite=False):
+    """"""
+    एक लक्षित कॉन्फ़िग फ़ाइल नाम और रेंडर किया गया YAML कॉन्फ़िग दिए जाने पर, इसे फ़ाइल में लिखें। 
+    आवश्यकतानुसार किसी भी समाहित डायरेक्टरी को बनाएं। 
+    लेकिन यदि फ़ाइल पहले से मौजूद है और `overwrite` False है, तो कुछ भी लिखने से पहले प्रक्रिया को रोक दें।
+    """"""
+    if os.path.exists(config_filename) and not overwrite:
+        raise FileExistsError(f""File {config_filename} already exists and overwrite is set to False."")
+    
+    # Create the directory if it doesn't exist
+    os.makedirs(os.path.dirname(config_filename), exist_ok=True)
+    
+    # Write the rendered config to the file
+    with open(config_filename, 'w') as f:
+        yaml.dump(rendered_config, f)
+    
+    # Set the file permissions
+    os.chmod(config_filename, mode)",english,english,none,
+62ece4992e6aefcf4aabbd7c,"def oneline(script, separator="" && ""):
+    """"""
+    एक स्क्रिप्ट को एक लाइन कमांड में बदलता है।
+    यह एकल SSH कमांड चलाने और एक लाइन स्क्रिप्ट पास करने के लिए उपयोगी है।
+
+    :param script: str, स्क्रिप्ट जिसे एक लाइन में बदलना है।
+    :param separator: str, विभाजक जो कमांड्स के बीच उपयोग किया जाएगा। डिफ़ॉल्ट रूप से "" && ""।
+    :return: str, एक लाइन में परिवर्तित स्क्रिप्ट।
+    """"""
+    lines = script.strip().splitlines()
+    return separator.join(line.strip() for line in lines if line.strip())",none,english,none,
+62ece4992e6aefcf4aabbd7d,"import subprocess
+import sys
+import os
+
+def subprocess_run_helper(func, *args, timeout, extra_env=None):
+    """"""
+    एक सब-प्रोसेस में एक फ़ंक्शन चलाएँ।
+
+    पैरामीटर (Parameters)
+    ---------------------
+    func : function
+        वह फ़ंक्शन जिसे चलाना है। यह किसी ऐसे मॉड्यूल में होना चाहिए जिसे आयात (import) किया जा सके।
+    *args : str
+        कोई भी अतिरिक्त कमांड लाइन तर्क जो ``subprocess.run`` के पहले तर्क में पास किए जाने हैं।
+    extra_env : dict[str, str]
+        सब-प्रोसेस के लिए सेट किए जाने वाले कोई भी अतिरिक्त पर्यावरण वेरिएबल।
+    """"""
+    # Get the module name and function name
+    module_name = func.__module__
+    func_name = func.__name__
+
+    # Prepare the command to run the function in a subprocess
+    command = [sys.executable, '-c', f'from {module_name} import {func_name}; {func_name}(*{args})']
+
+    # Prepare the environment
+    env = os.environ.copy()
+    if extra_env:
+        env.update(extra_env)
+
+    # Run the subprocess
+    result = subprocess.run(command, env=env, timeout=timeout, capture_output=True, text=True)
+
+    # Return the result
+    return result",english,english,none,
+62ece4992e6aefcf4aabbd7e,"import os
+
+def _resolve_string(matcher):
+    """"""
+    पर्यावरण से मान प्राप्त करें, जिसमें एक मैचर होता है जो एक नाम और वैकल्पिक डिफ़ॉल्ट मान को शामिल करता है।  
+    यदि पर्यावरण में चर परिभाषित नहीं है और कोई डिफ़ॉल्ट मान प्रदान नहीं किया गया है, तो एक त्रुटि उत्पन्न की जाती है।
+    """"""
+    name, *default = matcher.groups()
+    value = os.getenv(name)
+    
+    if value is not None:
+        return value
+    elif default:
+        return default[0]
+    else:
+        raise ValueError(f""Environment variable '{name}' is not defined and no default value is provided."")",none,english,english,
+62ece4992e6aefcf4aabbd7f,"from urllib.parse import urlparse
+from typing import Tuple
+
+def _parse_image_ref(image_href: str) -> Tuple[str, str, bool]:
+    """"""
+    छवि के हाइपरलिंक (href) को उसके घटक भागों में विभाजित करें।
+
+    :param image_href: छवि का हाइपरलिंक (href)
+    :returns: एक ट्यूपल (tuple) के रूप में परिणाम, जिसमें (image_id, netloc, use_ssl) शामिल हैं
+    :raises ValueError: यदि हाइपरलिंक अमान्य है
+    """"""
+    parsed_url = urlparse(image_href)
+    if not parsed_url.netloc or not parsed_url.path:
+        raise ValueError(""Invalid image href"")
+
+    image_id = parsed_url.path.strip('/')
+    netloc = parsed_url.netloc
+    use_ssl = parsed_url.scheme == 'https'
+
+    return image_id, netloc, use_ssl",none,english,none,
+62ece4992e6aefcf4aabbd80,"import os
+
+def remove_ending_os_sep(input_list):
+    if not isinstance(input_list, list):
+        raise TypeError(""Input must be a list of strings."")
+    
+    processed_list = []
+    for item in input_list:
+        if not isinstance(item, str):
+            raise TypeError(""All elements in the list must be strings."")
+        
+        if len(item) > 1 and item[-1] == os.sep:
+            processed_list.append(item[:-1])
+        else:
+            processed_list.append(item)
+    
+    return processed_list",none,english,english,
+62ece4992e6aefcf4aabbd82,"import re
+
+def get_pattern(pattern, strip=True):
+    """"""
+    यह मेथड दी गई स्ट्रिंग को रेगुलर एक्सप्रेशन (Regex) पैटर्न में बदलता है।
+    
+    :param pattern: स्ट्रिंग जिसे रेगुलर एक्सप्रेशन पैटर्न में बदलना है।
+    :param strip: यदि True है, तो स्ट्रिंग के शुरुआत और अंत के सफेद स्थान हटा दिए जाएंगे।
+    :return: रेगुलर एक्सप्रेशन पैटर्न।
+    """"""
+    if strip:
+        pattern = pattern.strip()
+    return re.compile(pattern)",none,english,none,
+62ece4992e6aefcf4aabbd83,"import subprocess
+
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):
+    """"""
+    दिए गए कमांड(s) को कॉल करें।
+    """"""
+    command_list = commands if isinstance(commands, list) else [commands]
+    command_list.extend(args)
+    
+    stderr = subprocess.DEVNULL if hide_stderr else subprocess.PIPE
+    
+    process = subprocess.Popen(
+        command_list,
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        env=env,
+        text=True
+    )
+    
+    stdout, stderr = process.communicate()
+    
+    if verbose:
+        print(f""Command: {' '.join(command_list)}"")
+        if stdout:
+            print(f""Stdout: {stdout}"")
+        if stderr and not hide_stderr:
+            print(f""Stderr: {stderr}"")
+    
+    return process.returncode, stdout, stderr",none,english,none,
+62ece4992e6aefcf4aabbd84,"import re
+
+def is_ipv4(target):
+    """"""
+    IPv4 पते की जांच करें या नहीं।
+    """"""
+    ipv4_pattern = re.compile(r'^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$')
+    return bool(ipv4_pattern.match(target))",none,english,none,
+62ece4992e6aefcf4aabbd85,"from typing import Set, Optional
+from rdflib import Graph, URIRef, Node
+
+def find_roots(
+    graph: Graph, prop: URIRef, roots: Optional[Set[Node]] = None
+) -> Set[Node]:
+    """"""
+    यह फ़ंक्शन ट्रांजिटिव पदानुक्रम में रूट्स खोजने के लिए उपयोग किया जाता है। उदाहरण के लिए, यदि आप `graph` और `rdflib.RDFS.subClassOf` पास करते हैं, तो यह उप-वर्ग पदानुक्रम के सभी रूट्स का सेट लौटाएगा।
+    """"""
+    if roots is None:
+        roots = set()
+    
+    # Get all nodes that are subjects in the graph with the given property
+    subjects = set(graph.subjects(prop, None))
+    
+    # Find nodes that are not objects in any triple with the given property
+    for subject in subjects:
+        if not any(graph.triples((None, prop, subject))):
+            roots.add(subject)
+    
+    return roots",english,english,none,
+62ece4992e6aefcf4aabbd86,"def _dump_string(obj, dumper=None):
+    """"""
+    पायथन 2 में यूनिकोड या पायथन 3 में स्ट्रिंग में डंप करें।
+    """"""
+    if dumper is not None:
+        return dumper(obj)
+    if isinstance(obj, str):
+        return obj
+    if isinstance(obj, bytes):
+        return obj.decode('utf-8')
+    return str(obj)",none,english,none,
+62ece4992e6aefcf4aabbd87,"import logging
+
+def build_app_logger(name='app', logfile='app.log', debug=True):
+    """"""
+    सामान्य उद्देश्य के लिए एप्लिकेशन लॉगर। मुख्य रूप से डिबगिंग के लिए उपयोगी।
+    """"""
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+
+    # Create a file handler
+    file_handler = logging.FileHandler(logfile)
+    file_handler.setLevel(logging.DEBUG if debug else logging.INFO)
+
+    # Create a console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG if debug else logging.INFO)
+
+    # Create a formatter and set it for both handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+
+    # Add the handlers to the logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger",english,english,none,
+62ece4992e6aefcf4aabbd88,"import numpy as np
+
+def make_array(shape, dtype=np.dtype(""float32"")):
+    """"""
+    यह फ़ंक्शन एक ऐरे बनाता है जिसमें दिए गए आकार (shape) और डेटा प्रकार (dtype) का उपयोग किया जाता है।
+
+    पैरामीटर (Parameters):
+    - shape : ट्यूपल  
+      बनाने वाले ऐरे का आकार (shape)।
+
+    - dtype : `numpy.dtype`  
+      बनाने वाले ऐरे का डेटा प्रकार (data-type)।
+    """"""
+    return np.zeros(shape, dtype=dtype)",none,english,none,
+62ece4992e6aefcf4aabbd89,"import math
+
+def gaussian(x):
+    """"""
+    गौसियन 0.1 के सिग्मा के साथ 0.2 के आसपास केन्द्रित है।
+    """"""
+    mu = 0.2
+    sigma = 0.1
+    return (1 / (sigma * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((x - mu) / sigma) ** 2)",none,english,none,
+62ece4992e6aefcf4aabbd8a,"import logging
+import json
+import os
+
+def load_configurations(config_filenames, overrides=None, resolve_env=True):
+    """"""
+    कॉनफिगरेशन फाइलों के अनुक्रम को दिया गया है, प्रत्येक कॉनफिगरेशन फाइल को लोड और सत्यापित करें। 
+    परिणाम को निम्नलिखित के रूप में ट्यूपल में लौटाएं:
+    1. कॉनफिगरेशन फाइल नाम और उसके संबंधित पार्स किए गए कॉनफिगरेशन का डिक्शनरी।
+    2. किसी भी पार्स त्रुटियों को शामिल करने वाले `logging.LogRecord` इंस्टेंस का अनुक्रम।
+    """"""
+    configurations = {}
+    errors = []
+
+    for filename in config_filenames:
+        try:
+            with open(filename, 'r') as file:
+                config_data = json.load(file)
+                
+                if resolve_env:
+                    for key, value in config_data.items():
+                        if isinstance(value, str) and value.startswith('$'):
+                            env_var = value[1:]
+                            config_data[key] = os.getenv(env_var, value)
+                
+                if overrides:
+                    config_data.update(overrides)
+                
+                configurations[filename] = config_data
+        except json.JSONDecodeError as e:
+            error_msg = f""JSON पार्स त्रुटि: {filename} - {str(e)}""
+            logging.error(error_msg)
+            errors.append(logging.LogRecord(
+                name=__name__,
+                level=logging.ERROR,
+                pathname=__file__,
+                lineno=e.lineno,
+                msg=error_msg,
+                args=None,
+                exc_info=None
+            ))
+        except Exception as e:
+            error_msg = f""त्रुटि: {filename} - {str(e)}""
+            logging.error(error_msg)
+            errors.append(logging.LogRecord(
+                name=__name__,
+                level=logging.ERROR,
+                pathname=__file__,
+                lineno=0,
+                msg=error_msg,
+                args=None,
+                exc_info=None
+            ))
+
+    return configurations, errors",none,english,none,
+62ece4992e6aefcf4aabbd8b,"def force_string(obj):
+    """"""
+    यह फ़ंक्शन UTF-8 का उपयोग करके `obj` के लिए संबंधित बाइट्स ऑब्जेक्ट लौटाता है, यदि `obj` एक स्ट्रिंग है।
+    """"""
+    if isinstance(obj, str):
+        return obj.encode('utf-8')
+    return obj",none,english,none,
+62e60723d76274f8a4026b76,"from datetime import datetime, timedelta, timezone
+
+class Time:
+    def __init__(self, hour, minute, second, microsecond, tzinfo=None):
+        self.hour = hour
+        self.minute = minute
+        self.second = second
+        self.microsecond = microsecond
+        self.tzinfo = tzinfo
+
+    @classmethod
+    def from_ticks(cls, ticks, tz=None):
+        """"""
+        टिक से समय बनाएं (आधी रात के बाद से नैनोसेकंड)।
+
+        :param ticks: आधी रात के बाद से नैनोसेकंड
+        :type ticks: int
+        :param tz: वैकल्पिक टाइमज़ोन
+        :type tz: datetime.tzinfo
+
+        :rtype: Time
+
+        :raises ValueError: यदि ticks सीमा से बाहर है
+            (0 <= ticks < 86400000000000)
+        """"""
+        if not (0 <= ticks < 86400000000000):
+            raise ValueError(""ticks must be in the range 0 <= ticks < 86400000000000"")
+        
+        # Convert ticks to microseconds
+        microseconds = ticks // 1000
+        
+        # Create a timedelta from the microseconds
+        delta = timedelta(microseconds=microseconds)
+        
+        # Create a datetime object at midnight and add the timedelta
+        midnight = datetime(1, 1, 1, tzinfo=tz)
+        dt = midnight + delta
+        
+        # Extract time components
+        hour = dt.hour
+        minute = dt.minute
+        second = dt.second
+        microsecond = dt.microsecond
+        
+        return cls(hour, minute, second, microsecond, tz)",english,english,none,
+62e60873d76274f8a4026bd8,"def protocol_handlers(cls, protocol_version=None):
+    """"""
+    उपलब्ध Bolt प्रोटोकॉल हैंडलर्स की एक डिक्शनरी लौटाता है,
+    जो संस्करण ट्यूपल द्वारा कुंजीबद्ध होती है। यदि एक विशिष्ट प्रोटोकॉल संस्करण
+    प्रदान किया गया है, तो डिक्शनरी में या तो शून्य या एक आइटम होगा,
+    इस पर निर्भर करता है कि वह संस्करण समर्थित है या नहीं। यदि कोई प्रोटोकॉल
+    संस्करण प्रदान नहीं किया गया है, तो सभी उपलब्ध संस्करण लौटाए जाएंगे।
+
+    :param protocol_version: एक विशिष्ट प्रोटोकॉल संस्करण को पहचानने वाला ट्यूपल
+        (जैसे (3, 5)) या None
+    :return: सभी प्रासंगिक और समर्थित प्रोटोकॉल संस्करणों के लिए संस्करण ट्यूपल
+        से हैंडलर क्लास की डिक्शनरी
+    :raise TypeError: यदि प्रोटोकॉल संस्करण ट्यूपल में पास नहीं किया गया है
+    """"""
+    # Example implementation of protocol handlers
+    supported_versions = {
+        (3, 5): ""HandlerForV3_5"",
+        (4, 0): ""HandlerForV4_0"",
+        (4, 1): ""HandlerForV4_1"",
+    }
+
+    if protocol_version is not None:
+        if not isinstance(protocol_version, tuple):
+            raise TypeError(""Protocol version must be a tuple."")
+        if protocol_version in supported_versions:
+            return {protocol_version: supported_versions[protocol_version]}
+        else:
+            return {}
+    else:
+        return supported_versions",english,english,none,
+62e60e3bd76274f8a4026d1a,"def from_raw_values(cls, values):
+    """"""
+    कच्चे बुकमार्क स्ट्रिंग मानों की सूची से एक Bookmarks ऑब्जेक्ट बनाएं।
+
+    इस विधि का उपयोग करने की आवश्यकता नहीं होनी चाहिए जब तक कि आप 
+    बुकमार्क्स को डीसिरियलाइज़ (deserialize) करना न चाहें।
+
+    :param values: ASCII स्ट्रिंग मान (कच्चे बुकमार्क्स)
+    :type values: Iterable[str]
+    """"""
+    # Assuming the Bookmarks class is defined elsewhere
+    bookmarks = cls()
+    for value in values:
+        # Process each raw value and add it to the Bookmarks object
+        # This is a placeholder for the actual deserialization logic
+        bookmarks.add(value)
+    return bookmarks",english,english,none,
+62b87b199a0c4fa8b80b354c,"def _get_seq_with_type(seq, bufsize=None):
+    """"""
+    (sequence, type) जोड़ी लौटाता है।
+    Sequence *seq* से प्राप्त किया जाता है
+    (या *seq* ही होता है, यदि वह sequence प्रकार का है)।
+    """"""
+    if isinstance(seq, (list, tuple, str, bytes)):
+        return seq, type(seq)
+    else:
+        return list(seq), type(seq)",none,english,none,
+62b87b4f9a0c4fa8b80b3581,"def scale(self, other=None, recompute=False):
+    if other is None:
+        if not hasattr(self, '_scale') or recompute:
+            # Calculate the scale (integral) of the histogram
+            self._scale = sum(self.bins)
+        return self._scale
+    else:
+        if not isinstance(other, (int, float)):
+            raise TypeError(""Scale factor must be a float or integer."")
+        if self._scale == 0:
+            raise LenaValueError(""Cannot rescale a histogram with zero scale."")
+        # Rescale the histogram
+        scale_factor = other / self._scale
+        self.bins = [bin_value * scale_factor for bin_value in self.bins]
+        self._scale = other",english,english,english,
+62b87b519a0c4fa8b80b3583,"def scale(self, other=None):
+    """"""
+    ग्राफ़ का स्केल प्राप्त करें या सेट करें।
+
+    यदि *other* ``None`` है, तो इस ग्राफ़ का स्केल लौटाएं।
+
+    यदि *other* एक संख्यात्मक मान है, तो ग्राफ़ को उस मान पर पुनः स्केल करें।
+    यदि ग्राफ़ का स्केल अज्ञात है या शून्य है,
+    तो पुनः स्केल करने पर :exc:`~.LenaValueError` उत्पन्न होगा।
+
+    सार्थक परिणाम प्राप्त करने के लिए, ग्राफ़ के फ़ील्ड्स का उपयोग किया जाता है।
+    केवल अंतिम निर्देशांक (coordinate) को पुनः स्केल किया जाता है।
+    उदाहरण के लिए, यदि ग्राफ़ में *x* और *y* निर्देशांक हैं,
+    तो *y* को पुनः स्केल किया जाएगा, और यदि ग्राफ़ 3-आयामी (3-dimensional) है,
+    तो *z* को पुनः स्केल किया जाएगा।
+    सभी त्रुटियों (errors) को उनके निर्देशांक के साथ पुनः स्केल किया जाता है।
+    """"""
+    if other is None:
+        return self._scale
+    elif isinstance(other, (int, float)):
+        if self._scale is None or self._scale == 0:
+            raise ValueError(""Cannot rescale graph with unknown or zero scale."")
+        # Rescale the last coordinate
+        if hasattr(self, 'z'):
+            self.z *= other / self._scale
+        elif hasattr(self, 'y'):
+            self.y *= other / self._scale
+        elif hasattr(self, 'x'):
+            self.x *= other / self._scale
+        # Rescale errors if they exist
+        if hasattr(self, 'errors'):
+            for i in range(len(self.errors)):
+                self.errors[i] *= other / self._scale
+        self._scale = other
+    else:
+        raise TypeError(""Expected a numeric value or None for scaling."")",english,english,english,
+62b87b869a0c4fa8b80b35e1,"def hist_to_graph(hist, make_value=None, get_coordinate=""left"",
+                  field_names=(""x"", ""y""), scale=None):
+    """"""
+    Convert a histogram to a graph.
+
+    Args:
+        hist: The histogram to convert.
+        make_value: A function that sets the value of the graph point.
+                   Defaults to the bin content.
+        get_coordinate: Defines the coordinate of the graph point from the histogram bin.
+                       Can be ""left"" (default), ""right"", or ""middle"".
+        field_names: The field names for the graph. The number should match the dimension of the result.
+        scale: The scale of the graph. If True, uses the histogram's scale.
+
+    Returns:
+        The resulting graph.
+    """"""
+    import numpy as np
+
+    if make_value is None:
+        make_value = lambda bin_: bin_.content
+
+    if get_coordinate not in [""left"", ""right"", ""middle""]:
+        raise ValueError(""get_coordinate must be 'left', 'right', or 'middle'"")
+
+    # Determine the coordinates based on get_coordinate
+    if get_coordinate == ""left"":
+        coordinates = hist.bin_edges[:-1]
+    elif get_coordinate == ""right"":
+        coordinates = hist.bin_edges[1:]
+    elif get_coordinate == ""middle"":
+        coordinates = (hist.bin_edges[:-1] + hist.bin_edges[1:]) / 2
+
+    # Apply make_value to each bin
+    values = [make_value(bin_) for bin_ in hist.bins]
+
+    # Create the graph
+    graph = np.array(list(zip(coordinates, values)), dtype=[(field_names[0], 'f8'), (field_names[1], 'f8')])
+
+    # Apply scale if provided
+    if scale is True:
+        graph = graph * hist.scale
+    elif scale is not None:
+        graph = graph * scale
+
+    return graph",english,english,none,
+62b8b4baeb7e40a82d2d1136,"from zope.interface import Invalid, providedBy
+from zope.interface.verify import verifyObject, verifyClass
+
+def _verify(iface, candidate, tentative=False, vtype=None):
+    """"""
+    Verify that the candidate correctly provides the interface.
+
+    This includes:
+    - Ensuring the candidate claims to provide the interface using `iface.providedBy`
+      (unless tentative is True, in which case this step is skipped).
+    - Ensuring the candidate defines all required methods.
+    - Ensuring the methods have the correct signatures (as far as possible).
+    - Ensuring the candidate defines all required attributes.
+
+    :return bool: Returns a true value if all checks pass.
+    :raises zope.interface.Invalid: If any of the above conditions are not met.
+    """"""
+    errors = []
+
+    # Step 1: Verify that the candidate claims to provide the interface
+    if not tentative:
+        if not iface.providedBy(candidate):
+            errors.append(f""{candidate} does not claim to provide {iface}."")
+
+    # Step 2: Verify that the candidate defines all required methods and attributes
+    try:
+        if vtype == 'class':
+            verifyClass(iface, candidate)
+        else:
+            verifyObject(iface, candidate)
+    except Invalid as e:
+        errors.append(str(e))
+
+    # Step 3: If there are any errors, raise them
+    if errors:
+        if len(errors) == 1:
+            raise Invalid(errors[0])
+        else:
+            raise Invalid(""\n"".join(errors))
+
+    return True",english,english,none,
+62b8b4baeb7e40a82d2d1137,"from zope.interface import providedBy, verify
+from zope.interface.exceptions import Invalid
+
+def verifyObject(iface, candidate, tentative=False):
+    """"""
+    *iface* को सही ढंग से प्रदान करने के लिए *candidate* की पुष्टि करें।
+
+    इसमें निम्नलिखित शामिल हैं:
+
+    - यह सुनिश्चित करना कि candidate यह दावा करता है कि वह इंटरफ़ेस प्रदान करता है, 
+      ``iface.providedBy`` का उपयोग करके (जब तक *tentative* `True` न हो, 
+      इस स्थिति में इस चरण को छोड़ दिया जाता है)। इसका मतलब है कि candidate की क्लास 
+      यह घोषित करती है कि वह इंटरफ़ेस को `implements <zope.interface.implementer>` करती है, 
+      या candidate स्वयं यह घोषित करता है कि वह इंटरफ़ेस को 
+      `provides <zope.interface.provider>` करता है।
+
+    - यह सुनिश्चित करना कि candidate सभी आवश्यक methods को परिभाषित करता है।
+
+    - यह सुनिश्चित करना कि methods का signature सही है (जहां तक संभव हो)।
+
+    - यह सुनिश्चित करना कि candidate सभी आवश्यक attributes को परिभाषित करता है।
+
+    :return bool: यदि सभी जांचें सफल होती हैं, तो एक सत्य मान लौटाता है।
+    :raises zope.interface.Invalid: यदि उपरोक्त में से कोई भी शर्त पूरी नहीं होती है।
+
+    .. versionchanged:: 5.0
+        यदि कई methods या attributes अमान्य हैं, तो सभी त्रुटियों को एकत्रित और रिपोर्ट किया जाता है। 
+        पहले, केवल पहली त्रुटि रिपोर्ट की जाती थी। एक विशेष मामले में, यदि केवल एक त्रुटि मौजूद है, 
+        तो इसे पहले की तरह अकेले उठाया जाता है।
+    """"""
+    if not tentative and not iface.providedBy(candidate):
+        raise Invalid(f""{candidate} does not provide {iface}"")
+
+    try:
+        verify.verifyObject(iface, candidate)
+    except Invalid as e:
+        raise Invalid(f""Verification failed: {e}"")
+
+    return True",none,english,none,
+62b8b4c1eb7e40a82d2d1139,"def verifyClass(iface, candidate, tentative=False):
+    """"""
+    यह फ़ंक्शन सत्यापित करता है कि *candidate* सही तरीके से *iface* प्रदान कर सकता है या नहीं।
+    """"""
+    if not tentative:
+        return all(hasattr(candidate, attr) and callable(getattr(candidate, attr)) for attr in dir(iface) if not attr.startswith('__'))
+    else:
+        return all(hasattr(candidate, attr) for attr in dir(iface) if not attr.startswith('__'))",none,english,none,
+62b8b559eb7e40a82d2d11f6,"def determineMetaclass(bases, explicit_mc=None):
+    """"""
+    1 या अधिक बेस क्लास और वैकल्पिक स्पष्ट __metaclass__ से मेटाक्लास निर्धारित करें।
+    """"""
+    if explicit_mc is not None:
+        return explicit_mc
+    
+    metaclass = type(bases[0])
+    for base in bases[1:]:
+        if type(base) is not metaclass:
+            return type
+    
+    return metaclass",none,english,none,
+62b8d22a48ba5a41d1c3f47d,"def pop(self, key, default=__marker):
+    """"""
+    D.pop(k[, d]) -> v
+    निर्दिष्ट कुंजी (key) को हटाएं और संबंधित मान (value) लौटाएं।
+    यदि कुंजी नहीं मिलती है, तो यदि 'd' दिया गया है तो उसे लौटाया जाएगा, 
+    अन्यथा KeyError उत्पन्न किया जाएगा।
+    """"""
+    if key in self:
+        value = self[key]
+        del self[key]
+        return value
+    elif default is not __marker:
+        return default
+    else:
+        raise KeyError(key)",none,english,none,
+62b8d23748ba5a41d1c3f497,"def popitem(self):
+    """"""
+    सबसे कम बार उपयोग किए गए `(key, value)` जोड़े को हटाएं और वापस करें।
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    
+    # Find the key with the least frequency
+    min_key = min(self.keys(), key=lambda k: self[k])
+    
+    # Remove and return the (key, value) pair
+    value = self.pop(min_key)
+    return (min_key, value)",english,english,none,
+62b8d23a48ba5a41d1c3f499,"def popitem(self):
+    """"""
+    सबसे हाल ही में उपयोग किए गए `(key, value)` जोड़े को हटाएं और वापस करें।
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    key = next(reversed(self))
+    value = self[key]
+    del self[key]
+    return key, value",none,english,none,
+62b8d23c48ba5a41d1c3f49b,"def popitem(self):
+    """"""
+    सबसे हाल ही में उपयोग किए गए `(कुंजी, मान)` जोड़े को हटाएं और वापस करें।
+    """"""
+    if not self:
+        raise KeyError(""Dictionary is empty"")
+    key = next(reversed(self))
+    value = self[key]
+    del self[key]
+    return (key, value)",none,english,english,
+62b8d23e48ba5a41d1c3f49e,"def popitem(self):
+    """"""
+    एक यादृच्छिक `(कुंजी, मान)` जोड़ी को हटाएं और लौटाएं।
+    """"""
+    if not self:
+        raise KeyError(""dictionary is empty"")
+    key = next(iter(self))
+    value = self[key]
+    del self[key]
+    return (key, value)",none,english,english,
+62b43425903eeb48555d3ea1,"import re
+
+def _create_in_regex(self) -> Pattern:
+    """"""
+    इन-स्टाइल पैरामीटर रेगुलर एक्सप्रेशन बनाएं।
+
+    रिटर्न करता है इन-स्टाइल पैरामीटर रेगुलर एक्सप्रेशन (:class:`re.Pattern`)।
+    """"""
+    # Example regex pattern for in-style parameters
+    pattern = r""\{([^}]+)\}""
+    return re.compile(pattern)",english,english,none,
+62b43426903eeb48555d3ea2,"def _create_converter(self) -> _converting._Converter:
+    """"""
+    पैरामीटर स्टाइल कन्वर्टर बनाएं।
+
+    रिटर्न करता है पैरामीटर स्टाइल कन्वर्टर (:class:`._converting._Converter`)।
+    """"""
+    return _converting._Converter()",none,english,none,
+62b8966c755ee91dce50a154,"from datetime import datetime
+from dateutil import parser
+
+def isoparse(self, dt_str):
+    """"""
+    एक ISO-8601 दिनांक और समय स्ट्रिंग को :class:`datetime.datetime` में पार्स करें।
+
+    एक ISO-8601 दिनांक और समय स्ट्रिंग में एक दिनांक भाग होता है, जिसके बाद वैकल्पिक रूप से 
+    समय भाग हो सकता है। दिनांक और समय भाग एक एकल कैरेक्टर सेपरेटर द्वारा अलग किए जाते हैं, 
+    जो आधिकारिक मानक में ``T`` होता है। अधूरे दिनांक प्रारूप (जैसे ``YYYY-MM``) को समय भाग 
+    के साथ *संयोजित नहीं* किया जा सकता।
+
+    समर्थित दिनांक प्रारूप:
+
+    सामान्य:
+    - ``YYYY``
+    - ``YYYY-MM`` या ``YYYYMM``
+    - ``YYYY-MM-DD`` या ``YYYYMMDD``
+
+    असामान्य:
+    - ``YYYY-Www`` या ``YYYYWww`` - ISO सप्ताह (दिन डिफ़ॉल्ट रूप से 0 होता है)
+    - ``YYYY-Www-D`` या ``YYYYWwwD`` - ISO सप्ताह और दिन
+
+    ISO सप्ताह और दिन की संख्या :func:`datetime.date.isocalendar` के समान तर्क का पालन करती है।
+
+    समर्थित समय प्रारूप:
+    - ``hh``
+    - ``hh:mm`` या ``hhmm``
+    - ``hh:mm:ss`` या ``hhmmss``
+    - ``hh:mm:ss.ssssss`` (6 उप-सेकंड अंकों तक)
+
+    मध्यरात्रि (`hh`) के लिए एक विशेष मामला है, क्योंकि मानक 00:00 और 24:00 दोनों को 
+    प्रतिनिधित्व के रूप में समर्थन करता है। दशमलव सेपरेटर एक डॉट या कॉमा हो सकता है।
+
+    .. चेतावनी::
+
+        सेकंड के अलावा अन्य भिन्नात्मक घटकों के लिए समर्थन ISO-8601 मानक का हिस्सा है, 
+        लेकिन वर्तमान में इस पार्सर में लागू नहीं किया गया है।
+
+    समर्थित समय क्षेत्र ऑफसेट प्रारूप:
+    - `Z` (UTC)
+    - `±HH:MM`
+    - `±HHMM`
+    - `±HH`
+
+    ऑफसेट को :class:`dateutil.tz.tzoffset` ऑब्जेक्ट्स के रूप में दर्शाया जाएगा, 
+    सिवाय UTC के, जिसे :class:`dateutil.tz.tzutc` के रूप में दर्शाया जाएगा। UTC के 
+    समकक्ष समय क्षेत्र ऑफसेट (जैसे `+00:00`) को भी :class:`dateutil.tz.tzutc` के रूप में 
+    दर्शाया जाएगा।
+
+    :param dt_str:
+        एक स्ट्रिंग या स्ट्रीम जिसमें केवल एक ISO-8601 दिनांक और समय स्ट्रिंग हो।
+
+    :return:
+        एक :class:`datetime.datetime` लौटाता है जो स्ट्रिंग का प्रतिनिधित्व करता है। 
+        निर्दिष्ट नहीं किए गए घटक उनके न्यूनतम मान पर डिफ़ॉल्ट होते हैं।
+
+    .. चेतावनी::
+
+        संस्करण 2.7.0 से, पार्सर की सख्ती को अनुबंध का स्थिर हिस्सा नहीं माना जाना चाहिए। 
+        कोई भी मान्य ISO-8601 स्ट्रिंग जो डिफ़ॉल्ट सेटिंग्स के साथ सही ढंग से पार्स होती है, 
+        भविष्य के संस्करणों में सही ढंग से पार्स होती रहेगी, लेकिन अमान्य स्ट्रिंग्स जो 
+        वर्तमान में विफल होती हैं (जैसे ``2017-01-01T00:00+00:00:00``) भविष्य के संस्करणों 
+        में विफल होने की गारंटी नहीं है यदि वे एक मान्य दिनांक को एन्कोड करती हैं।
+
+    .. versionadded:: 2.7.0
+    """"""
+    return parser.isoparse(dt_str)",none,english,none,
+62b896de755ee91dce50a183,"from dateutil.parser import parse as dateutil_parse
+from datetime import datetime
+from dateutil.tz import gettz
+
+def parse(self, timestr, default=None, ignoretz=False, tzinfos=None, **kwargs):
+    """"""
+    डेट/समय स्ट्रिंग को :class:`datetime.datetime` ऑब्जेक्ट में पार्स करें।
+
+    :param timestr:
+        कोई भी डेट/समय स्ट्रिंग जो समर्थित फॉर्मेट्स का उपयोग करती हो।
+
+    :param default:
+        डिफ़ॉल्ट datetime ऑब्जेक्ट। यदि यह एक datetime ऑब्जेक्ट है और ``None`` नहीं है, 
+        तो ``timestr`` में निर्दिष्ट तत्व डिफ़ॉल्ट ऑब्जेक्ट के तत्वों को बदल देंगे।
+
+    :param ignoretz:
+        यदि ``True`` सेट किया गया है, तो पार्स की गई स्ट्रिंग में टाइम ज़ोन को अनदेखा किया जाएगा 
+        और एक साधारण :class:`datetime.datetime` ऑब्जेक्ट लौटाया जाएगा।
+
+    :param tzinfos:
+        अतिरिक्त टाइम ज़ोन नाम/उपनाम जो स्ट्रिंग में हो सकते हैं। यह आर्ग्युमेंट टाइम ज़ोन नामों 
+        (और वैकल्पिक रूप से उन टाइम ज़ोन से ऑफ़सेट्स) को टाइम ज़ोन से मैप करता है। 
+        यह पैरामीटर एक डिक्शनरी हो सकता है जिसमें टाइम ज़ोन उपनाम टाइम ज़ोन नामों को टाइम ज़ोन से 
+        मैप करते हैं या एक फ़ंक्शन हो सकता है जो दो पैरामीटर (``tzname`` और ``tzoffset``) लेता है 
+        और एक टाइम ज़ोन लौटाता है।
+
+        जिन टाइम ज़ोन को नामों से मैप किया गया है, वे UTC से सेकंड में एक पूर्णांक ऑफ़सेट 
+        या :class:`tzinfo` ऑब्जेक्ट हो सकते हैं।
+
+    :param \*\*kwargs:
+        ``_parse()`` को पास किए गए कीवर्ड आर्ग्युमेंट्स।
+
+    :return:
+        एक :class:`datetime.datetime` ऑब्जेक्ट लौटाता है या, यदि ``fuzzy_with_tokens`` विकल्प ``True`` है, 
+        तो एक ट्यूपल लौटाता है, जिसमें पहला तत्व :class:`datetime.datetime` ऑब्जेक्ट होता है और दूसरा 
+        ट्यूपल होता है जिसमें अस्पष्ट टोकन होते हैं।
+
+    :raises ParserError:
+        अमान्य या अज्ञात स्ट्रिंग फॉर्मेट के लिए, यदि प्रदान किया गया :class:`tzinfo` वैध फॉर्मेट में नहीं है, 
+        या यदि एक अमान्य तिथि बनाई जाएगी, तो यह त्रुटि उठाई जाती है।
+
+    :raises TypeError:
+        गैर-स्ट्रिंग या कैरेक्टर स्ट्रीम इनपुट के लिए यह त्रुटि उठाई जाती है।
+
+    :raises OverflowError:
+        यदि पार्स की गई तिथि आपके सिस्टम पर सबसे बड़े वैध C पूर्णांक से अधिक हो जाती है, 
+        तो यह त्रुटि उठाई जाती है।
+    """"""
+    if default is not None and not isinstance(default, datetime):
+        raise TypeError(""default must be a datetime.datetime object or None"")
+
+    if ignoretz:
+        tzinfos = None
+
+    return dateutil_parse(timestr, default=default, ignoretz=ignoretz, tzinfos=tzinfos, **kwargs)",none,english,none,
+62b8a4a4755ee91dce50a3d3,"def fromutc(self, dt):
+    """"""
+    दिए गए टाइमज़ोन में एक टाइमज़ोन-अवेयर डेटटाइम को लेते हुए,
+    एक नए टाइमज़ोन में टाइमज़ोन-अवेयर डेटटाइम की गणना करता है।
+
+    चूंकि यह वह समय है जब हमें *पक्का* पता है कि हमारे पास एक 
+    अस्पष्टता रहित डेटटाइम ऑब्जेक्ट है, हम इस अवसर का उपयोग यह 
+    निर्धारित करने के लिए करते हैं कि क्या डेटटाइम अस्पष्ट है और 
+    ""फोल्ड"" स्थिति में है (उदाहरण के लिए, यदि यह अस्पष्ट डेटटाइम 
+    का पहला घटना है, कालानुक्रमिक रूप से)।
+
+    :param dt:
+        एक टाइमज़ोन-अवेयर :class:`datetime.datetime` ऑब्जेक्ट।
+    """"""
+    if dt.tzinfo is None:
+        raise ValueError(""fromutc() requires a timezone-aware datetime"")
+    
+    # Convert the datetime to the target timezone
+    offset = dt.tzinfo.utcoffset(dt)
+    if offset is None:
+        raise ValueError(""utcoffset() returned None"")
+    
+    # Calculate the new datetime in the target timezone
+    new_dt = dt + offset
+    
+    # Check if the new datetime is ambiguous
+    if new_dt.tzinfo is not None:
+        is_ambiguous = new_dt.tzinfo._is_ambiguous(new_dt)
+        if is_ambiguous:
+            # Handle the ambiguous case (e.g., by choosing the first occurrence)
+            new_dt = new_dt.tzinfo._resolve_ambiguous_time(new_dt, is_first=True)
+    
+    return new_dt",english,english,none,
+62b8a7b2755ee91dce50a4a7,"from datetime import datetime
+
+def default_tzinfo(dt, tzinfo):
+    """"""
+    केवल उन naive datetime पर ``tzinfo`` पैरामीटर सेट करता है।
+
+    यह उपयोगी है, उदाहरण के लिए, जब आपको एक datetime प्रदान किया जाता है 
+    जिसमें या तो एक implicit या explicit time zone हो सकता है, जैसे कि 
+    जब आप एक time zone string को पार्स कर रहे हों।
+
+    :param dt:
+        वह datetime जिस पर time zone को बदलना है।
+
+    :param tzinfo:
+        :py:class:`datetime.tzinfo` सबक्लास का उदाहरण, जिसे ``dt`` पर 
+        असाइन किया जाएगा यदि (और केवल यदि) यह naive है।
+
+    :return:
+        एक aware :py:class:`datetime.datetime` लौटाता है।
+    """"""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=tzinfo)
+    return dt",none,english,none,
+6305f9991d275c6667163c50,"def set_cut_chars(self, before: bytes, after: bytes) -> None:
+    """"""
+    स्लाइस पॉइंट्स को सीमांकित (delimit) करने के लिए उपयोग किए जाने वाले बाइट्स सेट करें।
+
+    आर्ग्युमेंट्स (Args):
+        before: इन डिलीमीटर (delimiters) से पहले फाइल को विभाजित (split) करें।
+        after: इन डिलीमीटर (delimiters) के बाद फाइल को विभाजित (split) करें।
+    """"""
+    self.before_delimiter = before
+    self.after_delimiter = after",none,english,none,
+6306292052e177c0ba469f09,"from typing import Union
+
+def identify_request(request: RequestType) -> bool:
+    """"""
+    यह फ़ंक्शन यह पहचानने की कोशिश करता है कि यह एक Diaspora अनुरोध है या नहीं।
+
+    सबसे पहले सार्वजनिक संदेश (public message) की जांच करें। 
+    फिर निजी संदेश (private message) की जांच करें। 
+    अंत में यह जांचें कि क्या यह एक पुराना (legacy) payload है।
+    """"""
+    # Check for public message
+    if hasattr(request, 'public_message') and request.public_message:
+        return True
+    
+    # Check for private message
+    if hasattr(request, 'private_message') and request.private_message:
+        return True
+    
+    # Check for legacy payload
+    if hasattr(request, 'legacy_payload') and request.legacy_payload:
+        return True
+    
+    # If none of the above, it's not a Diaspora request
+    return False",english,english,none,
+6306292152e177c0ba469f0d,"from typing import TypeVar
+
+RequestType = TypeVar('RequestType')
+
+def identify_request(request: RequestType) -> bool:
+    """"""
+    यह फ़ंक्शन यह पहचानने की कोशिश करता है कि क्या यह एक मैट्रिक्स (Matrix) अनुरोध है।
+    """"""
+    # Assuming that a Matrix request has a specific attribute or structure
+    # For example, if a Matrix request has a 'matrix' key in its data
+    if hasattr(request, 'data') and isinstance(request.data, dict):
+        return 'matrix' in request.data
+    return False",english,english,none,
+6306292252e177c0ba469f11,"from datetime import datetime
+
+def format_dt(dt):
+    """"""
+    D* नोड्स जिस प्रकार की datetime अपेक्षा करते हैं, उस प्रारूप में datetime को प्रारूपित करें।
+    """"""
+    if isinstance(dt, datetime):
+        return dt.strftime('%Y-%m-%dT%H:%M:%S')
+    else:
+        raise ValueError(""Input must be a datetime object"")",none,english,english,
+6306292352e177c0ba469f1d,"import re
+from typing import Set, Tuple, Callable
+
+def find_tags(text: str, replacer: Callable = None) -> Tuple[Set, str]:
+    """"""
+    टेक्स्ट में टैग्स खोजें।
+
+    कोड ब्लॉक्स के अंदर मौजूद टैग्स को अनदेखा करने की कोशिश करता है।
+
+    वैकल्पिक रूप से, यदि ""replacer"" पास किया गया है, तो यह टैग शब्द को 
+    replacer फ़ंक्शन द्वारा लौटाए गए परिणाम से बदल देगा, जिसे टैग शब्द के साथ कॉल किया गया है।
+
+    एक सेट के रूप में टैग्स और मूल या बदला हुआ टेक्स्ट लौटाता है।
+    """"""
+    # Regex to find tags (assuming tags are words starting with '@')
+    tag_pattern = re.compile(r'(?<!`)(@\w+)(?!`)')
+    
+    # Find all tags in the text
+    tags = set(tag_pattern.findall(text))
+    
+    # Replace tags if a replacer function is provided
+    if replacer:
+        def replace_tag(match):
+            return replacer(match.group(1))
+        text = tag_pattern.sub(replace_tag, text)
+    
+    return tags, text",english,english,none,
+6306292352e177c0ba469f1e,"import re
+
+def process_text_links(text):
+    """"""
+    टेक्स्ट में लिंक को प्रोसेस करें, कुछ विशेषताएँ जोड़ें और टेक्स्ट में मौजूद लिंक को हाइपरलिंक में बदलें।
+    """"""
+    # Regular expression to find URLs in the text
+    url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+    
+    def replace_with_hyperlink(match):
+        url = match.group(0)
+        return f'<a href=""{url}"" target=""_blank"">{url}</a>'
+    
+    # Replace URLs with hyperlinks
+    processed_text = url_pattern.sub(replace_with_hyperlink, text)
+    
+    return processed_text",english,english,none,
+6306292652e177c0ba469f34,"import requests
+from typing import Optional
+
+def fetch_content_type(url: str) -> Optional[str]:
+    """"""
+    रिमोट यूआरएल का हेड प्राप्त करें ताकि कंटेंट टाइप निर्धारित किया जा सके।
+    """"""
+    try:
+        response = requests.head(url, allow_redirects=True)
+        response.raise_for_status()
+        content_type = response.headers.get('Content-Type')
+        return content_type
+    except requests.RequestException:
+        return None",none,english,none,
+6306292a52e177c0ba469f41,"def test_tag(tag: str) -> bool:
+    """"""
+    किसी शब्द का परीक्षण करें कि क्या उसे टैग के रूप में स्वीकार किया जा सकता है।
+    """"""
+    # टैग के लिए मान्यता की शर्तें:
+    # 1. टैग खाली नहीं होना चाहिए।
+    # 2. टैग में केवल अक्षर, संख्याएं, और अंडरस्कोर (_) हो सकते हैं।
+    # 3. टैग की लंबाई 1 से 50 वर्णों के बीच होनी चाहिए।
+    
+    if not tag:
+        return False
+    
+    if not tag.isalnum() and not all(c == '_' for c in tag if not c.isalnum()):
+        return False
+    
+    if len(tag) < 1 or len(tag) > 50:
+        return False
+    
+    return True",none,english,none,
+6306298b52e177c0ba469fdc,"def xml_children_as_dict(node):
+    """"""
+    नोड <xml> के बच्चों को एक डिक्शनरी में बदलें, जो टैग नाम द्वारा कुंजीबद्ध हो।
+
+    यह केवल एक सतही रूपांतरण है - चाइल्ड नोड्स को पुनरावर्ती (recursively) प्रोसेस नहीं किया जाता है।
+    """"""
+    result = {}
+    for child in node:
+        tag = child.tag
+        if tag in result:
+            if isinstance(result[tag], list):
+                result[tag].append(child.text)
+            else:
+                result[tag] = [result[tag], child.text]
+        else:
+            result[tag] = child.text
+    return result",none,english,none,
+6306299052e177c0ba469fe8,"def check_sender_and_entity_handle_match(sender_handle, entity_handle):
+    """"""
+    सुनिश्चित करें कि सेंडर और एंटिटी हैंडल मेल खाते हैं।
+
+    मूल रूप से, हमने पहले ही यह सत्यापित कर लिया है कि जब पेलोड प्राप्त हो रहा है, तो सेंडर वही है जो वह होने का दावा करता है। हालांकि, सेंडर पेलोड में किसी अन्य लेखक को सेट करने की कोशिश कर सकता है, क्योंकि Diaspora में सेंडर की जानकारी पेलोड हेडर और ऑब्जेक्ट दोनों में होती है। हमें यह सुनिश्चित करना होगा कि ये दोनों समान हैं।
+
+    Args:
+        sender_handle (str): सेंडर का हैंडल।
+        entity_handle (str): एंटिटी का हैंडल।
+
+    Returns:
+        bool: True अगर सेंडर और एंटिटी हैंडल मेल खाते हैं, अन्यथा False।
+    """"""
+    return sender_handle == entity_handle",none,english,none,
+630629b952e177c0ba46a043,"import requests
+
+def get_nodeinfo_well_known_document(url, document_path=None):
+    """"""
+    NodeInfo .well-known दस्तावेज़ उत्पन्न करें।  
+
+    स्पेसिफिकेशन देखें: [http://nodeinfo.diaspora.software](http://nodeinfo.diaspora.software)  
+
+    पैरामीटर (Arguments): 
+    - url: पूरा बेस URL प्रोटोकॉल के साथ, जैसे `https://example.com`  
+    - document_path: कस्टम NodeInfo दस्तावेज़ पथ, यदि प्रदान किया गया हो (वैकल्पिक)  
+
+    रिटर्न (Returns):  
+    - dict: एक स्वरूपित डिक्शनरी
+    """"""
+    if document_path is None:
+        document_path = ""/.well-known/nodeinfo""
+    
+    full_url = f""{url.rstrip('/')}{document_path}""
+    
+    try:
+        response = requests.get(full_url)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {""error"": str(e)}",none,english,none,
+630629d052e177c0ba46a0a1,"from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+def verify_relayable_signature(public_key, doc, signature):
+    """"""
+    हस्ताक्षरित XML तत्वों को सत्यापित करें ताकि यह सुनिश्चित किया जा सके 
+    कि दावा किया गया लेखक ने वास्तव में यह संदेश उत्पन्न किया है।
+    """"""
+    try:
+        # Load the public key
+        pub_key = serialization.load_pem_public_key(
+            public_key.encode(),
+            backend=default_backend()
+        )
+        
+        # Verify the signature
+        pub_key.verify(
+            signature,
+            doc.encode(),
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except Exception as e:
+        print(f""Signature verification failed: {e}"")
+        return False",english,english,english,
+630629e052e177c0ba46a0c4,"import json
+from xml.etree import ElementTree as ET
+from typing import Dict
+
+def parse_diaspora_webfinger(document: str) -> Dict:
+    """"""
+    डायस्पोरा वेबफिंगर को पार्स करें, जो या तो JSON प्रारूप (नया) में होता है या XRD (पुराना) में।  
+
+    [डायस्पोरा वेबफिंगर के बारे में अधिक जानकारी के लिए यहां क्लिक करें।](https://diaspora.github.io/diaspora_federation/discovery/webfinger.html)
+    """"""
+    try:
+        # Try to parse as JSON (new format)
+        data = json.loads(document)
+        return data
+    except json.JSONDecodeError:
+        # If JSON parsing fails, try to parse as XML (XRD format)
+        try:
+            root = ET.fromstring(document)
+            result = {}
+            for link in root.findall('{http://docs.oasis-open.org/ns/xri/xrd-1.0}Link'):
+                rel = link.get('rel')
+                href = link.get('href')
+                if rel and href:
+                    result[rel] = href
+            return result
+        except ET.ParseError:
+            # If both JSON and XML parsing fail, return an empty dict
+            return {}",english,english,none,
+630629e152e177c0ba46a0d1,"import requests
+from typing import Optional
+
+def try_retrieve_webfinger_document(handle: str) -> Optional[str]:
+    """"""
+    एक RFC7033 वेबफिंगर दस्तावेज़ प्राप्त करने का प्रयास करें। 
+    यदि यह विफल होता है, तो कोई अपवाद उत्पन्न नहीं करता।
+    """"""
+    try:
+        # Extract the domain from the handle
+        domain = handle.split('@')[-1]
+        webfinger_url = f""https://{domain}/.well-known/webfinger?resource=acct:{handle}""
+        
+        # Make the request to retrieve the WebFinger document
+        response = requests.get(webfinger_url, timeout=5)
+        response.raise_for_status()
+        
+        # Return the JSON content if successful
+        return response.text
+    except (requests.RequestException, ValueError):
+        # Return None if any error occurs
+        return None",english,english,none,
+630629e152e177c0ba46a0d2,"import requests
+from lxml import etree
+
+def retrieve_and_parse_diaspora_webfinger(handle):
+    """"""
+    डायस्पोरा वेबफिंगर डॉक्यूमेंट को प्राप्त करें और पार्स करें।
+
+    :पैरामीटर हैंडल: प्राप्त करने के लिए रिमोट हैंडल  
+    :वापसी: डिक्शनरी (dict)
+    """"""
+    # Construct the WebFinger URL
+    webfinger_url = f""https://{handle.split('@')[1]}/.well-known/webfinger?resource=acct:{handle}""
+    
+    try:
+        # Send a GET request to the WebFinger URL
+        response = requests.get(webfinger_url)
+        response.raise_for_status()
+        
+        # Parse the XML response
+        root = etree.fromstring(response.content)
+        
+        # Extract relevant information from the XML
+        result = {}
+        for link in root.findall(""{http://webfinger.net/rel/profile-page}link""):
+            result[link.get(""rel"")] = link.get(""href"")
+        
+        return result
+    
+    except requests.exceptions.RequestException as e:
+        print(f""Error retrieving WebFinger document: {e}"")
+        return {}
+    except etree.XMLSyntaxError as e:
+        print(f""Error parsing WebFinger document: {e}"")
+        return {}",english,english,english,
+630629e252e177c0ba46a0d6,"import requests
+from lxml import etree
+
+def retrieve_diaspora_host_meta(host):
+    """"""
+    एक रिमोट डायस्पोरा होस्ट-मेटा डॉक्यूमेंट प्राप्त करें।
+
+    :arg host: वह होस्ट जिससे डेटा प्राप्त करना है
+    :returns: ``XRD`` इंस्टेंस
+    """"""
+    url = f""https://{host}/.well-known/host-meta""
+    response = requests.get(url)
+    response.raise_for_status()
+    
+    # Parse the XML response
+    xml_content = response.content
+    xrd = etree.fromstring(xml_content)
+    
+    return xrd",english,english,none,
+630629e752e177c0ba46a0fb,"import requests
+
+def send_document(url, data, timeout=10, method=""post"", *args, **kwargs):
+    """"""
+    यह एक सहायक मेथड है जो POST के माध्यम से एक दस्तावेज़ (डॉक्यूमेंट) भेजने के लिए उपयोग किया जाता है।
+
+    अतिरिक्त ``*args`` और ``**kwargs`` को ``requests.post`` में पास किया जाएगा।
+
+    पैरामीटर (Arguments):
+    - url: वह पूर्ण URL (प्रोटोकॉल सहित) जहां डेटा भेजा जाना है।
+    - data: एक डिक्शनरी (जो फॉर्म-एन्कोडेड होगी), बाइट्स, या फाइल-जैसे ऑब्जेक्ट जिसे बॉडी में भेजा जाएगा।
+    - timeout: प्रतिक्रिया (response) के लिए प्रतीक्षा करने का समय, सेकंड में (डिफ़ॉल्ट रूप से 10 सेकंड)।
+    - method: उपयोग की जाने वाली HTTP विधि, डिफ़ॉल्ट रूप से ""post""।
+
+    रिटर्न (Returns):
+    - status code: एक ट्यूपल जिसमें HTTP स्थिति कोड (int या None) होता है।
+    - error: एक अपवाद (exception) क्लास का उदाहरण या None।
+    """"""
+    try:
+        if method.lower() == ""post"":
+            response = requests.post(url, data=data, timeout=timeout, *args, **kwargs)
+        elif method.lower() == ""put"":
+            response = requests.put(url, data=data, timeout=timeout, *args, **kwargs)
+        elif method.lower() == ""patch"":
+            response = requests.patch(url, data=data, timeout=timeout, *args, **kwargs)
+        else:
+            raise ValueError(f""Unsupported HTTP method: {method}"")
+        
+        return response.status_code, None
+    except requests.exceptions.RequestException as e:
+        return None, e",none,english,none,
+6306091073426c38ae68acac,"def dict_insert(dic, val, key, *keys):
+    """"""
+    एक डिक्शनरी में नेस्टेड कुंजी का मान डालें।
+
+    नेस्टेड कुंजी के लिए मान डालने के लिए, सभी पूर्वज कुंजियों को 
+    इस मेथड के आर्ग्युमेंट्स के रूप में दिया जाना चाहिए।
+
+    उदाहरण:
+      dict_insert({}, 'मान', 'कुंजी1.कुंजी2'.split('.'))
+
+    :param dic: वह डिक्शनरी ऑब्जेक्ट जिसमें नेस्टेड कुंजी का मान डालना है।
+    :param val: वह मान जो दी गई डिक्शनरी में डालना है।
+    :param key: कुंजियों की श्रृंखला में पहली कुंजी जो मान को स्टोर करेगी।
+    :param keys: कुंजियों की श्रृंखला में उप-कुंजियां।
+    """"""
+    current = dic
+    for k in keys[:-1]:
+        if k not in current:
+            current[k] = {}
+        current = current[k]
+    current[keys[-1]] = val",none,english,none,
+6306091a73426c38ae68acc8,"def list_of_file_names(settings_dirs, spec_option):
+    """"""
+    एक नया IniType कॉम्प्लेक्स टाइप बनाएं
+    """"""
+    import os
+    file_names = []
+    for directory in settings_dirs:
+        if os.path.isdir(directory):
+            for file in os.listdir(directory):
+                if file.endswith(spec_option):
+                    file_names.append(os.path.join(directory, file))
+    return file_names",none,english,none,
+6306091b73426c38ae68acd7,"def ansible_config_manager(cls):
+    """"""
+    ansible कॉन्फ़िगरेशन मैनेजर प्राप्त करता है।
+    """"""
+    # Placeholder implementation for ansible configuration manager
+    # This function should return the Ansible configuration manager instance
+    # For now, it returns None as a placeholder
+    return None",english,english,none,
+6306091b73426c38ae68acd9,"def workspace_manager(cls):
+    """"""
+    वर्कस्पेस मैनेजर प्राप्त करता है।
+    """"""
+    # Assuming the workspace manager is a class method or a static method
+    # that returns an instance of the workspace manager.
+    # This is a placeholder implementation.
+    return cls._workspace_manager",english,english,none,
+6306091b73426c38ae68acda,"def plugins_manager(cls):
+    """"""
+    प्लगइन मैनेजर प्राप्त करता है।
+    """"""
+    return cls._plugins_manager",none,english,none,
+6306091c73426c38ae68acdc,"import yaml
+
+def validate_from_content(cls, spec_content=None):
+    """"""
+    यह फ़ंक्शन सत्यापित करता है कि spec (YAML) सामग्री में सभी आवश्यक फ़ील्ड्स मौजूद हैं।
+
+    :param spec_content: spec फ़ाइल की सामग्री
+    :raise IRValidatorException: जब spec फ़ाइल में अनिवार्य डेटा गायब हो
+    :return: एक डिक्शनरी जिसमें spec (YAML) फ़ाइल से लोड किया गया डेटा होता है
+    """"""
+    if spec_content is None:
+        raise ValueError(""Spec content cannot be None."")
+    
+    try:
+        spec_data = yaml.safe_load(spec_content)
+    except yaml.YAMLError as e:
+        raise ValueError(f""Invalid YAML content: {e}"")
+    
+    required_fields = ['field1', 'field2', 'field3']  # Replace with actual required fields
+    
+    for field in required_fields:
+        if field not in spec_data:
+            raise IRValidatorException(f""Missing required field: {field}"")
+    
+    return spec_data
+
+class IRValidatorException(Exception):
+    pass",english,english,none,
+6306091c73426c38ae68acdd,"import yaml
+
+def validate_from_file(cls, yaml_file=None):
+    """"""
+    एक YAML फ़ाइल को लोड और सत्यापित करता है कि उसमें सभी आवश्यक फ़ील्ड्स मौजूद हैं।
+
+    :param yaml_file: YAML फ़ाइल का पथ
+    :raise IRValidatorException: जब फ़ाइल में अनिवार्य डेटा गायब हो
+    :return: YAML फ़ाइल से लोड किए गए डेटा के साथ एक डिक्शनरी
+    """"""
+    if yaml_file is None:
+        raise ValueError(""YAML फ़ाइल का पथ प्रदान करना आवश्यक है।"")
+    
+    try:
+        with open(yaml_file, 'r') as file:
+            data = yaml.safe_load(file)
+    except Exception as e:
+        raise IRValidatorException(f""YAML फ़ाइल लोड करने में त्रुटि: {e}"")
+    
+    # यहां आप आवश्यक फ़ील्ड्स की जांच कर सकते हैं
+    required_fields = ['field1', 'field2', 'field3']  # उदाहरण के लिए आवश्यक फ़ील्ड्स
+    for field in required_fields:
+        if field not in data:
+            raise IRValidatorException(f""अनिवार्य फ़ील्ड '{field}' YAML फ़ाइल में गायब है।"")
+    
+    return data
+
+class IRValidatorException(Exception):
+    pass",hindi,english,hindi,
+6306091d73426c38ae68ace5,"def _include_groups(self, parser_dict):
+    """"""
+    स्पेक फाइलों में 'include dict' निर्देश को हल करता है।
+    """"""
+    if 'include' in parser_dict:
+        for group in parser_dict['include']:
+            if group in self.groups:
+                parser_dict.update(self.groups[group])
+    return parser_dict",none,english,none,
+6306092373426c38ae68acfa,"def get_spec_defaults(self):
+    """"""
+    स्पेक और अन्य स्रोतों से तर्कों के डिफ़ॉल्ट मान प्राप्त करें।
+    """"""
+    defaults = {}
+    # Assuming self.spec is a dictionary or object that contains the default values
+    if hasattr(self, 'spec'):
+        if isinstance(self.spec, dict):
+            defaults.update(self.spec)
+        else:
+            # If spec is an object, get its attributes
+            for key in dir(self.spec):
+                if not key.startswith('_'):
+                    defaults[key] = getattr(self.spec, key)
+    return defaults",english,english,none,
+6306092973426c38ae68ad01,"def get_deprecated_args(self):
+    """"""
+    अन्य विकल्पों को अप्रचलित करने वाले विकल्पों के साथ डिक्शनरी लौटाना
+    """"""
+    deprecated_args = {
+        'old_arg1': 'new_arg1',
+        'old_arg2': 'new_arg2',
+        'old_arg3': 'new_arg3'
+    }
+    return deprecated_args",none,english,none,
+6306092c73426c38ae68ad02,"def validate_arg_deprecation(self, cli_args, answer_file_args):
+    """"""
+    अप्रचलित तर्कों को मान्य करता है और उन्हें प्रिंट करता है।
+
+    :param cli_args: CLI (कमांड लाइन इंटरफ़ेस) से प्राप्त तर्कों की डिक्शनरी
+    :param answer_file_args: फ़ाइलों से प्राप्त तर्कों की डिक्शनरी
+    """"""
+    deprecated_args = set(cli_args.keys()).intersection(answer_file_args.keys())
+    
+    for arg in deprecated_args:
+        print(f""अप्रचलित तर्क: {arg}"")
+        print(f""CLI से मान: {cli_args[arg]}"")
+        print(f""फ़ाइल से मान: {answer_file_args[arg]}"")
+        print(""यह तर्क अप्रचलित है और भविष्य के संस्करणों में हटाया जा सकता है।\n"")",none,english,none,
+6306092d73426c38ae68ad04,"def get_parser_option_specs(self, command_name):
+    """"""
+    निर्दिष्ट कमांड के लिए सभी विकल्प प्राप्त करता है।
+
+    :param command_name: कमांड का नाम (जैसे main, virsh, ospd, आदि...)
+    :return: सभी कमांड विकल्पों की सूची
+    """"""
+    # Assuming self.parser is an instance of argparse.ArgumentParser or similar
+    if hasattr(self, 'parser') and hasattr(self.parser, '_actions'):
+        options = []
+        for action in self.parser._actions:
+            if action.dest != 'help':  # Exclude the help option
+                options.append(action.option_strings)
+        return options
+    else:
+        return []",english,english,none,
+6306092d73426c38ae68ad05,"def get_option_spec(self, command_name):
+    """"""
+    दिए गए विकल्प नाम के लिए विनिर्देश प्राप्त करता है।
+    
+    Args:
+        command_name (str): विकल्प का नाम जिसके लिए विनिर्देश प्राप्त करना है।
+    
+    Returns:
+        dict: विकल्प का विनिर्देश, यदि उपलब्ध हो। अन्यथा, None।
+    """"""
+    # Assuming self.options is a dictionary where keys are command names and values are their specifications
+    return self.options.get(command_name, None)",english,english,none,
+6306092d73426c38ae68ad06,"def get_silent_args(self, args):
+    """"""
+    मौन (साइलेंट) तर्कों की सूची प्राप्त करें।
+
+    :param args: प्राप्त तर्क (arguments)।
+    :return: list, मौन (साइलेंट) तर्कों के नाम।
+    """"""
+    silent_args = []
+    for arg in args:
+        if arg.startswith('--'):
+            silent_args.append(arg[2:])
+    return silent_args",none,english,none,
+6306092d73426c38ae68ad07,"def validate_requires_args(self, args):
+    """"""
+    जांचें कि क्या सभी आवश्यक तर्क प्रदान किए गए हैं।
+    """"""
+    required_args = getattr(self, 'required_args', [])
+    missing_args = [arg for arg in required_args if arg not in args]
+    
+    if missing_args:
+        raise ValueError(f""Missing required arguments: {', '.join(missing_args)}"")
+    
+    return True",none,english,none,
+6306092d73426c38ae68ad08,"def _get_conditionally_required_args(self, command_name, options_spec, args):
+    """"""
+    उन तर्कों (arguments) की सूची बनाएं जिनके लिए ``required_when`` शर्त लागू होती है।
+
+    :param command_name: कमांड का नाम।
+    :param options_spec: कमांड स्पेसिफिकेशन विकल्पों की सूची।
+    :param args: प्राप्त इनपुट तर्क (arguments)।
+    :return: list, उन तर्क नामों की सूची जिन पर ``required_when`` शर्त लागू होती है।
+    """"""
+    conditionally_required_args = []
+    
+    for option in options_spec:
+        if 'required_when' in option:
+            condition = option['required_when']
+            if condition in args:
+                conditionally_required_args.append(option['name'])
+    
+    return conditionally_required_args",none,english,none,
+6306092e73426c38ae68ad09,"def validate_length_args(self, args):
+    """"""
+    दिए गए तर्कों की लंबाई की जाँच करें
+    :param args: प्राप्त तर्क।  
+    """"""
+    if not args:
+        raise ValueError(""कोई तर्क प्रदान नहीं किया गया है।"")
+    if len(args) < 1:
+        raise ValueError(""तर्कों की लंबाई कम से कम 1 होनी चाहिए।"")
+    return True",none,english,hindi,
+6306092e73426c38ae68ad0a,"def validate_choices_args(self, args):
+    """"""
+    चॉइस आर्ग्युमेंट्स का मान उपलब्ध विकल्पों में से एक है या नहीं, इसकी जांच करें।
+
+    :param args: प्राप्त किए गए आर्ग्युमेंट्स।
+    """"""
+    if not hasattr(self, 'choices'):
+        raise AttributeError(""'choices' attribute is not defined in the class."")
+    
+    if not isinstance(self.choices, (list, tuple)):
+        raise TypeError(""'choices' should be a list or tuple."")
+    
+    for arg in args:
+        if arg not in self.choices:
+            raise ValueError(f""Invalid choice: {arg}. Valid choices are: {self.choices}"")
+    
+    return True",none,english,none,
+6306092e73426c38ae68ad0b,"def validate_min_max_args(self, args):
+    """"""
+    जांचें कि आर्ग्युमेंट्स का मान न्यूनतम और अधिकतम मानों के बीच है या नहीं।
+
+    :param args: प्राप्त किए गए आर्ग्युमेंट्स।
+    """"""
+    min_value = 0  # यहां न्यूनतम मान सेट करें
+    max_value = 100  # यहां अधिकतम मान सेट करें
+    
+    for arg in args:
+        if not (min_value <= arg <= max_value):
+            return False
+    return True",hindi,english,none,
+6306092e73426c38ae68ad0d,"def create_complex_argumet_type(self, subcommand, type_name, option_name, spec_option):
+    """"""
+    जटिल आर्गुमेंट प्रकार (complex argument type) बनाएं
+
+    :param subcommand: कमांड का नाम
+    :param type_name: जटिल प्रकार का नाम (complex type name)
+    :param option_name: विकल्प का नाम (option name)
+    :param spec_option: विकल्प की विशिष्टताएँ (option's specifications)
+    :return: जटिल प्रकार का उदाहरण (complex type instance)
+    """"""
+    # Create a complex type instance based on the provided specifications
+    complex_type_instance = {
+        ""subcommand"": subcommand,
+        ""type_name"": type_name,
+        ""option_name"": option_name,
+        ""spec_option"": spec_option
+    }
+    return complex_type_instance",english,english,none,
+6306092e73426c38ae68ad0f,"def get_nested_custom_and_control_args(self, args):
+    """"""
+    इनपुट आर्ग्युमेंट्स को नेस्टेड और कस्टम में विभाजित करें।
+
+    कंट्रोल आर्ग्युमेंट्स: IR (Intermediate Representation) व्यवहार को नियंत्रित करते हैं। 
+        ये आर्ग्युमेंट्स spec.yml फाइल में नहीं डाले जाएंगे।
+    नेस्टेड आर्ग्युमेंट्स: Ansible प्लेबुक्स द्वारा उपयोग किए जाते हैं और 
+        spec.yml फाइल में डाले जाएंगे।
+    कस्टम आर्ग्युमेंट्स: सामान्य नेस्टेड उपयोग के बजाय कस्टम Ansible वेरिएबल्स का उपयोग करने के लिए।
+
+    :param args: एकत्रित आर्ग्युमेंट्स की सूची।
+    :return: (dict, dict): फ्लैट डिक्शनरीज़ (control_args, nested_args)
+    """"""
+    control_args = {}
+    nested_args = {}
+    
+    for key, value in args.items():
+        if key.startswith('_'):
+            control_args[key] = value
+        else:
+            nested_args[key] = value
+    
+    return control_args, nested_args",none,english,none,
+6306092e73426c38ae68ad11,"def merge_extra_vars(vars_dict, extra_vars=None):
+    """"""
+    ``vars_dict`` को ``extra-vars`` के साथ मर्ज (जोड़ना) करें।
+
+    :param vars_dict: वह डिक्शनरी जिसमें extra-vars को मर्ज करना है
+    :param extra_vars: extra-vars की सूची (लिस्ट)
+    """"""
+    if extra_vars is None:
+        extra_vars = []
+    
+    for var in extra_vars:
+        key, value = var.split('=', 1)
+        vars_dict[key] = value
+    
+    return vars_dict",none,english,none,
+6306092f73426c38ae68ad13,"import subprocess
+
+def ansible_playbook(ir_workspace, ir_plugin, playbook_path, verbose=None, extra_vars=None, ansible_args=None):
+    """"""
+    'ansible-playbook' CLI को रैप करता है।
+
+    :param ir_workspace: एक Infrared Workspace ऑब्जेक्ट जो सक्रिय वर्कस्पेस को दर्शाता है।
+    :param ir_plugin: वर्तमान प्लगइन का एक InfraredPlugin ऑब्जेक्ट।
+    :param playbook_path: वह प्लेबुक जिसे निष्पादित करना है।
+    :param verbose: Ansible की वर्बोसिटी स्तर।
+    :param extra_vars: dict। इसे Ansible को अतिरिक्त वेरिएबल्स (extra-vars) के रूप में पास किया जाता है।
+    :param ansible_args: ansible-playbook के तर्कों का एक dict, जिसे सीधे Ansible तक पहुँचाने के लिए उपयोग किया जाता है।
+    """"""
+    command = ['ansible-playbook', playbook_path]
+
+    if verbose:
+        command.append(f'-{""v"" * verbose}')
+
+    if extra_vars:
+        extra_vars_str = ' '.join([f'{k}={v}' for k, v in extra_vars.items()])
+        command.extend(['--extra-vars', extra_vars_str])
+
+    if ansible_args:
+        for arg, value in ansible_args.items():
+            command.extend([f'--{arg}', value])
+
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print(f""Error: {result.stderr}"")
+    else:
+        print(result.stdout)
+
+    return result.returncode",none,english,none,
+6306093273426c38ae68ad15,"def _run_playbook(cli_args, vars_dict, ir_workspace, ir_plugin):
+    """"""
+    Ansible CLI को vars_dict के साथ चलाता है।
+
+    :param vars_dict: dict, इसे Ansible extra-vars के रूप में पास किया जाएगा
+    :param cli_args: कमांड लाइन आर्ग्युमेंट्स की सूची
+    :param ir_workspace: एक Infrared Workspace ऑब्जेक्ट जो सक्रिय वर्कस्पेस को दर्शाता है
+    :param ir_plugin: वर्तमान प्लगइन का एक InfraredPlugin ऑब्जेक्ट
+    :return: ansible के परिणाम
+    """"""
+    import subprocess
+
+    # Convert vars_dict to a string format suitable for Ansible extra-vars
+    extra_vars = "" "".join([f""{k}={v}"" for k, v in vars_dict.items()])
+
+    # Construct the full command
+    command = [""ansible-playbook""] + cli_args + [""--extra-vars"", extra_vars]
+
+    # Execute the command
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    # Return the result
+    return result",english,english,none,
+63060ada73426c38ae68ad31,"def _convert_non_cli_args(self, parser_name, values_dict):
+    """"""
+    तर्कों को सही प्रकारों में परिवर्तित करता है और values_dict पैरामीटर को संशोधित करता है।
+
+    डिफ़ॉल्ट रूप से, सभी मान स्ट्रिंग्स के रूप में होते हैं।
+
+    :param parser_name: कमांड का नाम, जैसे main, virsh, ospd, आदि।
+    :param values_dict: तर्कों के साथ डिक्शनरी।
+    """"""
+    for key, value in values_dict.items():
+        if isinstance(value, str):
+            if value.lower() == 'true':
+                values_dict[key] = True
+            elif value.lower() == 'false':
+                values_dict[key] = False
+            elif value.isdigit():
+                values_dict[key] = int(value)
+            elif value.replace('.', '', 1).isdigit():
+                values_dict[key] = float(value)
+            elif value.lower() == 'none':
+                values_dict[key] = None",none,english,none,
+63060b1a73426c38ae68ad3e,"import os
+import json
+
+def get_plugin_spec_flatten_dict(plugin_dir):
+    """"""
+    प्लगइन स्पेसिफिकेशन से एक फ्लैट डिक्शनरी बनाता है।
+
+    :param plugin_dir: प्लगइन की डायरेक्टरी का पथ
+    :return: एक फ्लैट डिक्शनरी जो प्लगइन की प्रॉपर्टीज़ को समाहित करती है
+    """"""
+    plugin_spec_path = os.path.join(plugin_dir, 'plugin_spec.json')
+    if not os.path.exists(plugin_spec_path):
+        raise FileNotFoundError(f""Plugin specification file not found at {plugin_spec_path}"")
+    
+    with open(plugin_spec_path, 'r') as file:
+        plugin_spec = json.load(file)
+    
+    def flatten_dict(d, parent_key='', sep='.'):
+        items = []
+        for k, v in d.items():
+            new_key = f""{parent_key}{sep}{k}"" if parent_key else k
+            if isinstance(v, dict):
+                items.extend(flatten_dict(v, new_key, sep=sep).items())
+            else:
+                items.append((new_key, v))
+        return dict(items)
+    
+    return flatten_dict(plugin_spec)",none,english,english,
+63060b1b73426c38ae68ad42,"def inject_config(self):
+    import os
+    if 'CONFIG_PATH' not in os.environ:
+        os.environ['CONFIG_PATH'] = '/path/to/default/config'",none,english,none,
+63060b1b73426c38ae68ad43,"def extend_cli(self, root_subparsers):
+    """"""
+    मुख्य एंट्री पॉइंट में स्पेक CLI विकल्प जोड़ता है।
+
+    :param subparser: वह सबपार्सर ऑब्जेक्ट जिसे विस्तारित करना है।
+    """"""
+    spec_parser = root_subparsers.add_parser('spec', help='स्पेक संबंधित कमांड')
+    spec_parser.add_argument('--option1', help='स्पेक विकल्प 1')
+    spec_parser.add_argument('--option2', help='स्पेक विकल्प 2')",none,english,"hindi, english",
+62ece4982e6aefcf4aabbd64,"def strip_root(path, root):
+    """"""
+    पथ से रूट को हटाएं, और यदि यह विफल होता है, तो अपवाद फेंकें।
+    """"""
+    if not path.startswith(root):
+        raise ValueError(f""Path '{path}' does not start with root '{root}'"")
+    return path[len(root):]",none,english,english,

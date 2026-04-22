@@ -1,0 +1,4816 @@
+id,generated_code,comments,identifiers,literals,notes
+62e60f43d76274f8a4026e28,"from datetime import time, timedelta
+import pytz
+
+def hydrate_time(nanoseconds, tz=None):
+    """"""
+    Idratatore per valori di `Time` e `LocalTime`.
+
+    :param nanoseconds: Il tempo in nanosecondi.
+    :param tz: Il fuso orario (timezone) opzionale.
+    :return: Un oggetto `time` con il tempo calcolato.
+    """"""
+    # Convert nanoseconds to seconds
+    seconds = nanoseconds / 1e9
+    
+    # Calculate hours, minutes, seconds, and microseconds
+    hours = int(seconds // 3600)
+    seconds %= 3600
+    minutes = int(seconds // 60)
+    seconds %= 60
+    microseconds = int((seconds - int(seconds)) * 1e6)
+    seconds = int(seconds)
+    
+    # Create a time object
+    time_obj = time(hour=hours, minute=minutes, second=seconds, microsecond=microseconds)
+    
+    # If timezone is provided, localize the time
+    if tz:
+        tz_obj = pytz.timezone(tz)
+        time_obj = tz_obj.localize(time_obj)
+    
+    return time_obj",english,english,none,
+62e60f3bd76274f8a4026e10,"from datetime import timedelta
+
+def dehydrate_timedelta(value):
+    """"""
+    Deidratatore per valori di tipo `timedelta`.
+
+    :param value: Un oggetto di tipo `timedelta`.
+    :type value: timedelta
+    :return: Un dizionario contenente i giorni, secondi e microsecondi del `timedelta`.
+    :rtype: dict
+    """"""
+    if not isinstance(value, timedelta):
+        raise TypeError(""Il parametro 'value' deve essere di tipo 'timedelta'."")
+    
+    return {
+        'days': value.days,
+        'seconds': value.seconds,
+        'microseconds': value.microseconds
+    }",none,english,italian,
+62e60f37d76274f8a4026dfd,"from datetime import time
+
+def dehydrate_time(value):
+    """"""
+    Disidratatore per valori di tipo `time`.
+
+    :param value: 
+    :type value: Time
+    :return: String representation of the time in 'HH:MM:SS' format.
+    :rtype: str
+    """"""
+    if not isinstance(value, time):
+        raise TypeError(""Expected a time object"")
+    
+    return value.strftime('%H:%M:%S')",none,english,english,
+62e60f33d76274f8a4026de9,"def dehydrate_point(value):
+    """"""
+    Deidratatore per i dati di tipo `Point`.
+
+    :param value: Un oggetto di tipo `Point`.
+    :type value: Point
+    :return: Un dizionario con le coordinate x e y del punto.
+    :rtype: dict
+    """"""
+    return {'x': value.x, 'y': value.y}",none,english,none,
+62e60ed4d76274f8a4026da0,"def keys(self):
+    """"""
+    Restituisce le chiavi del record.
+
+    :return: lista dei nomi delle chiavi
+    """"""
+    return list(self.__dict__.keys())",none,english,none,
+62e60ecfd76274f8a4026d6a,"def protocol_handlers(cls, protocol_version=None):
+    """"""
+    Restituisce un dizionario dei gestori del protocollo Bolt disponibili, indicizzati da una tupla che rappresenta la versione. Se viene fornita una versione di protocollo esplicita, il dizionario conterrà zero o un elemento, a seconda che quella versione sia supportata o meno. Se non viene fornita alcuna versione di protocollo, verranno restituite tutte le versioni disponibili.
+
+    :param protocol_version: tupla che identifica una specifica versione del protocollo
+        (ad esempio, (3, 5)) oppure None
+    :return: dizionario che associa tuple di versione alla classe del gestore per tutte
+        le versioni del protocollo rilevanti e supportate
+    :raise TypeError: se la versione del protocollo non è passata come una tupla
+    """"""
+    # Esempio di gestori di protocollo disponibili
+    available_handlers = {
+        (3, 5): ""Bolt3_5Handler"",
+        (4, 0): ""Bolt4_0Handler"",
+        (4, 1): ""Bolt4_1Handler"",
+    }
+
+    if protocol_version is not None:
+        if not isinstance(protocol_version, tuple):
+            raise TypeError(""La versione del protocollo deve essere una tupla."")
+        if protocol_version in available_handlers:
+            return {protocol_version: available_handlers[protocol_version]}
+        else:
+            return {}
+    else:
+        return available_handlers",italian,english,italian,
+62e60e49d76274f8a4026d25,"from functools import wraps
+
+def unit_of_work(metadata=None, timeout=None):
+    """"""
+    Decorator for transaction functions that allows additional control over how the transaction is executed.
+
+    :param metadata: A dictionary with metadata. The specified metadata will be associated with the executing transaction and visible in the output of `dbms.listQueries` and `dbms.listTransactions` procedures. It will also be logged in the `query.log` file.
+    :type metadata: dict
+
+    :param timeout: The transaction timeout in seconds. Transactions that run longer than the configured timeout will be terminated by the database. This feature allows limiting the execution time of queries/transactions. The specified timeout overrides the default timeout configured in the database using the `dbms.transaction.timeout` setting. The value must not represent a negative duration. A duration of zero will allow the transaction to run indefinitely. A value of `None` will use the default timeout configured in the database.
+    :type timeout: float or None
+    """"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Here you would typically integrate with a transaction management system
+            # For example, in Neo4j, you might use the session or transaction context
+            # This is a simplified example
+            if metadata is not None:
+                kwargs['metadata'] = metadata
+            if timeout is not None:
+                kwargs['timeout'] = timeout
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator",english,english,none,
+62e60e05d76274f8a4026cfd,"def index(self, key):
+    """"""
+    Restituisce l'indice dell'elemento specificato.
+
+    :param key: una chiave  
+    :return: indice  
+    :rtype: int
+    """"""
+    for i, item in enumerate(self):
+        if item == key:
+            return i
+    raise ValueError(f""{key} not found in the list"")",none,english,english,
+62e60da4d76274f8a4026cf1,"def values(self, *keys):
+    """"""
+    Restituisce i valori del record, con la possibilità di filtrare per includere solo determinati valori in base all'indice o alla chiave.
+
+    :param keys: indici o chiavi degli elementi da includere; se non viene fornito nessun parametro, verranno inclusi tutti i valori  
+    :return: lista di valori  
+    :rtype: list
+    """"""
+    if not keys:
+        return list(self.__dict__.values())
+    else:
+        return [self.__dict__.get(key) for key in keys]",none,english,none,
+62e60b10d76274f8a4026ccd,"def data(self, *keys):
+    """"""
+    Restituisce le chiavi e i valori di questo record come un dizionario, includendo opzionalmente solo determinati valori in base all'indice o alla chiave. 
+    Le chiavi fornite negli elementi che non sono presenti nel record verranno inserite con un valore di :const:`None`; 
+    gli indici forniti che sono fuori dai limiti genereranno un'eccezione :exc:`IndexError`.
+
+    :param keys: indici o chiavi degli elementi da includere; se non ne vengono forniti, verranno inclusi tutti i valori  
+    :return: dizionario dei valori, indicizzati per nome del campo  
+    :raises: :exc:`IndexError` se viene specificato un indice fuori dai limiti  
+    """"""
+    result = {}
+    if not keys:
+        # Se non vengono fornite chiavi, restituisci tutti i valori
+        for key in self.__dict__:
+            result[key] = self.__dict__[key]
+    else:
+        for key in keys:
+            if isinstance(key, int):
+                # Se la chiave è un indice, verifica che sia valido
+                if key < 0 or key >= len(self.__dict__):
+                    raise IndexError(""Indice fuori dai limiti"")
+                # Converti l'indice in una chiave
+                key = list(self.__dict__.keys())[key]
+            # Aggiungi la chiave al risultato, anche se non esiste
+            result[key] = self.__dict__.get(key, None)
+    return result",italian,english,italian,
+62e6087bd76274f8a4026bfa,"def pop_u16(self):
+    """"""
+    Rimuove gli ultimi due byte da `self.data`, restituendoli come un intero senza segno a 16 bit in formato big-endian.
+    """"""
+    if len(self.data) < 2:
+        raise ValueError(""Not enough bytes in data to pop a 16-bit unsigned integer."")
+    
+    # Estrai gli ultimi due byte
+    byte1, byte2 = self.data[-2], self.data[-1]
+    
+    # Rimuovi gli ultimi due byte da self.data
+    self.data = self.data[:-2]
+    
+    # Combina i due byte in un intero a 16 bit in formato big-endian
+    return (byte1 << 8) | byte2",italian,english,english,
+62e6087ad76274f8a4026bf2,"def discard(self, n=-1, qid=-1, dehydration_hooks=None, hydration_hooks=None, **handlers):
+    """"""
+    Aggiunge un messaggio DISCARD alla coda di output.
+
+    :param n: numero di record da scartare, valore predefinito = -1 (TUTTI)
+    :param qid: ID della query per cui scartare, valore predefinito = -1 (ultima query)
+    :param dehydration_hooks:
+        Hook per disidratare i tipi (dizionario da tipo (classe) a funzione di disidratazione).
+        Le funzioni di disidratazione ricevono il valore e restituiscono un oggetto di tipo
+        comprensibile da packstream.
+    :param hydration_hooks:
+        Hook per idratare i tipi (mappatura da tipo (classe) a funzione di idratazione).
+        Le funzioni di idratazione ricevono il valore di un tipo comprensibile da packstream
+        e possono restituire qualsiasi cosa.
+    :param handlers: funzioni gestore passate all'oggetto Response restituito
+    """"""
+    # Creazione del messaggio DISCARD
+    discard_message = {
+        ""type"": ""DISCARD"",
+        ""n"": n,
+        ""qid"": qid,
+        ""dehydration_hooks"": dehydration_hooks if dehydration_hooks else {},
+        ""hydration_hooks"": hydration_hooks if hydration_hooks else {},
+        **handlers
+    }
+    
+    # Aggiunta del messaggio alla coda di output
+    self.output_queue.append(discard_message)
+    
+    # Restituzione dell'oggetto Response
+    return Response(handlers=handlers)",italian,english,none,
+62e60879d76274f8a4026bec,"def begin(self, mode=None, bookmarks=None, metadata=None, timeout=None,
+          db=None, imp_user=None, dehydration_hooks=None,
+          hydration_hooks=None, **handlers):
+    """"""
+    Aggiunge un messaggio BEGIN alla coda di output.
+
+    :param mode: modalità di accesso per il routing - ""READ"" o ""WRITE"" (predefinito)
+    :param bookmarks: iterabile di valori di segnalibro dopo i quali questa transazione dovrebbe iniziare
+    :param metadata: dizionario di metadati personalizzati da allegare alla transazione
+    :param timeout: timeout per l'esecuzione della transazione (in secondi)
+    :param db: nome del database su cui avviare la transazione
+        Richiede Bolt 4.0+.
+    :param imp_user: l'utente da impersonare
+        Richiede Bolt 4.4+.
+    :param dehydration_hooks:
+        Hook per disidratare i tipi (dizionario da tipo (classe) a funzione di disidratazione).
+        Le funzioni di disidratazione ricevono il valore e restituiscono un oggetto di tipo
+        compreso da packstream.
+    :param hydration_hooks:
+        Hook per idratare i tipi (mappatura da tipo (classe) a funzione di idratazione).
+        Le funzioni di idratazione ricevono il valore di tipo compreso da packstream
+        e possono restituire qualsiasi cosa.
+    :param handlers: funzioni gestore passate all'oggetto Response restituito
+    :return: oggetto Response
+    """"""
+    # Create the BEGIN message
+    begin_message = {
+        ""mode"": mode,
+        ""bookmarks"": list(bookmarks) if bookmarks else None,
+        ""metadata"": metadata,
+        ""timeout"": timeout,
+        ""db"": db,
+        ""imp_user"": imp_user,
+        ""dehydration_hooks"": dehydration_hooks,
+        ""hydration_hooks"": hydration_hooks,
+        **handlers
+    }
+    
+    # Add the BEGIN message to the output queue
+    self.output_queue.append((""BEGIN"", begin_message))
+    
+    # Create and return a Response object
+    response = Response(handlers)
+    return response",english,english,none,
+62e60723d76274f8a4026b75,"def round_half_to_even(n):
+    """"""
+    Rounds a number to the nearest integer, with ties (i.e., 0.5) rounded to the nearest even integer.
+
+    Args:
+        n (float or int): The number to round.
+
+    Returns:
+        int: The rounded integer.
+    """"""
+    if n % 1 == 0.5:
+        # If the fractional part is exactly 0.5, round to the nearest even integer
+        if int(n) % 2 == 0:
+            return int(n)
+        else:
+            return int(n) + 1
+    else:
+        # Otherwise, round to the nearest integer
+        return round(n)",english,english,none,
+62e60707d76274f8a4026b69,"def point_type(name, fields, srid_map):
+    """"""
+    Crea dinamicamente una sottoclasse di Point.
+
+    :param name: Nome della sottoclasse da creare.
+    :param fields: Lista di campi (attributi) da aggiungere alla sottoclasse.
+    :param srid_map: Dizionario che mappa i nomi dei campi ai rispettivi SRID.
+    :return: La sottoclasse creata.
+    """"""
+    from shapely.geometry import Point
+
+    class DynamicPoint(Point):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            for field in fields:
+                setattr(self, field, kwargs.get(field))
+            self.srid_map = srid_map
+
+        def __repr__(self):
+            fields_repr = ', '.join(f""{field}={getattr(self, field)}"" for field in fields)
+            return f""{name}({fields_repr}, srid_map={self.srid_map})""
+
+    DynamicPoint.__name__ = name
+    return DynamicPoint",none,english,none,
+62e5dc9ed76274f8a4026b5b,"import warnings
+
+def deprecated(message):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            warnings.warn(f""{func.__name__} is deprecated: {message}"", DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator",none,english,none,
+62e4fc3c85ea98643089041e,"def _inline_r_setup(code: str) -> str:
+    """"""
+    Alcuni comportamenti di R non possono essere configurati tramite variabili di ambiente, ma possono essere configurati solo tramite opzioni di R una volta che R è stato avviato. Questi vengono impostati qui.
+    """"""
+    setup_code = """"""
+    options(
+        repos = c(CRAN = ""https://cloud.r-project.org/""),
+        warn = 1,
+        stringsAsFactors = FALSE,
+        encoding = ""UTF-8""
+    )
+    """"""
+    return f""{setup_code}\n{code}""",none,english,none,
+62e4fbda85ea986430890405,"import subprocess
+import sys
+import os
+from typing import Sequence, Any, Tuple
+
+def xargs(
+        cmd: tuple[str, ...],
+        varargs: Sequence[str],
+        *,
+        color: bool = False,
+        target_concurrency: int = 1,
+        _max_length: int = _get_platform_max_length(),
+        **kwargs: Any,
+) -> tuple[int, bytes]:
+    """"""
+    Un'implementazione semplificata di xargs.
+
+    - **color**: Crea un pty se si è su una piattaforma che lo supporta.
+    - **target_concurrency**: Numero target di partizioni da eseguire in parallelo.
+    """"""
+    if color and sys.platform != ""win32"":
+        import pty
+        master, slave = pty.openpty()
+        kwargs['stdout'] = slave
+        kwargs['stderr'] = slave
+
+    processes = []
+    for i in range(0, len(varargs), target_concurrency):
+        chunk = varargs[i:i + target_concurrency]
+        process = subprocess.Popen(
+            cmd + tuple(chunk),
+            **kwargs
+        )
+        processes.append(process)
+
+    for process in processes:
+        process.wait()
+
+    if color and sys.platform != ""win32"":
+        os.close(slave)
+        output = os.read(master, _max_length)
+        os.close(master)
+    else:
+        output = b""""
+
+    return (0, output)
+
+def _get_platform_max_length() -> int:
+    if sys.platform == ""win32"":
+        return 8192
+    else:
+        return 65536",none,english,none,
+62e4fbda85ea986430890403,"import random
+
+def _shuffled(seq: Sequence[str]) -> list[str]:
+    """"""Mescolamento deterministico""""""
+    # Create a copy of the sequence to avoid modifying the original
+    seq_copy = list(seq)
+    # Use a fixed seed for deterministic shuffling
+    random.seed(42)
+    # Shuffle the sequence
+    random.shuffle(seq_copy)
+    return seq_copy",english,english,none,
+62e4fb6585ea98643089032b,"def parse_version(s: str) -> tuple[int, ...]:
+    """"""
+    Parses a version string into a tuple of integers for simplified version comparison.
+
+    Args:
+        s (str): The version string to parse.
+
+    Returns:
+        tuple[int, ...]: A tuple of integers representing the version.
+    """"""
+    return tuple(map(int, s.split('.')))",none,english,none,
+62e4fb4d85ea9864308902e7,"def normalize_cmd(cmd: tuple[str, ...]) -> tuple[str, ...]:
+    """"""
+    Normalizes the command tuple to handle issues with shebangs and paths on Windows.
+
+    Args:
+        cmd: A tuple of strings representing the command and its arguments.
+
+    Returns:
+        A normalized tuple of strings that can be used to execute the command correctly on Windows.
+    """"""
+    if not cmd:
+        return cmd
+
+    # Handle shebang lines by extracting the interpreter path
+    first_arg = cmd[0]
+    if first_arg.startswith('#!'):
+        # Split the shebang line into parts
+        shebang_parts = first_arg.split()
+        if len(shebang_parts) > 1:
+            # The interpreter is the second part of the shebang line
+            interpreter = shebang_parts[1]
+            # The rest of the command is the script and its arguments
+            script_and_args = cmd[1:]
+            # Return the normalized command with the interpreter and script
+            return (interpreter,) + script_and_args
+
+    # If no shebang, return the command as is
+    return cmd",english,english,none,
+62b8d27a48ba5a41d1c3f4c6,"from functools import wraps
+
+def cached(cache, key=hashkey, lock=None):
+    """"""
+    Decorator per racchiudere una funzione con un callable di memoizzazione che salva  
+    i risultati in una cache.
+    """"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            cache_key = key(*args, **kwargs)
+            if lock:
+                with lock:
+                    if cache_key in cache:
+                        return cache[cache_key]
+                    result = func(*args, **kwargs)
+                    cache[cache_key] = result
+            else:
+                if cache_key in cache:
+                    return cache[cache_key]
+                result = func(*args, **kwargs)
+                cache[cache_key] = result
+            return result
+        return wrapper
+    return decorator",none,english,none,
+62b8d24048ba5a41d1c3f49f,"import time
+from functools import lru_cache, wraps
+
+def ttl_cache(maxsize=128, ttl=600, timer=time.monotonic, typed=False):
+    def decorator(func):
+        @lru_cache(maxsize=maxsize, typed=typed)
+        def cached_func(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            key = (args, frozenset(kwargs.items())) if typed else (args, tuple(kwargs.items()))
+            if key in wrapper._cache:
+                value, timestamp = wrapper._cache[key]
+                if timer() - timestamp < ttl:
+                    return value
+            result = cached_func(*args, **kwargs)
+            wrapper._cache[key] = (result, timer())
+            return result
+
+        wrapper._cache = {}
+        return wrapper
+    return decorator",none,english,none,
+62b8d23b48ba5a41d1c3f49a,"from functools import wraps
+from collections import OrderedDict
+
+def mru_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto richiamabile che memorizza
+    fino a `maxsize` risultati basandosi su un algoritmo di tipo Most Recently Used (MRU).
+    """"""
+    def decorator(func):
+        cache = OrderedDict()
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if typed:
+                key = (args, tuple((k, type(v)) for k, v in sorted(kwargs.items())))
+            else:
+                key = (args, tuple(sorted(kwargs.items())))
+
+            if key in cache:
+                # Move the accessed key to the end to mark it as recently used
+                cache.move_to_end(key)
+                return cache[key]
+
+            result = func(*args, **kwargs)
+            cache[key] = result
+
+            if len(cache) > maxsize:
+                # Remove the least recently used item
+                cache.popitem(last=False)
+
+            return result
+
+        return wrapper
+
+    return decorator",english,english,none,
+62b8d23948ba5a41d1c3f498,"from functools import lru_cache as _lru_cache
+
+def lru_cache(maxsize=128, typed=False):
+    """"""
+    Decorator per racchiudere una funzione con un oggetto callable che memorizza
+    fino a `maxsize` risultati basandosi su un algoritmo Least Recently Used (LRU).
+    """"""
+    return _lru_cache(maxsize=maxsize, typed=typed)",none,english,none,
+62b8d23748ba5a41d1c3f496,"from functools import wraps
+from collections import defaultdict, OrderedDict
+
+def lfu_cache(maxsize=128, typed=False):
+    def decorator(func):
+        cache = {}
+        frequency = defaultdict(int)
+        frequency_list = defaultdict(OrderedDict)
+        min_freq = 0
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if typed:
+                key = (args, tuple(sorted(kwargs.items())))
+            else:
+                key = args + tuple(sorted(kwargs.items()))
+
+            if key in cache:
+                # Increment the frequency of the key
+                freq = frequency[key]
+                frequency[key] += 1
+                del frequency_list[freq][key]
+                if not frequency_list[freq]:
+                    del frequency_list[freq]
+                    if freq == min_freq:
+                        min_freq += 1
+                frequency_list[freq + 1][key] = None
+                return cache[key]
+
+            result = func(*args, **kwargs)
+
+            if len(cache) >= maxsize:
+                # Remove the least frequently used item
+                lfu_key, _ = frequency_list[min_freq].popitem(last=False)
+                del cache[lfu_key]
+                del frequency[lfu_key]
+
+            cache[key] = result
+            frequency[key] = 1
+            frequency_list[1][key] = None
+            min_freq = 1
+
+            return result
+
+        return wrapper
+
+    return decorator",english,english,none,
+62b8d22f48ba5a41d1c3f488,"def popitem(self):
+    """"""
+    Rimuove e restituisce la coppia `(chiave, valore)` inserita per prima.
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    key = next(iter(self))
+    value = self[key]
+    del self[key]
+    return key, value",none,english,english,
+62b8d22a48ba5a41d1c3f47e,"def setdefault(self, key, default=None):
+    """"""
+    D.setdefault(k[,d]) -> D.get(k,d), imposta anche D[k]=d se k non è presente in D.
+    """"""
+    if key not in self:
+        self[key] = default
+    return self[key]",none,english,none,
+62b8d22948ba5a41d1c3f47c,"def get(self, key, default=None):
+    """"""
+    `D.get(k[, d]) -> D[k]` se `k` è presente in `D`, altrimenti `d`. Il valore predefinito di `d` è `None`.
+    """"""
+    try:
+        return self[key]
+    except KeyError:
+        return default",none,english,none,
+62b8d22548ba5a41d1c3f472,"def cachedmethod(cache, key=hashkey, lock=None):
+    """"""
+    Decorator per racchiudere un metodo di classe o di istanza con una funzione memoizzante che salva i risultati in una cache.
+
+    :param cache: La cache in cui memorizzare i risultati.
+    :param key: Funzione per generare la chiave di cache. Default è hashkey.
+    :param lock: Lock opzionale per sincronizzare l'accesso alla cache.
+    :return: Il metodo decorato con la funzionalità di caching.
+    """"""
+    def decorator(method):
+        def wrapper(self, *args, **kwargs):
+            cache_key = key(self, *args, **kwargs)
+            if lock:
+                with lock:
+                    if cache_key in cache:
+                        return cache[cache_key]
+                    result = method(self, *args, **kwargs)
+                    cache[cache_key] = result
+                    return result
+            else:
+                if cache_key in cache:
+                    return cache[cache_key]
+                result = method(self, *args, **kwargs)
+                cache[cache_key] = result
+                return result
+        return wrapper
+    return decorator",none,english,none,
+62b8c517e0d34b282c18122e,"def extostr(cls, e, max_level=30, max_path_level=5):
+    """"""
+    Formatta un'eccezione.
+    :param e: Qualsiasi istanza di eccezione.
+    :type e: Exception
+    :param max_level: Livello massimo dello stack delle chiamate (predefinito 30)
+    :type max_level: int
+    :param max_path_level: Livello massimo del percorso (predefinito 5)
+    :type max_path_level: int
+    :return: La stringa leggibile dell'eccezione
+    :rtype: str
+    """"""
+    import traceback
+    
+    # Estrai lo stack trace
+    stack_trace = traceback.format_exc()
+    
+    # Limita il numero di livelli dello stack
+    stack_lines = stack_trace.splitlines()
+    if len(stack_lines) > max_level:
+        stack_lines = stack_lines[:max_level]
+        stack_lines.append(""... (stack trace truncated)"")
+    
+    # Limita il numero di livelli del percorso
+    path_lines = []
+    for line in stack_lines:
+        if ""File"" in line and ""line"" in line:
+            parts = line.split("","")
+            if len(parts) > max_path_level:
+                parts = parts[:max_path_level]
+                parts.append(""... (path truncated)"")
+            line = "","".join(parts)
+        path_lines.append(line)
+    
+    # Unisci le linee in una singola stringa
+    formatted_trace = ""\n"".join(path_lines)
+    
+    # Aggiungi il messaggio dell'eccezione
+    result = f""{str(e)}\n{formatted_trace}""
+    
+    return result",italian,english,english,
+62b8bbbfe0d34b282c181210,"def append_text_to_file(file_name, text_buffer, encoding, overwrite=False):
+    """"""
+    Scrive nel file specificato il buffer di testo fornito.  
+    Crea il file se necessario.  
+    :param file_name: Nome del file.  
+    :type file_name: str  
+    :param text_buffer: Buffer di testo da scrivere.  
+    :type text_buffer: str  
+    :param encoding: La codifica da utilizzare.  
+    :type encoding: str  
+    :param overwrite: Se impostato a True, il file viene sovrascritto.  
+    :type overwrite: bool  
+    :return: Il numero di byte scritti o un valore inferiore a 0 in caso di errore.  
+    :rtype int  
+    """"""
+    try:
+        mode = 'w' if overwrite else 'a'
+        with open(file_name, mode, encoding=encoding) as file:
+            bytes_written = file.write(text_buffer)
+            return bytes_written
+    except Exception as e:
+        print(f""Errore durante la scrittura del file: {e}"")
+        return -1",none,english,italian,
+62b8bbbfe0d34b282c18120f,"def file_to_textbuffer(file_name, encoding):
+    """"""
+    Carica un file in un buffer di testo (UTF-8), utilizzando la codifica specificata durante la lettura.
+    ATTENZIONE: Questo metodo leggerà l'intero file IN MEMORIA.
+    :param file_name: Nome del file.
+    :type file_name: str
+    :param encoding: Codifica da utilizzare.
+    :type encoding: str
+    :return: Un buffer di testo o None in caso di errore.
+    :rtype: str
+    """"""
+    try:
+        with open(file_name, 'r', encoding=encoding) as file:
+            text_buffer = file.read()
+        return text_buffer
+    except Exception as e:
+        print(f""Errore durante la lettura del file: {e}"")
+        return None",none,english,italian,
+62b8bbbce0d34b282c18120d,"import os
+
+def is_file_exist(file_name):
+    """"""
+    Controlla se il nome del file esiste.
+    :param file_name: Nome del file.
+    :type file_name: str
+    :return: Restituisce True (esiste), False (non esiste o nome del file non valido).
+    :rtype: bool
+    """"""
+    if not isinstance(file_name, str) or not file_name:
+        return False
+    return os.path.isfile(file_name)",none,english,none,
+62b8b99de0d34b282c1811f8,"def _reset_logging(cls):
+    """"""
+    Reimposta la configurazione del logging al suo stato iniziale.
+    """"""
+    import logging
+    logging.root.handlers = []
+    logging.root.setLevel(logging.WARNING)",none,english,none,
+62b8b59feb7e40a82d2d1291,"def _getTargetClass(self):
+    """"""
+    Definire questo metodo per restituire l'implementazione in uso, 
+    senza il suffisso 'Py' o 'Fallback'.
+    """"""
+    class_name = self.__class__.__name__
+    if class_name.endswith('Py') or class_name.endswith('Fallback'):
+        return class_name[:-2] if class_name.endswith('Py') else class_name[:-8]
+    return class_name",none,english,none,
+62b8b590eb7e40a82d2d1275,"def _legacy_mergeOrderings(orderings):
+    """"""
+    Unisci più ordinamenti in modo che l'ordine all'interno di ciascun ordinamento venga preservato.
+
+    Gli ordinamenti sono vincolati in modo tale che, se un oggetto appare in due o più ordinamenti, il suffisso che inizia con l'oggetto deve essere presente in entrambi gli ordinamenti.
+
+    Ad esempio:
+
+    >>> _mergeOrderings([
+    ... ['x', 'y', 'z'],
+    ... ['q', 'z'],
+    ... [1, 3, 5],
+    ... ['z']
+    ... ])
+    ['x', 'y', 'q', 1, 3, 5, 'z']
+    """"""
+    from collections import defaultdict, deque
+
+    # Build a graph and in-degree count
+    graph = defaultdict(set)
+    in_degree = defaultdict(int)
+    all_nodes = set()
+
+    for ordering in orderings:
+        for i in range(len(ordering) - 1):
+            u, v = ordering[i], ordering[i + 1]
+            if v not in graph[u]:
+                graph[u].add(v)
+                in_degree[v] += 1
+            all_nodes.add(u)
+            all_nodes.add(v)
+        if ordering:
+            all_nodes.add(ordering[-1])
+
+    # Initialize queue with nodes having zero in-degree
+    queue = deque([node for node in all_nodes if in_degree[node] == 0])
+
+    # Perform topological sort
+    result = []
+    while queue:
+        u = queue.popleft()
+        result.append(u)
+        for v in graph[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                queue.append(v)
+
+    # Check for cycles (if any node still has in-degree > 0)
+    if len(result) != len(all_nodes):
+        raise ValueError(""Input orderings contain a cycle or are inconsistent."")
+
+    return result",english,english,english,
+62b8b58deb7e40a82d2d1269,"def directlyProvidedBy(object):  # pylint:disable=redefined-builtin
+    """"""Restituisce le interfacce direttamente fornite dall'oggetto dato.
+
+    Il valore restituito è un `~zope.interface.interfaces.IDeclaration`.
+    """"""
+    provides = getattr(object, ""__provides__"", None)
+    if (
+            provides is None  # nessuna specifica
+            # Potremmo aver ottenuto la specifica ""implements"", come
+            # ottimizzazione. In tal caso, è come avere una sola base, che
+            # escludiamo per evitare dichiarazioni fornite dalla classe:
+            or getattr(provides, ""__class__"", None) is None
+    ):
+        return None
+    return provides",italian,english,none,
+62b8b559eb7e40a82d2d11f8,"def minimalBases(classes):
+    """"""
+    Riduce una lista di classi base al suo equivalente minimo ordinato.
+    """"""
+    # Create a set to store unique classes
+    unique_classes = set()
+    
+    # Iterate through the list of classes
+    for cls in classes:
+        # Check if the class is already in the set
+        if not any(issubclass(cls, existing_cls) for existing_cls in unique_classes):
+            # Remove any existing classes that are subclasses of the current class
+            unique_classes = {existing_cls for existing_cls in unique_classes if not issubclass(existing_cls, cls)}
+            # Add the current class to the set
+            unique_classes.add(cls)
+    
+    # Return the sorted list of unique classes
+    return sorted(unique_classes, key=lambda x: x.__name__)",english,english,none,
+62b8b4b9eb7e40a82d2d1134,"def namesAndDescriptions(self, all=False):  # pylint:disable=redefined-builtin
+    """"""Restituisce i nomi e le descrizioni degli attributi definiti dall'interfaccia.""""""
+    if not all:
+        return [(name, desc) for name, desc in self.__dict__.items() if not name.startswith('_')]
+    else:
+        return [(name, desc) for name, desc in self.__dict__.items()]",none,english,none,
+62b8b416eb7e40a82d2d1129,"def names(self, all=False):  # pylint:disable=redefined-builtin
+    """"""Restituisce i nomi degli attributi definiti dall'interfaccia.""""""
+    if not all:
+        return [name for name in dir(self) if not name.startswith('_')]
+    else:
+        return [name for name in dir(self)]",none,english,none,
+62b8b3d6eb7e40a82d2d111c,"def _normalizeargs(sequence, output=None):
+    """"""
+    Normalizza gli argomenti della dichiarazione
+
+    Gli argomenti di normalizzazione possono contenere Dichiarazioni, tuple o singole
+    interfacce.
+
+    Qualsiasi cosa diversa da interfacce individuali o specifiche di implementazione verrà espansa.
+    """"""
+    if output is None:
+        output = []
+    
+    for item in sequence:
+        if isinstance(item, (list, tuple)):
+            _normalizeargs(item, output)
+        else:
+            output.append(item)
+    
+    return output",none,english,none,
+62b8b3d5eb7e40a82d2d1110,"def _c_optimizations_available():
+    """"""
+    Restituisce il modulo di ottimizzazione C, se disponibile, altrimenti un valore falso.
+
+    Se le ottimizzazioni sono richieste ma non disponibili, viene sollevata un'eccezione `ImportError`.
+
+    Questo non specifica se le ottimizzazioni debbano essere utilizzate o meno.
+    """"""
+    try:
+        import _c_optimizations
+        return _c_optimizations
+    except ImportError:
+        return False",none,english,none,
+62b8b3d4eb7e40a82d2d110f,"def _should_attempt_c_optimizations():
+    """"""
+    Restituisce un valore vero se dovremmo tentare di utilizzare le ottimizzazioni in C.
+
+    Questo tiene conto del fatto che stiamo utilizzando PyPy e del valore della variabile di ambiente
+    ``PURE_PYTHON``, come definito in `_use_c_impl`.
+    """"""
+    import os
+    import platform
+
+    # Controlla se stiamo eseguendo su PyPy
+    is_pypy = platform.python_implementation() == ""PyPy""
+
+    # Controlla la variabile di ambiente PURE_PYTHON
+    pure_python = os.getenv(""PURE_PYTHON"", """").lower() in (""1"", ""true"", ""yes"")
+
+    # Tentiamo le ottimizzazioni in C solo se non siamo su PyPy e PURE_PYTHON non è impostato
+    return not is_pypy and not pure_python",italian,english,none,
+62b8b3d4eb7e40a82d2d110e,"def _c_optimizations_ignored():
+    """"""
+    L'opposto di `_c_optimizations_required`.
+    """"""
+    return not _c_optimizations_required()",none,english,none,
+62b8b3d4eb7e40a82d2d110d,"def _c_optimizations_required():
+    """"""
+    Restituisce un valore vero se le ottimizzazioni in C sono richieste.
+
+    Questo utilizza la variabile ``PURE_PYTHON`` come     
+    documentato in `_use_c_impl`.
+    """"""
+    import os
+    return not os.environ.get('PURE_PYTHON', '').lower() in ('1', 'true', 'yes')",none,english,none,
+62b87b989a0c4fa8b80b35ee,"def reset(self):
+    """"""
+    Reimposta l'istogramma.
+
+    Il contesto attuale viene reimpostato a un dizionario vuoto.
+    I bin vengono reinizializzati con il *valore_iniziale*
+    o con *make_bins()* (a seconda dell'inizializzazione).
+    """"""
+    self.context = {}
+    if hasattr(self, 'valore_iniziale'):
+        self.bins = [self.valore_iniziale] * len(self.bins)
+    else:
+        self.bins = self.make_bins()",none,english,none,
+62b87b859a0c4fa8b80b35d7,"def to_csv(self, separator="","", header=None):
+    """"""
+    Converts the points of the graph into CSV format.
+
+    Args:
+        separator (str): Delimiter for values, default is a comma.
+        header (str, optional): If not None, this string is the first line of the output 
+                                (a newline is automatically added).
+
+    Returns:
+        str: The CSV representation of the graph.
+    """"""
+    csv_lines = []
+    
+    # Add header if provided
+    if header is not None:
+        csv_lines.append(header)
+    
+    # Convert each point to CSV format
+    for point in self.points:
+        # Convert coordinates to string
+        coords_str = separator.join(map(str, point.coordinates))
+        # Convert value parts to string
+        value_str = separator.join(map(str, point.value))
+        # Combine coordinates and value
+        csv_line = f""{coords_str}{separator}{value_str}""
+        csv_lines.append(csv_line)
+    
+    # Join all lines with newline characters
+    return ""\n"".join(csv_lines)",english,english,none,
+62b87b839a0c4fa8b80b35cb,"def _get_err_indices(self, coord_name):
+    """"""
+    Ottieni gli indici di errore corrispondenti a una coordinata.
+    """"""
+    # Assuming self.errors is a dictionary where keys are coordinate names
+    # and values are lists of error indices.
+    if coord_name in self.errors:
+        return self.errors[coord_name]
+    else:
+        return []",english,english,none,
+62b87b7e9a0c4fa8b80b35bc,"def _update_context(self, context):
+    """"""
+    Aggiorna il *context* con le proprietà di questo grafo.
+
+    *context.error* viene aggiornato aggiungendo gli indici degli errori.
+    Esempio di subcontext per un grafo con i campi ""E,t,error_E_low"":
+    `{""error"": {""x_low"": {""index"": 2}}}`.
+    Nota che i nomi degli errori sono chiamati ""x"", ""y"" e ""z""
+    (questo corrisponde alle prime tre coordinate, se presenti),
+    il che consente di semplificare la rappresentazione grafica.
+    I valori esistenti non vengono rimossi
+    da *context.value* e dai suoi subcontesti.
+
+    Viene chiamato durante la ""distruzione"" del grafo (ad esempio,
+    nella classe :class:`.ToCSV`). Per ""distruzione"" si intende la conversione
+    in un'altra struttura (come il testo) nel flusso di lavoro.
+    L'oggetto grafo non viene realmente distrutto in questo processo.
+    """"""
+    if not hasattr(context, 'error'):
+        context.error = {}
+
+    # Assuming self has a property `error_indices` that contains the error indices
+    # and a property `coordinates` that contains the coordinate names (e.g., [""x"", ""y"", ""z""])
+    if hasattr(self, 'error_indices') and hasattr(self, 'coordinates'):
+        for i, error_index in enumerate(self.error_indices):
+            if i < len(self.coordinates):
+                coord_name = self.coordinates[i]
+                context.error[f""{coord_name}_low""] = {""index"": error_index}
+
+    # Ensure existing values in context.value are not removed
+    if not hasattr(context, 'value'):
+        context.value = {}
+
+    return context",english,english,none,
+62b87b4f9a0c4fa8b80b3580,"def integral(bins, edges):
+    """"""
+    Calcola l'integrale (scala per un istogramma).
+
+    *i bins* contengono i valori, mentre *gli edges* formano la griglia  
+    per l'integrazione.  
+    Il loro formato è definito nella descrizione della classe :class:`.histogram`.
+    """"""
+    integral_value = 0.0
+    for i in range(len(bins)):
+        bin_width = edges[i+1] - edges[i]
+        integral_value += bins[i] * bin_width
+    return integral_value",none,english,none,
+62b87b199a0c4fa8b80b354e,"def is_fill_request_seq(seq):
+    """"""
+    Verifica se *seq* può essere convertito in un oggetto di tipo FillRequestSeq.
+
+    Restituisce `True` solo se *seq* è un elemento di tipo FillRequest  
+    o contiene almeno un elemento di questo tipo,  
+    e non è una sequenza di tipo Source.
+    """"""
+    from collections.abc import Sequence
+    from typing import Type
+
+    # Supponiamo che FillRequest e Source siano classi definite altrove
+    FillRequest = Type('FillRequest')  # Placeholder per la classe FillRequest
+    Source = Type('Source')  # Placeholder per la classe Source
+
+    if isinstance(seq, FillRequest):
+        return True
+    elif isinstance(seq, Sequence) and not isinstance(seq, Source):
+        return any(isinstance(item, FillRequest) for item in seq)
+    else:
+        return False",italian,english,none,
+62b87b099a0c4fa8b80b3538,"def is_fill_request_el(obj):
+    """"""
+    L'oggetto contiene i metodi eseguibili `fill` e `request`.
+    """"""
+    return all(callable(getattr(obj, method, None)) for method in ['fill', 'request'])",none,english,none,
+62b87af99a0c4fa8b80b3524,"def is_run_el(obj):
+    """"""
+    Controlla se l'oggetto contiene il metodo eseguibile 'run'.
+    """"""
+    return callable(getattr(obj, 'run', None))",none,english,none,
+62b87af69a0c4fa8b80b351a,"def is_fill_compute_el(obj):
+    """"""
+    Verifica se l'oggetto contiene i metodi eseguibili 'fill' e 'compute'.
+    return callable(getattr(obj, 'fill', None)) and callable(getattr(obj, 'compute', None))
+    """"""
+    return callable(getattr(obj, 'fill', None)) and callable(getattr(obj, 'compute', None))",none,english,none,
+62b87af19a0c4fa8b80b34f7,"import copy
+
+def difference(d1, d2, level=-1):
+    """"""
+    Restituisce un dizionario con gli elementi di *d1* che non sono contenuti in *d2*.
+
+    Il parametro *level* definisce la profondità massima della ricorsione. Per una ricorsione infinita, impostare *level* a -1. Per livello 1, se una chiave è presente sia in *d1* che in *d2* ma ha valori diversi, viene inclusa nella differenza. Consulta la funzione :func:`intersection` per ulteriori dettagli.
+
+    *d1* e *d2* rimangono invariati. Tuttavia, *d1* o alcuni dei suoi sottodizionari potrebbero essere restituiti direttamente. Effettua una copia profonda (deep copy) del risultato quando appropriato.
+
+    .. versione aggiunta:: 0.5
+       Aggiunto il parametro *level*.
+    """"""
+    if level == 0:
+        return {}
+    
+    diff = {}
+    for key in d1:
+        if key not in d2:
+            diff[key] = copy.deepcopy(d1[key])
+        elif isinstance(d1[key], dict) and isinstance(d2[key], dict) and (level == -1 or level > 1):
+            sub_diff = difference(d1[key], d2[key], level - 1 if level != -1 else -1)
+            if sub_diff:
+                diff[key] = sub_diff
+        elif d1[key] != d2[key]:
+            diff[key] = copy.deepcopy(d1[key])
+    
+    return diff",none,english,none,
+62b87af09a0c4fa8b80b34f1,"def fill(self, coord, weight=1):
+    """"""
+    Riempie l'istogramma alla posizione *coord* con il peso specificato *weight*.
+    """"""
+    if coord in self.histogram:
+        self.histogram[coord] += weight
+    else:
+        self.histogram[coord] = weight",none,english,none,
+62b86aa3b4d922cb0e688d36,"import re
+from typing import Dict, List, Union
+
+class ValidationError(Exception):
+    def __init__(self, messages: List[Dict[str, str]]):
+        self.messages = messages
+        super().__init__(str(messages))
+
+def _validate_labels(labels: Dict[str, Union[str, List[str]]]) -> None:
+    """"""
+    Verifica che le chiavi e i valori nelle etichette fornite corrispondano alle rispettive espressioni regolari.
+
+    ### Argomenti:
+    - **labels (dict)**: il dizionario contenente le diverse etichette da validare.
+
+    ### Eccezioni:
+    - **ValidationError**: viene sollevata se una qualsiasi delle chiavi o dei valori delle etichette non corrisponde alla rispettiva espressione regolare. L'errore contiene come messaggio la lista di tutti gli errori che si sono verificati nelle etichette. Ogni elemento della lista è un dizionario con una coppia chiave-valore:
+      - **key**: la chiave dell'etichetta o il valore dell'etichetta per cui si è verificato un errore, come stringa.
+      - **value**: il messaggio di errore.
+    """"""
+    key_regex = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+    value_regex = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
+    errors = []
+
+    for key, value in labels.items():
+        # Validate key
+        if not isinstance(key, str):
+            errors.append({str(key): 'expected string or bytes-like object'})
+        elif not key_regex.match(key):
+            errors.append({key: f""Label key '{key}' does not match the regex {key_regex.pattern}""})
+
+        # Validate value
+        if isinstance(value, list):
+            for item in value:
+                if not isinstance(item, str):
+                    errors.append({str(item): 'expected string or bytes-like object'})
+                elif not value_regex.match(item):
+                    errors.append({item: f""Label value '{item}' does not match the regex {value_regex.pattern}""})
+        else:
+            if not isinstance(value, str):
+                errors.append({str(value): 'expected string or bytes-like object'})
+            elif not value_regex.match(value):
+                errors.append({value: f""Label value '{value}' does not match the regex {value_regex.pattern}""})
+
+    if errors:
+        raise ValidationError(errors)",english,english,english,
+62b86a9eb4d922cb0e688d25,"import re
+
+def _get_resource_name_regex():
+    """"""
+    Crea o restituisci le espressioni regolari utilizzate per convalidare il nome delle risorse Krake.
+
+    **Restituisce:**  
+        `(re.Pattern)`: le espressioni regolari compilate, utilizzate per convalidare il nome della risorsa.
+    """"""
+    # Definisci un pattern per convalidare i nomi delle risorse Krake
+    # Esempio: solo lettere minuscole, numeri e trattini, lunghezza tra 1 e 63 caratteri
+    pattern = r'^[a-z0-9-]{1,63}$'
+    return re.compile(pattern)",italian,english,none,
+62b86a4fb4d922cb0e688cf8,"import re
+
+def validate_value(value):
+    """"""
+    Convalida il valore fornito rispetto alla corrispondente espressione regolare.
+
+    Argomenti:
+        value: la stringa da convalidare
+
+    Eccezioni:
+        ValidationError: se il valore fornito non è conforme all'espressione regolare.
+    """"""
+    # Definisci l'espressione regolare per la convalida
+    # Esempio: accetta solo stringhe alfanumeriche con lunghezza tra 3 e 10 caratteri
+    pattern = re.compile(r'^[a-zA-Z0-9]{3,10}$')
+    
+    if not pattern.match(value):
+        raise ValidationError(""Il valore fornito non è conforme all'espressione regolare."")
+    
+    return True
+
+class ValidationError(Exception):
+    """"""Eccezione sollevata quando la convalida fallisce.""""""
+    pass",italian,english,italian,
+62b86a4fb4d922cb0e688cf7,"import re
+
+def validate_key(key):
+    """"""
+    Valida la chiave fornita rispetto alla corrispondente espressione regolare.
+
+    Argomenti:
+        key: la stringa da validare
+
+    Eccezioni:
+        ValidationError: se la chiave fornita non è conforme all'espressione regolare.
+    """"""
+    # Definisci l'espressione regolare per la validazione della chiave
+    # Esempio: la chiave deve essere composta da lettere minuscole e numeri, lunghezza 8-16 caratteri
+    pattern = re.compile(r'^[a-z0-9]{8,16}$')
+    
+    if not pattern.match(key):
+        raise ValidationError(""La chiave fornita non è conforme all'espressione regolare."")
+    
+    return True
+
+class ValidationError(Exception):
+    """"""Eccezione sollevata quando la validazione fallisce.""""""
+    pass",italian,english,italian,
+62b86a01b4d922cb0e688ccc,"def generate_default_observer_schema_dict(manifest_dict, first_level=False):
+    """"""
+    Generates a default observer schema dictionary based on the provided manifest dictionary.
+
+    Args:
+        manifest_dict (dict): Partial Kubernetes resources.
+        first_level (bool, optional): If True, indicates that the dictionary represents the entire observer_schema of a Kubernetes resource.
+
+    Returns:
+        dict: The generated partial observer_schema.
+    """"""
+    observer_schema = {}
+    
+    for key, value in manifest_dict.items():
+        if isinstance(value, dict):
+            observer_schema[key] = generate_default_observer_schema_dict(value)
+        elif isinstance(value, list):
+            observer_schema[key] = generate_default_observer_schema_list(value)
+        else:
+            if first_level and key in ['apiVersion', 'kind', 'metadata']:
+                observer_schema[key] = value
+            else:
+                observer_schema[key] = None
+    
+    return observer_schema
+
+def generate_default_observer_schema_list(manifest_list):
+    """"""
+    Generates a default observer schema list based on the provided manifest list.
+
+    Args:
+        manifest_list (list): Partial Kubernetes resources in list format.
+
+    Returns:
+        list: The generated partial observer_schema.
+    """"""
+    observer_schema = []
+    
+    for item in manifest_list:
+        if isinstance(item, dict):
+            observer_schema.append(generate_default_observer_schema_dict(item))
+        elif isinstance(item, list):
+            observer_schema.append(generate_default_observer_schema_list(item))
+        else:
+            observer_schema.append(None)
+    
+    return observer_schema",none,english,none,
+62b869ebb4d922cb0e688cc6,"def update_last_applied_manifest_list_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    Insieme alla funzione :func:``update_last_applied_manifest_dict_from_resp``, 
+    questa funzione viene chiamata ricorsivamente per aggiornare un 
+    ``last_applied_manifest`` parziale a partire da una risposta parziale di Kubernetes.
+
+    Argomenti:
+        last_applied_manifest (list): ``last_applied_manifest`` parziale in fase di aggiornamento.
+        observer_schema (list): ``observer_schema`` parziale.
+        response (list): risposta parziale dall'API di Kubernetes.
+
+    Questa funzione attraversa tutti i campi osservati e inizializza il loro valore 
+    in ``last_applied_manifest`` se non sono ancora presenti.
+    """"""
+    for i, (schema_item, resp_item) in enumerate(zip(observer_schema, response)):
+        if isinstance(schema_item, dict) and isinstance(resp_item, dict):
+            if i >= len(last_applied_manifest):
+                last_applied_manifest.append({})
+            update_last_applied_manifest_dict_from_resp(
+                last_applied_manifest[i], schema_item, resp_item
+            )
+        elif isinstance(schema_item, list) and isinstance(resp_item, list):
+            if i >= len(last_applied_manifest):
+                last_applied_manifest.append([])
+            update_last_applied_manifest_list_from_resp(
+                last_applied_manifest[i], schema_item, resp_item
+            )
+        else:
+            if i >= len(last_applied_manifest):
+                last_applied_manifest.append(resp_item)",none,english,none,
+62b869eab4d922cb0e688cc5,"def update_last_applied_manifest_dict_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    Aggiorna un last_applied_manifest parziale a partire da una risposta parziale di Kubernetes.
+
+    Args:
+        last_applied_manifest (dict): last_applied_manifest parziale in fase di aggiornamento.
+        observer_schema (dict): observer_schema parziale.
+        response (dict): risposta parziale dall'API di Kubernetes.
+
+    Raises:
+        KeyError: Se il campo osservato non è presente nella risposta di Kubernetes.
+    """"""
+    for key, schema in observer_schema.items():
+        if key not in response:
+            raise KeyError(f""Campo osservato '{key}' non presente nella risposta di Kubernetes."")
+        
+        if isinstance(schema, dict):
+            if key not in last_applied_manifest:
+                last_applied_manifest[key] = {}
+            update_last_applied_manifest_dict_from_resp(last_applied_manifest[key], schema, response[key])
+        elif isinstance(schema, list):
+            if key not in last_applied_manifest:
+                last_applied_manifest[key] = []
+            update_last_applied_manifest_list_from_resp(last_applied_manifest[key], schema, response[key])
+        else:
+            if key not in last_applied_manifest:
+                last_applied_manifest[key] = response[key]
+
+def update_last_applied_manifest_list_from_resp(
+    last_applied_manifest, observer_schema, response
+):
+    """"""
+    Aggiorna un last_applied_manifest parziale (lista) a partire da una risposta parziale di Kubernetes.
+
+    Args:
+        last_applied_manifest (list): last_applied_manifest parziale in fase di aggiornamento.
+        observer_schema (list): observer_schema parziale.
+        response (list): risposta parziale dall'API di Kubernetes.
+
+    Raises:
+        KeyError: Se il campo osservato non è presente nella risposta di Kubernetes.
+    """"""
+    for i, item in enumerate(response):
+        if i >= len(last_applied_manifest):
+            last_applied_manifest.append({})
+        if isinstance(observer_schema[0], dict):
+            update_last_applied_manifest_dict_from_resp(last_applied_manifest[i], observer_schema[0], item)
+        else:
+            last_applied_manifest[i] = item",none,english,italian,
+62b869eab4d922cb0e688cbf,"def generate_default_observer_schema(app):
+    """"""
+    Genera lo schema di osservazione predefinito per ogni risorsa Kubernetes presente in
+    ``spec.manifest`` per la quale non è stato specificato uno schema di osservazione personalizzato.
+
+    Argomenti:
+        app (krake.data.kubernetes.Application): L'applicazione per la quale generare uno
+            schema di osservazione predefinito.
+    """"""
+    default_schema = {
+        ""apiVersion"": ""v1"",
+        ""kind"": ""ObserverSchema"",
+        ""metadata"": {
+            ""name"": ""default-observer-schema"",
+            ""namespace"": app.metadata.namespace
+        },
+        ""spec"": {
+            ""rules"": [
+                {
+                    ""apiGroups"": [""*""],
+                    ""resources"": [""*""],
+                    ""verbs"": [""get"", ""list"", ""watch""]
+                }
+            ]
+        }
+    }
+
+    for resource in app.spec.manifest:
+        if not hasattr(resource, 'observer_schema'):
+            resource.observer_schema = default_schema
+
+    return app",none,english,none,
+62b43427903eeb48555d3ea5,"def format(
+        self,
+        sql: AnyStr,
+        params: Union[Dict[Union[str, int], Any], Sequence[Any]],
+) -> Tuple[AnyStr, Union[Dict[Union[str, int], Any], Sequence[Any]]]:
+    """"""
+    Converte la query SQL per utilizzare i parametri in stile ""out"" invece dei parametri in stile ""in"".
+
+    **sql** (:class:`str` o :class:`bytes`) è la query SQL.
+
+    Restituisce una :class:`tuple` contenente:
+    - La query SQL formattata (:class:`str` o :class:`bytes`).
+    - L'insieme dei parametri convertiti in stile ""out"" (:class:`dict` o :class:`list`).
+    """"""
+    if isinstance(params, dict):
+        # Convert dictionary-style params to out-style
+        out_params = {f""out_{key}"": value for key, value in params.items()}
+        # Replace placeholders in SQL with out-style placeholders
+        formatted_sql = sql
+        for key in params:
+            formatted_sql = formatted_sql.replace(f"":{key}"", f"":out_{key}"")
+    elif isinstance(params, (list, tuple)):
+        # Convert list-style params to out-style
+        out_params = [f""out_{i}"" for i in range(len(params))]
+        # Replace placeholders in SQL with out-style placeholders
+        formatted_sql = sql
+        for i in range(len(params)):
+            formatted_sql = formatted_sql.replace(f""?"", f"":out_{i}"", 1)
+    else:
+        raise TypeError(""params must be either a dict, list, or tuple"")
+
+    return formatted_sql, out_params",english,english,english,
+62b43428903eeb48555d3eaa,"def formatmany(
+        self,
+        sql: AnyStr,
+        many_params: Union[Iterable[Dict[Union[str, int], Any]], Iterable[Sequence[Any]]],
+) -> Tuple[AnyStr, Union[List[Dict[Union[str, int], Any]], List[Sequence[Any]]]]:
+    formatted_sql = sql
+    formatted_params = []
+
+    for params in many_params:
+        if isinstance(params, dict):
+            # Convert named parameters to out style
+            out_params = {f""out_{key}"": value for key, value in params.items()}
+            formatted_params.append(out_params)
+        elif isinstance(params, (list, tuple)):
+            # Convert ordinal parameters to out style
+            out_params = [f""out_{i}"" for i in range(len(params))]
+            formatted_params.append(out_params)
+        else:
+            raise TypeError(""params must be a Mapping or Sequence"")
+
+    return formatted_sql, formatted_params",english,english,english,
+62b45df05108cfac7f2109ce,"def validate(self, path):
+    """"""
+    Valida l'oggetto OCFL nel percorso specificato o nella radice di pyfs.
+    """"""
+    import os
+    from fs import open_fs
+
+    # Open the filesystem at the given path
+    fs = open_fs(path)
+
+    # Check if the required OCFL structure exists
+    if not fs.exists('0=ocfl_object_1.0'):
+        return False
+
+    # Validate the inventory file
+    if not fs.exists('inventory.json'):
+        return False
+
+    # Validate the manifest in the inventory
+    inventory_path = fs.getsyspath('inventory.json')
+    with open(inventory_path, 'r') as f:
+        import json
+        inventory = json.load(f)
+        if 'manifest' not in inventory:
+            return False
+
+    # Validate the content directory
+    if not fs.exists('content'):
+        return False
+
+    # If all checks pass, the object is valid
+    return True",english,english,none,
+62b45df15108cfac7f2109dc,"def status_str(self, prefix=''):
+    """"""
+    Restituisce una stringa che rappresenta lo stato del validatore, con un prefisso opzionale.
+    """"""
+    status = ""Valid"" if self.is_valid() else ""Invalid""
+    return f""{prefix}{status}""",none,english,english,
+62b45df15108cfac7f2109dd,"def status_str(self, prefix=''):
+    """"""
+    Restituisce la rappresentazione in formato stringa del registro di validazione, con un prefisso opzionale.
+    """"""
+    return f""{prefix}Validation Status: {self.status}""",none,english,none,
+62b45e135108cfac7f2109f4,"def is_valid(self, identifier):
+    """"""
+    Restituisce True se l'identificatore è valido, sempre True in questa implementazione di base.
+    """"""
+    return True",none,english,none,
+62b45e145108cfac7f210a07,"def validate(self, inventory, extract_spec_version=False):
+    """"""
+    Convalida un inventario specificato.
+
+    Se `extract_spec_version` è impostato su `True`, verrà esaminato il valore del tipo (`type`) 
+    per determinare la versione della specifica. Nel caso in cui non sia presente un valore per 
+    il tipo o questo non sia valido, verranno eseguiti altri test basati sulla versione specificata 
+    in `self.spec_version`.
+    """"""
+    if extract_spec_version:
+        if 'type' in inventory:
+            spec_type = inventory['type']
+            if spec_type in self.supported_spec_versions:
+                self.spec_version = spec_type
+            else:
+                print(""Invalid type value. Falling back to default spec version."")
+                self.spec_version = self.default_spec_version
+        else:
+            print(""No type value found. Falling back to default spec version."")
+            self.spec_version = self.default_spec_version
+    
+    # Perform validation based on the determined spec version
+    if self.spec_version == ""v1"":
+        self._validate_v1(inventory)
+    elif self.spec_version == ""v2"":
+        self._validate_v2(inventory)
+    else:
+        raise ValueError(f""Unsupported spec version: {self.spec_version}"")
+
+def _validate_v1(self, inventory):
+    """"""
+    Validate inventory against v1 specification.
+    """"""
+    # Example validation logic for v1
+    if 'name' not in inventory:
+        raise ValueError(""Inventory must have a 'name' field for v1 specification."")
+    # Add more validation rules as needed
+
+def _validate_v2(self, inventory):
+    """"""
+    Validate inventory against v2 specification.
+    """"""
+    # Example validation logic for v2
+    if 'id' not in inventory:
+        raise ValueError(""Inventory must have an 'id' field for v2 specification."")
+    # Add more validation rules as needed",english,english,english,
+62b45e145108cfac7f210a09,"def check_digests_present_and_used(self, manifest_files, digests_used):
+    """"""
+    Verifica che tutti i digest nel manifesto necessari siano presenti e utilizzati.
+    
+    :param manifest_files: Lista di file di manifesto che contengono i digest.
+    :param digests_used: Lista di digest che devono essere presenti e utilizzati.
+    :return: True se tutti i digest sono presenti e utilizzati, False altrimenti.
+    """"""
+    # Estrai tutti i digest dai file di manifesto
+    manifest_digests = set()
+    for file in manifest_files:
+        with open(file, 'r') as f:
+            for line in f:
+                if line.strip():  # Ignora righe vuote
+                    manifest_digests.add(line.strip())
+    
+    # Verifica che tutti i digest richiesti siano presenti nel manifesto
+    for digest in digests_used:
+        if digest not in manifest_digests:
+            return False
+    
+    return True",italian,english,none,
+62b45e165108cfac7f210a16,"def validate_as_prior_version(self, prior):
+    """"""
+    Verifica che ""prior"" sia una versione precedente valida dell'oggetto inventario corrente.
+
+    La variabile di input ""prior"" deve essere un oggetto di tipo InventoryValidator
+    e si presume che sia l'inventario corrente (self) sia l'inventario ""prior"" siano stati
+    verificati per coerenza interna.
+    """"""
+    if not isinstance(prior, InventoryValidator):
+        raise TypeError(""prior must be an instance of InventoryValidator"")
+    
+    # Add logic to compare self and prior to ensure prior is a valid previous version
+    # For example, check if prior's timestamp is earlier than self's timestamp
+    if prior.timestamp >= self.timestamp:
+        raise ValueError(""prior must be an earlier version than the current inventory"")
+    
+    # Additional validation logic can be added here based on specific requirements
+    # For example, checking if certain fields in prior are consistent with self
+    
+    return True",english,english,english,
+62b45e165108cfac7f210a17,"def get_logical_path_map(inventory, version):
+    """"""
+    Ottiene una mappa dei percorsi logici nello stato verso i file su disco per una determinata versione nell'inventario.
+
+    Restituisce un dizionario: `logical_path_in_state -> set(content_files)`
+
+    Il set di `content_files` può includere riferimenti a file duplicati presenti in versioni successive rispetto alla versione descritta.
+    """"""
+    logical_path_map = {}
+    
+    for logical_path, versions in inventory.items():
+        if version in versions:
+            content_files = set()
+            for v in range(version, max(versions.keys()) + 1):
+                if v in versions:
+                    content_files.update(versions[v])
+            logical_path_map[logical_path] = content_files
+    
+    return logical_path_map",none,english,none,
+62b45e175108cfac7f210a19,"def validate_fixity(self, fixity, manifest_files):
+    """"""
+    Convalida l'attributo fixty block nell'inventario.
+
+    Controlla la struttura del blocco di fissità e assicurati che siano referenziati solo i file elencati nel manifesto.
+    """"""
+    if not isinstance(fixity, dict):
+        raise ValueError(""Il blocco di fissità deve essere un dizionario."")
+    
+    for file_name, checksum in fixity.items():
+        if file_name not in manifest_files:
+            raise ValueError(f""Il file '{file_name}' non è presente nel manifesto."")
+        
+        if not isinstance(checksum, str) or not checksum:
+            raise ValueError(f""Il checksum per il file '{file_name}' deve essere una stringa non vuota."")
+    
+    return True",none,english,italian,
+62b463153879012d19481498,"import os
+
+def files_list(path):
+    """"""
+    Restituisce i file nel percorso `path`.
+    """"""
+    if not os.path.exists(path):
+        raise FileNotFoundError(f""Path '{path}' does not exist."")
+    
+    if not os.path.isdir(path):
+        raise NotADirectoryError(f""'{path}' is not a directory."")
+    
+    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]",none,english,english,
+62b463153879012d1948149a,"def _group_files_by_xml_filename(source, xmls, files):
+    """"""
+    Raggruppa i file per il nome base degli XML
+
+    Raggruppa i file in base al nome base degli XML e restituisce i dati in formato dizionario.
+
+    Parametri
+    ----------
+    source : str
+        Percorso della cartella o dell'archivio zip.
+    xmls : list
+        Lista dei nomi dei file XML.
+    files : list
+        Lista dei file presenti nella cartella o nell'archivio zip.
+
+    Ritorna
+    -------
+    dict
+        - chiave: nome dei file XML.
+        - valore: lista di file associati al nome XML.
+    """"""
+    grouped_files = {}
+    
+    for xml in xmls:
+        xml_base = xml.split('.')[0]  # Estrae il nome base senza estensione
+        grouped_files[xml] = [file for file in files if xml_base in file]
+    
+    return grouped_files",italian,english,none,
+62b463153879012d1948149b,"def match_file_by_prefix(prefix, file_path):
+    """"""
+    Identifica se un `file_path` appartiene a un pacchetto di documenti in base a un determinato `prefix`.
+
+    Restituisce `True` per i documenti che appartengono a un pacchetto.
+
+    Parametri
+    ----------
+    prefix : str  
+        Prefisso del nome del file  
+
+    file_path : str  
+        Percorso del file  
+    Restituisce
+    -------
+    bool  
+        `True` - il file appartiene al pacchetto
+    """"""
+    import os
+    file_name = os.path.basename(file_path)
+    return file_name.startswith(prefix)",none,english,none,
+62b463153879012d1948149c,"import os
+
+def select_filenames_by_prefix(prefix, files):
+    """"""
+    Ottieni i file che appartengono a un pacchetto di documenti.
+
+    Restituisce i file della lista `files` i cui nomi iniziano con il prefisso `prefix`.
+
+    Parametri
+    ----------
+    prefix : `str`  
+        Prefisso del nome del file.  
+
+    files : `list` di `str`  
+        Percorsi dei file.  
+
+    Ritorno
+    -------
+    list  
+        Percorsi dei file i cui nomi base corrispondono al prefisso specificato.  
+    """"""
+    selected_files = []
+    for file_path in files:
+        file_name = os.path.basename(file_path)
+        if file_name.startswith(prefix):
+            selected_files.append(file_path)
+    return selected_files",none,english,none,
+62b463153879012d1948149d,"import os
+from collections import defaultdict
+
+def _explore_folder(folder):
+    """"""
+    Ottiene i dati dei pacchetti dalla cartella
+
+    Raggruppa i file in base al loro nome base XML e restituisce i dati in formato dizionario.
+
+    Parametri
+    ----------
+    folder : str
+        Cartella del pacchetto
+
+    Restituisce
+    -------
+    dict
+        Dizionario con i file raggruppati per nome base XML
+    """"""
+    file_groups = defaultdict(list)
+    
+    for filename in os.listdir(folder):
+        if filename.endswith('.xml'):
+            base_name = os.path.splitext(filename)[0]
+            file_groups[base_name].append(os.path.join(folder, filename))
+    
+    return dict(file_groups)",none,english,none,
+62b463153879012d1948149f,"def _eval_file(prefix, file_path):
+    """"""
+    Identifica il tipo di file del pacchetto: `asset` o `rendition`.
+
+    Identifica il tipo di file del pacchetto e aggiorna `packages` con il tipo e
+    il percorso del file in analisi.
+
+    Parametri
+    ----------
+    prefix : str
+        Nome del file XML senza estensione.
+    file_path : str
+        Percorso completo del file.
+
+    Restituisce
+    -------
+    dict
+        Un dizionario contenente il tipo di file e il percorso del file.
+    """"""
+    import os
+
+    # Estrai il nome del file e la cartella dal percorso completo
+    filename = os.path.basename(file_path)
+    file_folder = os.path.dirname(file_path)
+
+    # Determina il tipo di file in base al prefisso
+    if prefix.startswith(""asset""):
+        file_type = ""asset""
+    elif prefix.startswith(""rendition""):
+        file_type = ""rendition""
+    else:
+        file_type = ""unknown""
+
+    # Crea il dizionario di ritorno
+    result = {
+        ""type"": file_type,
+        ""file_path"": file_path,
+        ""filename"": filename,
+        ""file_folder"": file_folder
+    }
+
+    return result",italian,english,none,
+62b463153879012d194814a1,"def add_rendition(self, lang, file_path):
+    """"""Add a new rendition of the document in a specific language.
+    
+    Args:
+        lang (str): The language code for the rendition (e.g., 'en' for English).
+        file_path (str): The file path to the rendition document.
+    """"""
+    if not hasattr(self, 'renditions'):
+        self.renditions = {}
+    self.renditions[lang] = file_path",none,english,none,
+62b463163879012d194814a2,"def add_asset(self, basename, file_path):
+    """"""
+    Adds an asset to the internal dictionary with the given basename and file path.
+    
+    Args:
+        basename (str): The base name of the asset (e.g., ""artigo02-gf03"").
+        file_path (str): The full path to the asset file.
+    
+    Returns:
+        None
+    """"""
+    if not hasattr(self, 'assets'):
+        self.assets = {}
+    
+    # Generate keys for different file formats
+    self.assets[f""{basename}.tiff""] = file_path.replace("".tiff"", "".tiff"")
+    self.assets[f""{basename}.jpg""] = file_path.replace("".tiff"", "".jpg"")
+    self.assets[f""{basename}.png""] = file_path.replace("".tiff"", "".png"")",english,english,none,
+62b463163879012d194814a4,"import zipfile
+import os
+from collections import defaultdict
+
+def _explore_zipfile(zip_path):
+    """"""
+    Ottiene i dati dei pacchetti dal percorso zip fornito.
+
+    Raggruppa i file in base al nome base dei loro file XML e restituisce i dati in formato dizionario.
+
+    Parametri
+    ----------
+    zip_path : str  
+        Percorso del file zip.
+
+    Restituisce
+    -------
+    dict
+        Un dizionario che raggruppa i file in base al nome base dei loro file XML.
+    """"""
+    grouped_files = defaultdict(list)
+    
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        for file_name in zip_ref.namelist():
+            base_name = os.path.basename(file_name)
+            if base_name.endswith('.xml'):
+                base_name_without_ext = os.path.splitext(base_name)[0]
+                grouped_files[base_name_without_ext].append(file_name)
+    
+    return dict(grouped_files)",none,english,none,
+62b463163879012d194814a6,"import zipfile
+
+def files_list_from_zipfile(zip_path):
+    """"""
+    Restituisce i file presenti in `zip_path`.
+
+    Esempio:
+
+    [
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200069.pdf',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200069.xml',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071.pdf',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071.xml',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf01.tif',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf02.tif',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf03.tif',
+        '2318-0889-tinf-33-0421/2318-0889-tinf-33-e200071-gf04.tif',
+    ]
+    """"""
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        return zip_ref.namelist()",none,english,none,
+62b4631b3879012d194814dd,"def correggi_prefisso_namespace_w(contenuto):
+    """"""
+    Converte il testo che di default è 'w:st=""' in 'w-st=""'.
+    """"""
+    return contenuto.replace('w:st=""', 'w-st=""')",none,english,none,
+62b463283879012d1948153d,"def match_pubdate(node, pubdate_xpaths):
+    """"""
+    Restituisce la prima corrispondenza nella lista `pubdate_xpaths`.
+    
+    :param node: L'elemento XML/HTML da cui cercare.
+    :param pubdate_xpaths: Lista di XPath per cercare la data di pubblicazione.
+    :return: La prima corrispondenza trovata, o None se nessuna corrispondenza è trovata.
+    """"""
+    for xpath in pubdate_xpaths:
+        result = node.xpath(xpath)
+        if result:
+            return result[0]
+    return None",none,english,none,
+62b463303879012d19481579,"def _extract_number_and_supplment_from_issue_element(issue):
+    """"""
+    Estrai i possibili valori di numero e supplemento dai issue.
+
+    Args:
+        issue (str): La stringa contenente il numero e il supplemento.
+
+    Returns:
+        tuple: Una tupla contenente il numero (int) e il supplemento (str, se presente, altrimenti None).
+    """"""
+    # Rimuovi eventuali spazi bianchi all'inizio e alla fine
+    issue = issue.strip()
+    
+    # Cerca un numero seguito da un supplemento (es. ""123A"")
+    if issue and issue[-1].isalpha():
+        number = issue[:-1]
+        supplement = issue[-1]
+        try:
+            number = int(number)
+            return number, supplement
+        except ValueError:
+            pass
+    
+    # Se non c'è un supplemento, prova a convertire l'intera stringa in un numero
+    try:
+        number = int(issue)
+        return number, None
+    except ValueError:
+        pass
+    
+    # Se non è possibile estrarre un numero, restituisci None per entrambi i valori
+    return None, None",italian,english,none,
+62b46740d2f69a53b466171a,"def pretty(self, indent=0, debug=False):
+    """"""
+    Restituisce una rappresentazione formattata in modo leggibile di sé stesso.
+    
+    obj = f""'{self.obj}'"" if isinstance(self.obj, str) else repr(self.obj)
+    debug_details = ""debug=True, "" if debug else """"
+    return ("" "" * indent) + f""{self.__class__.__name__}({debug_details}{obj})""
+    """"""
+    obj = f""'{self.obj}'"" if isinstance(self.obj, str) else repr(self.obj)
+    debug_details = ""debug=True, "" if debug else """"
+    return ("" "" * indent) + f""{self.__class__.__name__}({debug_details}{obj})""",none,english,none,
+62b46746d2f69a53b4661722,"def absorb(self, args):
+    """"""
+    Dato un insieme `args` di espressioni, restituisce una nuova lista di espressioni applicando l'assorbimento e l'assorbimento negativo.
+
+    Consulta https://en.wikipedia.org/wiki/Absorption_law
+
+    Assorbimento::
+
+        A & (A | B) = A, A | (A & B) = A
+
+    Assorbimento negativo::
+
+        A & (~A | B) = A & B, A | (~A & B) = A | B
+    """"""
+    def apply_absorption(expr):
+        if isinstance(expr, tuple):
+            if expr[0] == '&':
+                A, B = expr[1], expr[2]
+                if isinstance(B, tuple) and B[0] == '|' and B[1] == A:
+                    return A
+                if isinstance(B, tuple) and B[0] == '|' and isinstance(B[1], tuple) and B[1][0] == '~' and B[1][1] == A:
+                    return ('&', A, B[2])
+            elif expr[0] == '|':
+                A, B = expr[1], expr[2]
+                if isinstance(B, tuple) and B[0] == '&' and B[1] == A:
+                    return A
+                if isinstance(B, tuple) and B[0] == '&' and isinstance(B[1], tuple) and B[1][0] == '~' and B[1][1] == A:
+                    return ('|', A, B[2])
+        return expr
+
+    return [apply_absorption(expr) for expr in args]",none,english,none,
+62b86707b4d922cb0e688c2a,"def on(self, hook):
+    """"""
+    Funzione decorator per aggiungere un nuovo gestore al registro.
+
+    Argomenti:
+    - `hook` (HookType): Attributo del hook per il quale registrare il gestore.
+
+    Restituisce:
+    - `callable`: Decorator per registrare i listener per il hook specificato.
+    """"""
+    def decorator(func):
+        if not hasattr(self, '_hooks'):
+            self._hooks = {}
+        if hook not in self._hooks:
+            self._hooks[hook] = []
+        self._hooks[hook].append(func)
+        return func
+    return decorator",none,english,none,
+62b86729b4d922cb0e688c2f,"def base_config(user, etcd_host=""localhost"", etcd_port=2379):
+    """"""
+    Crea una configurazione con alcuni parametri semplici, che hanno un valore predefinito che può essere impostato.
+
+    Argomenti:
+    user (str): il nome dell'utente per l'autenticazione statica.
+    etcd_host (str): l'host per il database.
+    etcd_port (int): la porta per il database.
+
+    Ritorna:
+    dict: la configurazione creata.
+    """"""
+    config = {
+        ""user"": user,
+        ""etcd_host"": etcd_host,
+        ""etcd_port"": etcd_port
+    }
+    return config",none,english,none,
+62b8a4a4755ee91dce50a3d2,"def _fromutc(self, dt):
+    if dt.tzinfo is not self:
+        raise ValueError(""dt.tzinfo is not self"")
+    
+    # Convert the datetime to the new timezone
+    new_dt = dt.astimezone(self)
+    
+    # Check if the datetime is ambiguous in the new timezone
+    if self._is_ambiguous(new_dt):
+        # If ambiguous, set the fold attribute accordingly
+        new_dt = new_dt.replace(fold=1 if new_dt.fold else 0)
+    
+    return new_dt",english,english,english,
+62b8982f755ee91dce50a241,"def normalized(self):
+    """"""
+    Restituisce una versione di questo oggetto rappresentata interamente utilizzando valori interi per gli attributi relativi.
+
+    >>> relativedelta(days=1.5, hours=2).normalized()
+    relativedelta(days=+1, hours=+14)
+
+    :return:
+        Restituisce un oggetto di tipo :class:`dateutil.relativedelta.relativedelta`.
+    """"""
+    from dateutil.relativedelta import relativedelta
+
+    # Convert fractional days to hours
+    total_hours = int(self.days * 24) + self.hours
+    days = total_hours // 24
+    hours = total_hours % 24
+
+    # Create a new relativedelta object with integer values
+    return relativedelta(days=days, hours=hours, minutes=self.minutes, seconds=self.seconds,
+                         microseconds=self.microseconds, years=self.years, months=self.months)",english,english,none,
+62b89640755ee91dce50a114,"def tzname_in_python2(namefunc):
+    """"""
+    Modifica l'output unicode in stringhe di byte in Python 2
+
+    L'API tzname() è cambiata in Python 3. In precedenza restituiva stringhe di byte, ma è stata modificata per restituire stringhe unicode.
+    """"""
+    def wrapper(*args, **kwargs):
+        result = namefunc(*args, **kwargs)
+        if isinstance(result, unicode):
+            return result.encode('utf-8')
+        elif isinstance(result, tuple):
+            return tuple(item.encode('utf-8') if isinstance(item, unicode) else item for item in result)
+        return result
+    return wrapper",none,english,none,
+62b87d24d292efb640a55670,"def get_versions():
+    """"""
+    Ottieni le informazioni sulla versione o restituisci il valore predefinito se non è possibile ottenerle.
+    """"""
+    import sys
+    import platform
+    import subprocess
+
+    try:
+        # Ottieni la versione di Python
+        python_version = sys.version.split()[0]
+
+        # Ottieni la versione del sistema operativo
+        os_version = platform.platform()
+
+        # Ottieni la versione di pip (se disponibile)
+        try:
+            pip_version = subprocess.check_output([sys.executable, '-m', 'pip', '--version']).decode().split()[1]
+        except Exception:
+            pip_version = ""N/A""
+
+        return {
+            ""python_version"": python_version,
+            ""os_version"": os_version,
+            ""pip_version"": pip_version
+        }
+    except Exception:
+        return {
+            ""python_version"": ""N/A"",
+            ""os_version"": ""N/A"",
+            ""pip_version"": ""N/A""
+        }",italian,english,none,
+62b87d24d292efb640a5566f,"def render(pieces, style):
+    """"""
+    Renderizzare i pezzi forniti nella versione richiesta dello stile.
+
+    :param pieces: Lista di pezzi da renderizzare.
+    :param style: Stile di renderizzazione richiesto.
+    :return: Stringa rappresentante i pezzi renderizzati.
+    """"""
+    if style == ""plain"":
+        return ""\n"".join(pieces)
+    elif style == ""html"":
+        return ""<ul>\n"" + ""\n"".join(f""<li>{piece}</li>"" for piece in pieces) + ""\n</ul>""
+    elif style == ""json"":
+        import json
+        return json.dumps(pieces)
+    else:
+        raise ValueError(f""Stile non supportato: {style}"")",none,english,italian,
+62b87d24d292efb640a5566d,"def plus_or_dot(pezzi):
+    """"""
+    Restituisci un ""+"" se non è già presente, altrimenti restituisci un "".""
+    """"""
+    if '+' not in pezzi:
+        return '+'
+    else:
+        return '.'",none,english,none,
+62b87d23d292efb640a5566b,"import subprocess
+
+def run_command(comandi, argomenti, cwd=None, verbose=False, nascondi_stderr=False, env=None):
+    """"""
+    Esegui il comando specificato.
+
+    :param comandi: Lista di comandi da eseguire.
+    :param argomenti: Lista di argomenti da passare ai comandi.
+    :param cwd: Directory di lavoro corrente (opzionale).
+    :param verbose: Se True, stampa il comando eseguito (opzionale).
+    :param nascondi_stderr: Se True, nasconde l'output di stderr (opzionale).
+    :param env: Dizionario delle variabili d'ambiente (opzionale).
+    :return: Il risultato dell'esecuzione del comando.
+    """"""
+    command = comandi + argomenti
+    stderr = subprocess.DEVNULL if nascondi_stderr else subprocess.PIPE
+    
+    if verbose:
+        print(f""Esecuzione comando: {' '.join(command)}"")
+    
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        text=True
+    )
+    
+    if verbose:
+        print(f""Output: {result.stdout}"")
+        if result.stderr:
+            print(f""Errore: {result.stderr}"")
+    
+    return result",none,english,italian,
+62b87d23d292efb640a55668,"def get_config():
+    """"""
+    Crea, popola e restituisci l'oggetto VersioneerConfig()
+    """"""
+    from versioneer import VersioneerConfig
+
+    config = VersioneerConfig()
+    # Popola l'oggetto config con i valori necessari
+    config.VCS = ""git""
+    config.style = ""pep440""
+    config.versionfile_source = ""my_package/_version.py""
+    config.versionfile_build = ""my_package/_version.py""
+    config.tag_prefix = ""v""
+    config.parentdir_prefix = ""my_package-""
+
+    return config",italian,english,none,
+62b87d23d292efb640a55667,"def registra_gestore_vcs(vcs, metodo):  # decorator
+    """"""Crea un decorator per contrassegnare un metodo come gestore di un VCS.""""""
+    def decorator(func):
+        if not hasattr(func, '_vcs_gestori'):
+            func._vcs_gestori = {}
+        func._vcs_gestori[vcs] = metodo
+        return func
+    return decorator",none,english,none,
+62b45e945108cfac7f210a4a,"def validate_hierarchy(self, validate_objects=True, check_digests=True, show_warnings=False):
+    """"""
+    Valida la gerarchia di archiviazione.
+
+    Restituisce:
+        num_objects - numero di oggetti verificati
+        good_objects - numero di oggetti verificati che sono risultati validi
+    """"""
+    num_objects = 0
+    good_objects = 0
+    
+    # Simulate validation logic
+    if validate_objects:
+        # Example: Validate objects in the hierarchy
+        num_objects = 100  # Example number of objects
+        good_objects = 95   # Example number of valid objects
+    
+    if check_digests:
+        # Example: Check digests of objects
+        pass  # Add digest checking logic here
+    
+    if show_warnings:
+        # Example: Show warnings if any
+        pass  # Add warning logic here
+    
+    return num_objects, good_objects",english,english,none,
+62b45e515108cfac7f210a3c,"def initialize(self):
+    """"""
+    Crea e inizializza una nuova radice di archiviazione OCFL.
+    """"""
+    import os
+
+    # Crea la directory radice OCFL
+    os.makedirs(""ocfl_root"", exist_ok=True)
+
+    # Crea il file di dichiarazione OCFL
+    with open(os.path.join(""ocfl_root"", ""0=ocfl_object_1.0""), ""w"") as f:
+        f.write(""ocfl_1.0\n"")
+
+    # Crea la directory per gli oggetti OCFL
+    os.makedirs(os.path.join(""ocfl_root"", ""objects""), exist_ok=True)
+
+    # Crea il file di inventario
+    with open(os.path.join(""ocfl_root"", ""inventory.json""), ""w"") as f:
+        f.write('{""head"": ""v1"", ""versions"": {}}')
+
+    print(""Radice OCFL inizializzata con successo."")",italian,english,italian,
+62b45e2eb89c9fd354170232,"def next_version(version):
+    """"""
+    Prossimo identificatore di versione seguendo il modello esistente.
+
+    Deve gestire sia versioni con prefisso zero che versioni senza prefisso zero.
+    """"""
+    # Split the version into parts
+    parts = version.split('.')
+    
+    # Increment the last part
+    last_part = int(parts[-1]) + 1
+    
+    # Handle the case where the last part overflows (e.g., 9 -> 10)
+    if last_part > 9:
+        parts[-1] = '0'
+        if len(parts) > 1:
+            parts[-2] = str(int(parts[-2]) + 1)
+        else:
+            parts.insert(0, '1')
+    else:
+        parts[-1] = str(last_part)
+    
+    # Reconstruct the version string
+    return '.'.join(parts)",english,english,none,
+62b45e23e0d4551b0392c90a,"def validate_version_inventories(self, version_dirs):
+    """"""
+    Ogni versione DOVREBBE avere un inventario fino a quel punto.
+    Inoltre, tieni traccia di eventuali digest di contenuto diversi da quelli
+    presenti nell'inventario principale, in modo da poterli verificare
+    anche durante la validazione del contenuto.
+
+    version_dirs è un array di nomi di directory di versione e si presume
+    che sia in sequenza di versione (1, 2, 3...).
+    """"""
+    inventories = {}
+    for version_dir in version_dirs:
+        inventory_path = os.path.join(version_dir, ""inventory.json"")
+        if not os.path.exists(inventory_path):
+            raise FileNotFoundError(f""Inventory not found for version: {version_dir}"")
+        
+        with open(inventory_path, 'r') as f:
+            inventory = json.load(f)
+        
+        inventories[version_dir] = inventory
+        
+        # Check for discrepancies in content digests
+        if version_dir != version_dirs[0]:  # Skip the first version
+            previous_version = version_dirs[version_dirs.index(version_dir) - 1]
+            previous_inventory = inventories[previous_version]
+            
+            for key, value in inventory.items():
+                if key in previous_inventory and previous_inventory[key] != value:
+                    print(f""Warning: Content digest mismatch for {key} in {version_dir}"")
+    
+    return inventories",english,english,english,
+62b45e21e0d4551b0392c8ed,"import os
+
+def find_path_type(path):
+    """"""
+    Restituisce una stringa che indica il tipo di elemento presente nel percorso specificato.
+
+    Valori restituiti:
+        'root' - sembra essere una Radice di Archiviazione OCFL (OCFL Storage Root)
+        'object' - sembra essere un Oggetto OCFL (OCFL Object)
+        'file' - un file, potrebbe essere un inventario
+        altra stringa - descrive un errore o una spiegazione del problema
+
+    Si basa esclusivamente sui file ""0=*"" Namaste per determinare il tipo di directory.
+    """"""
+    if not os.path.exists(path):
+        return ""Il percorso specificato non esiste.""
+    
+    if os.path.isfile(path):
+        return ""file""
+    
+    if os.path.isdir(path):
+        namaste_files = [f for f in os.listdir(path) if f.startswith(""0="")]
+        if not namaste_files:
+            return ""La directory non contiene file Namaste.""
+        
+        namaste_file = namaste_files[0]
+        with open(os.path.join(path, namaste_file), 'r') as f:
+            content = f.read().strip()
+        
+        if content == ""ocfl_1.0"":
+            return ""root""
+        elif content.startswith(""ocfl_object_""):
+            return ""object""
+        else:
+            return f""Contenuto del file Namaste non riconosciuto: {content}""
+    
+    return ""Tipo di percorso non riconosciuto.""",none,english,italian,
+62b45b396decaeff903e1001,"def amend_bzparams(self, params, bug_ids):
+    """"""
+    Modifica i parametri di Bugzilla.
+
+    :param params: Dizionario contenente i parametri da modificare.
+    :param bug_ids: Lista di ID dei bug da aggiornare.
+    :return: True se l'operazione è riuscita, False altrimenti.
+    """"""
+    try:
+        for bug_id in bug_ids:
+            # Supponiamo che self.bz sia un'istanza di un client Bugzilla
+            self.bz.update_bug(bug_id, params)
+        return True
+    except Exception as e:
+        print(f""Errore durante la modifica dei parametri: {e}"")
+        return False",italian,english,italian,
+62b4567ed7d32e5b55cc83d9,"def deep_merge_nodes(nodes):
+    from ruamel.yaml.nodes import MappingNode, ScalarNode
+
+    merged_nodes = {}
+
+    for key_node, value_node in nodes:
+        key = key_node.value
+        if key in merged_nodes:
+            existing_value_node = merged_nodes[key]
+            if isinstance(existing_value_node, MappingNode) and isinstance(value_node, MappingNode):
+                # Deep merge the MappingNodes
+                existing_mapping = {k.value: v for k, v in existing_value_node.value}
+                new_mapping = {k.value: v for k, v in value_node.value}
+                for k, v in new_mapping.items():
+                    if k in existing_mapping and isinstance(existing_mapping[k], MappingNode) and isinstance(v, MappingNode):
+                        # Recursively merge nested MappingNodes
+                        existing_mapping[k] = deep_merge_nodes([(ScalarNode(tag='tag:yaml.org,2002:str', value=k), v)])
+                    else:
+                        # Overwrite or add new key-value pair
+                        existing_mapping[k] = v
+                merged_nodes[key] = MappingNode(
+                    tag='tag:yaml.org,2002:map',
+                    value=[(ScalarNode(tag='tag:yaml.org,2002:str', value=k), v) for k, v in existing_mapping.items()]
+                )
+            else:
+                # Overwrite with the new value_node if not both are MappingNodes
+                merged_nodes[key] = value_node
+        else:
+            # Add new key-value pair
+            merged_nodes[key] = value_node
+
+    return [(ScalarNode(tag='tag:yaml.org,2002:str', value=k), v] for k, v in merged_nodes.items()]",english,english,none,
+62b4567ad7d32e5b55cc83af,"import argparse
+
+def parse_arguments(*arguments):
+    """"""
+    Dati gli argomenti della riga di comando con cui è stato invocato questo script,
+    analizza gli argomenti e restituiscili come un'istanza di ArgumentParser.
+    """"""
+    parser = argparse.ArgumentParser(description=""Parse command line arguments."")
+    
+    # Example of adding arguments (customize as needed)
+    parser.add_argument('-f', '--file', type=str, help=""Path to the input file"")
+    parser.add_argument('-v', '--verbose', action='store_true', help=""Enable verbose output"")
+    
+    # Parse the arguments
+    args = parser.parse_args(arguments)
+    
+    return args",english,english,english,
+62b45679d7d32e5b55cc83a9,"def parser_flags(parser):
+    """"""
+    Dato un'istanza di argparse.ArgumentParser, restituisce le sue opzioni (flag) 
+    degli argomenti in una stringa separata da spazi.
+    """"""
+    flags = []
+    for action in parser._actions:
+        if action.option_strings:
+            flags.extend(action.option_strings)
+    return ' '.join(flags)",none,english,none,
+62b45665d7d32e5b55cc8365,"import argparse
+
+def parse_arguments(*unparsed_arguments):
+    """"""
+    Dati gli argomenti della riga di comando con cui è stato invocato questo script, analizza gli argomenti e restituiscili come un dizionario che mappa il nome del sotto-parser (o ""global"") a un'istanza di `argparse.Namespace`.
+    """"""
+    # Create the main parser
+    main_parser = argparse.ArgumentParser(description=""Main parser"")
+    subparsers = main_parser.add_subparsers(dest=""subparser_name"", help=""Sub-commands"")
+
+    # Global arguments
+    main_parser.add_argument('--global-arg', type=str, help=""Global argument"")
+
+    # Sub-parser 1
+    parser1 = subparsers.add_parser('subparser1', help=""Subparser 1 help"")
+    parser1.add_argument('--arg1', type=str, help=""Argument 1 for subparser1"")
+
+    # Sub-parser 2
+    parser2 = subparsers.add_parser('subparser2', help=""Subparser 2 help"")
+    parser2.add_argument('--arg2', type=int, help=""Argument 2 for subparser2"")
+
+    # Parse the arguments
+    parsed_args = main_parser.parse_args(unparsed_arguments)
+
+    # Organize the parsed arguments into a dictionary
+    result = {}
+    if hasattr(parsed_args, 'subparser_name'):
+        result[parsed_args.subparser_name] = parsed_args
+    else:
+        result['global'] = parsed_args
+
+    return result",english,english,none,
+62b45665d7d32e5b55cc8364,"def parse_subparser_arguments(unparsed_arguments, subparsers):
+    """"""
+    Dato un insieme di argomenti e un dizionario che associa il nome di un sottoparser a un'istanza di `argparse.ArgumentParser`, consente a ciascun sottoparser richiesto di tentare di analizzare tutti gli argomenti. Questo permette di condividere argomenti comuni, come ""--repository"", tra più sottoparser.
+
+    Restituisce il risultato come una tupla composta da (un dizionario che associa il nome del sottoparser a uno spazio dei nomi di argomenti analizzati, una lista di argomenti rimanenti non gestiti da alcun sottoparser).
+    """"""
+    parsed_args = {}
+    remaining_args = list(unparsed_arguments)
+    
+    for subparser_name, parser in subparsers.items():
+        try:
+            args, remaining = parser.parse_known_args(remaining_args)
+            parsed_args[subparser_name] = args
+            remaining_args = remaining
+        except SystemExit:
+            # Ignore SystemExit exceptions raised by argparse when parsing fails
+            continue
+    
+    return parsed_args, remaining_args",english,english,none,
+62b45665d7d32e5b55cc8363,"def make_parsers():
+    import argparse
+
+    # Creazione del parser di livello superiore
+    parser = argparse.ArgumentParser(description=""Parser principale"")
+
+    # Creazione dei sottoparser
+    subparsers = parser.add_subparsers(dest=""command"", help=""Comandi disponibili"")
+
+    # Sottoparser per il comando 'foo'
+    parser_foo = subparsers.add_parser('foo', help=""Esegui il comando foo"")
+    parser_foo.add_argument('--bar', type=int, help=""Parametro bar per il comando foo"")
+
+    # Sottoparser per il comando 'baz'
+    parser_baz = subparsers.add_parser('baz', help=""Esegui il comando baz"")
+    parser_baz.add_argument('--qux', type=str, help=""Parametro qux per il comando baz"")
+
+    return parser, subparsers",italian,english,italian,
+62b438ba66fea644fe22cca2,"from ruamel.yaml.nodes import ScalarNode, MappingNode
+
+def deep_merge_nodes(nodes):
+    merged = {}
+    
+    for key_node, value_node in nodes:
+        key = key_node.value
+        
+        if key in merged:
+            existing_value_node = merged[key]
+            
+            if isinstance(existing_value_node, MappingNode) and isinstance(value_node, MappingNode):
+                # Merge the MappingNodes
+                existing_mapping = {k.value: v for k, v in existing_value_node.value}
+                new_mapping = {k.value: v for k, v in value_node.value}
+                
+                # Deep merge the mappings
+                for new_key, new_value in new_mapping.items():
+                    if new_key in existing_mapping and isinstance(existing_mapping[new_key], MappingNode) and isinstance(new_value, MappingNode):
+                        # Recursively merge nested MappingNodes
+                        merged_nodes = deep_merge_nodes([
+                            (ScalarNode(tag='tag:yaml.org,2002:str', value=new_key), existing_mapping[new_key]),
+                            (ScalarNode(tag='tag:yaml.org,2002:str', value=new_key), new_value)
+                        ])
+                        existing_mapping[new_key] = merged_nodes[0][1]
+                    else:
+                        # Overwrite or add new key-value pair
+                        existing_mapping[new_key] = new_value
+                
+                # Convert back to list of tuples
+                merged[key] = MappingNode(
+                    tag='tag:yaml.org,2002:map',
+                    value=[(ScalarNode(tag='tag:yaml.org,2002:str', value=k), v] for k, v in existing_mapping.items()
+                )
+            else:
+                # If either value is not a MappingNode, the last value prevails
+                merged[key] = value_node
+        else:
+            # If the key is not in the merged dict, just add it
+            merged[key] = value_node
+    
+    # Convert the merged dict back to a list of tuples
+    return [(ScalarNode(tag='tag:yaml.org,2002:str', value=k), v] for k, v in merged.items()]",english,english,none,
+62b438b666fea644fe22cc78,"import argparse
+
+def parse_arguments(*arguments):
+    """"""
+    Dati gli argomenti della riga di comando con cui è stato invocato questo script,
+    analizza gli argomenti e restituiscili come un'istanza di ArgumentParser.
+    """"""
+    parser = argparse.ArgumentParser(description=""Parse command line arguments."")
+    
+    # Example of adding arguments (customize as needed)
+    parser.add_argument('-f', '--file', type=str, help=""Path to the input file"")
+    parser.add_argument('-v', '--verbose', action='store_true', help=""Enable verbose output"")
+    
+    # Parse the arguments
+    args = parser.parse_args(arguments)
+    
+    return args",english,english,english,
+62b438b666fea644fe22cc72,"def parser_flags(parser):
+    """"""
+    Dato un'istanza di argparse.ArgumentParser, restituisce i flag degli argomenti
+    in una stringa separata da spazi.
+    """"""
+    flags = []
+    for action in parser._actions:
+        if action.option_strings:
+            flags.extend(action.option_strings)
+    return ' '.join(flags)",none,english,none,
+62b438b566fea644fe22cc70,"import subprocess
+
+def bash_completion():
+    """"""
+    Restituisci uno script bash di completamento per il comando ""borgmatic"". Genera questo script analizzando i parser degli argomenti della riga di comando di ""borgmatic"".
+    """"""
+    # Ottieni l'output di 'borgmatic --help' per analizzare i comandi disponibili
+    result = subprocess.run(['borgmatic', '--help'], capture_output=True, text=True)
+    help_output = result.stdout
+
+    # Estrai i comandi disponibili dall'output di help
+    commands = []
+    for line in help_output.splitlines():
+        if line.strip().startswith('-'):
+            command = line.split()[0]
+            commands.append(command)
+
+    # Genera lo script di completamento bash
+    bash_script = """"""
+_borgmatic_completion() {
+    local cur prev commands
+    COMPREPLY=()
+    cur=""${COMP_WORDS[COMP_CWORD]}""
+    prev=""${COMP_WORDS[COMP_CWORD-1]}""
+    commands=""{}""
+
+    if [[ ${cur} == -* ]]; then
+        COMPREPLY=( $(compgen -W ""${commands}"" -- ${cur}) )
+        return 0
+    fi
+}
+
+complete -F _borgmatic_completion borgmatic
+"""""".format("" "".join(commands))
+
+    return bash_script
+
+# Esempio di utilizzo
+if __name__ == ""__main__"":
+    print(bash_completion())",italian,english,none,
+62b438a266fea644fe22cc2e,"import argparse
+
+def parse_arguments(*unparsed_arguments):
+    """"""
+    Dato un insieme di argomenti della riga di comando con cui è stato invocato questo script, analizza gli argomenti e restituiscili come un dizionario che mappa il nome del sotto-parser (o ""global"") a un'istanza di argparse.Namespace.
+    """"""
+    # Create the main parser
+    main_parser = argparse.ArgumentParser(description=""Main parser"")
+    main_parser.add_argument('--global-arg', type=str, help='Global argument')
+
+    # Create subparsers
+    subparsers = main_parser.add_subparsers(dest='subparser_name', help='Sub-commands')
+
+    # Subparser for command 'command1'
+    parser_command1 = subparsers.add_parser('command1', help='Command 1 help')
+    parser_command1.add_argument('--arg1', type=str, help='Argument 1 for command1')
+
+    # Subparser for command 'command2'
+    parser_command2 = subparsers.add_parser('command2', help='Command 2 help')
+    parser_command2.add_argument('--arg2', type=int, help='Argument 2 for command2')
+
+    # Parse the arguments
+    parsed_args = main_parser.parse_args(unparsed_arguments)
+
+    # Organize the parsed arguments into a dictionary
+    result = {}
+    if hasattr(parsed_args, 'subparser_name'):
+        result[parsed_args.subparser_name] = parsed_args
+    else:
+        result['global'] = parsed_args
+
+    return result",english,english,english,
+62b438a266fea644fe22cc2d,"def parse_subparser_arguments(unparsed_arguments, subparsers):
+    """"""
+    Dato un insieme di argomenti e un dizionario che associa il nome di un sottoparser a un'istanza di `argparse.ArgumentParser`, consente a ciascun sottoparser richiesto di tentare di analizzare tutti gli argomenti. Questo permette di condividere argomenti comuni, come ""--repository"", tra più sottoparser.
+
+    Restituisce il risultato come una tupla composta da (un dizionario che associa il nome del sottoparser a uno spazio dei nomi analizzato degli argomenti, una lista di argomenti rimanenti non gestiti da alcun sottoparser).
+    """"""
+    parsed_args = {}
+    remaining_args = list(unparsed_arguments)
+    
+    for subparser_name, parser in subparsers.items():
+        try:
+            args, remaining = parser.parse_known_args(remaining_args)
+            parsed_args[subparser_name] = args
+            remaining_args = remaining
+        except SystemExit:
+            # Ignore SystemExit exceptions raised by argparse when parsing fails
+            continue
+    
+    return parsed_args, remaining_args",english,english,none,
+62b438a266fea644fe22cc2c,"import argparse
+
+def make_parsers():
+    """"""
+    Crea un parser di livello superiore e i suoi sottoparser, quindi restituiscili come una tupla.
+    """"""
+    # Creazione del parser principale
+    main_parser = argparse.ArgumentParser(description=""Parser principale"")
+
+    # Creazione dei sottoparser
+    subparsers = main_parser.add_subparsers(title=""comandi"", dest=""comando"")
+
+    # Sottoparser per il comando 'comando1'
+    parser_comando1 = subparsers.add_parser('comando1', help=""Descrizione del comando1"")
+    parser_comando1.add_argument('arg1', type=int, help=""Descrizione di arg1"")
+
+    # Sottoparser per il comando 'comando2'
+    parser_comando2 = subparsers.add_parser('comando2', help=""Descrizione del comando2"")
+    parser_comando2.add_argument('arg2', type=str, help=""Descrizione di arg2"")
+
+    return main_parser, subparsers",italian,english,none,
+62ece4982e6aefcf4aabbd5f,"def paging(response, max_results):
+    """"""
+    Restituisce la risposta WAPI pagina per pagina
+        Argomenti: 
+        response (list): Risposta WAPI.  
+        max_results (int): Numero massimo di oggetti da restituire in una singola pagina.  
+
+        Restituisce: 
+        Oggetto generatore con la risposta WAPI suddivisa pagina per pagina.  
+    """"""
+    for i in range(0, len(response), max_results):
+        yield response[i:i + max_results]",none,english,none,
+62ece4982e6aefcf4aabbd60,"def size_to_bytes(size: str) -> int:
+    """"""
+    Convertire una dimensione di file leggibile dall'uomo in byte.
+
+    Il valore risultante è un'approssimazione poiché il valore di input è nella maggior parte dei casi arrotondato.
+
+    Args:
+        size: Una stringa che rappresenta una dimensione di file leggibile dall'uomo (es: '500K')
+
+    Returns:
+        Una rappresentazione decimale della dimensione del file
+
+    Esempi::
+
+        >>> size_to_bytes(""500"")
+        500
+        >>> size_to_bytes(""1K"")
+        1000
+    """"""
+    size = size.strip().upper()
+    if size[-1] in ['K', 'M', 'G', 'T']:
+        num = float(size[:-1])
+        unit = size[-1]
+        if unit == 'K':
+            return int(num * 1000)
+        elif unit == 'M':
+            return int(num * 1000 ** 2)
+        elif unit == 'G':
+            return int(num * 1000 ** 3)
+        elif unit == 'T':
+            return int(num * 1000 ** 4)
+    else:
+        return int(size)",none,english,none,
+62ece4982e6aefcf4aabbd61,"def _dictsum(dicts):
+    """"""
+    Combina i valori dei dizionari forniti tramite l'iterabile `dicts`.
+
+    >>> _dictsum([{'a': 1, 'b': 2}, {'a': 5, 'b': 0}])
+    {'a': 6, 'b': 2}
+    """"""
+    result = {}
+    for d in dicts:
+        for key, value in d.items():
+            if key in result:
+                result[key] += value
+            else:
+                result[key] = value
+    return result",none,english,none,
+62ece4982e6aefcf4aabbd62,"def _replace_url_args(url, url_args):
+    """"""
+    Sostituisci eventuali elementi personalizzati della stringa URL con i valori presenti in `args`.
+    """"""
+    for key, value in url_args.items():
+        placeholder = f'{{{key}}}'
+        url = url.replace(placeholder, str(value))
+    return url",none,english,none,
+62ece4982e6aefcf4aabbd63,"def is_none_string(val: any) -> bool:
+    """"""
+    Verifica se una stringa rappresenta un valore None.
+    """"""
+    if isinstance(val, str):
+        return val.lower() in ['none', 'null', 'nil', '']
+    return False",none,english,none,
+62ece4982e6aefcf4aabbd65,"def parser_flags(parser):
+    """"""
+    Dato un'istanza di `argparse.ArgumentParser`, restituisce i flag degli argomenti in una stringa separata da spazi.  
+    Args:
+        parser: istanza di `argparse.ArgumentParser`
+
+    Returns:
+        flag degli argomenti in una stringa separata da spazi
+    """"""
+    flags = []
+    for action in parser._actions:
+        if action.option_strings:
+            flags.extend(action.option_strings)
+    return ' '.join(flags)",none,english,none,
+62ece4982e6aefcf4aabbd66,"import os
+
+def was_processed(processed, path_name, verbose):
+    """"""
+    Verifica se un file o una directory è già stato elaborato.
+
+    Per prevenire la ricorsione, espandi il nome del percorso a un percorso assoluto
+    e chiama questa funzione con un set che memorizzerà tutte le voci e la voce da testare.
+    Se la voce è già presente nel set, segnala il problema e restituisci ``True``.
+    Altrimenti, aggiungi la voce al set e restituisci ``False`` per consentire l'elaborazione del percorso.
+
+    Args:
+        processed: Set per memorizzare i percorsi già elaborati
+        path_name: Percorso di una directory o di un file
+        verbose: True se è richiesta un'uscita dettagliata
+
+    Returns:
+        True se il percorso è già presente nel set. False altrimenti.
+    """"""
+    abs_path = os.path.abspath(path_name)
+    if abs_path in processed:
+        if verbose:
+            print(f""Il percorso '{abs_path}' è già stato elaborato."")
+        return True
+    else:
+        processed.add(abs_path)
+        return False",none,english,italian,
+62ece4982e6aefcf4aabbd67,"def vertex3tuple(vertices):
+    """"""
+    Restituisce 3 punti per ogni vertice del poligono. Questo includerà il vertice e i 2 punti su entrambi i lati del vertice::
+
+    Esempio:  
+    Poligono con vertici ABCD  
+    Restituirà:  
+    DAB, ABC, BCD, CDA -> restituisce tuple di 3 elementi  
+    #A    B    C    D  -> dei vertici
+    """"""
+    n = len(vertices)
+    result = []
+    for i in range(n):
+        # Get the previous, current, and next vertex
+        prev = vertices[(i - 1) % n]
+        curr = vertices[i]
+        next_ = vertices[(i + 1) % n]
+        result.append((prev, curr, next_))
+    return result",english,english,none,
+62ece4982e6aefcf4aabbd68,"from typing import List, Optional
+
+def int_to_string(number: int, alphabet: List[str], padding: Optional[int] = None) -> str:
+    '''
+    Converti un numero in una stringa utilizzando l'alfabeto fornito.
+
+    L'output avrà la cifra più significativa per prima.
+    '''
+    if number < 0:
+        raise ValueError(""Il numero deve essere non negativo."")
+    
+    base = len(alphabet)
+    if base == 0:
+        raise ValueError(""L'alfabeto non può essere vuoto."")
+    
+    if number == 0:
+        return alphabet[0] if padding is None else alphabet[0].rjust(padding, alphabet[0])
+    
+    result = []
+    while number > 0:
+        remainder = number % base
+        result.append(alphabet[remainder])
+        number = number // base
+    
+    result.reverse()
+    
+    result_str = ''.join(result)
+    
+    if padding is not None:
+        result_str = result_str.rjust(padding, alphabet[0])
+    
+    return result_str",none,english,italian,
+62ece4982e6aefcf4aabbd69,"def _replace_register(flow_params, register_number, register_value):
+    """"""
+    Sostituisci il valore dai flussi con il numero di registro specificato.
+
+    La chiave `register_value` nel dizionario verrà sostituita dal numero di registro specificato da `register_number`.
+
+    :param flow_params: Dizionario contenente i flussi definiti  
+    :param register_number: Il numero del registro in cui il valore verrà memorizzato  
+    :param register_value: Chiave da sostituire con il numero di registro  
+    """"""
+    if register_value in flow_params:
+        flow_params[register_value] = register_number
+    return flow_params",none,english,none,
+62ece4982e6aefcf4aabbd6a,"def replace_dots(value, arg):
+    """"""
+    Sostituisce tutti i valori di '.' con arg nella stringa fornita
+    """"""
+    return value.replace('.', arg)",none,english,none,
+62ece4982e6aefcf4aabbd6b,"def subclasses(cls):
+    """"""
+    Restituisce tutte le sottoclassi di una classe, ricorsivamente.
+    """"""
+    def _subclasses(cls):
+        for subclass in cls.__subclasses__():
+            yield subclass
+            yield from _subclasses(subclass)
+    
+    return list(_subclasses(cls))",none,english,none,
+62ece4982e6aefcf4aabbd6d,"from typing import List
+
+def string_to_int(string: str, alphabet: List[str]) -> int:
+    """"""
+    Convertire una stringa in un numero, utilizzando l'alfabeto fornito.  
+
+    Si assume che l'input abbia la cifra più significativa per prima.
+    """"""
+    base = len(alphabet)
+    num = 0
+    for i, char in enumerate(string):
+        power = len(string) - i - 1
+        num += alphabet.index(char) * (base ** power)
+    return num",none,english,none,
+62ece4982e6aefcf4aabbd6f,"import tarfile
+import requests
+from pathlib import Path
+
+def get_repo_archive(url: str, destination_path: Path) -> Path:
+    """"""
+    Dato un URL e un percorso di destinazione, recupera e decomprimi un archivio .tar.gz che contiene il file 'desc' per ogni pacchetto.  
+    Ogni archivio .tar.gz corrisponde a un repository di Arch Linux ('core', 'extra', 'community').
+    Args:
+        url: URL dell'archivio .tar.gz da scaricare
+        destination_path: il percorso sul disco dove estrarre l'archivio
+
+    Returns:
+        un oggetto Path che rappresenta la directory dove l'archivio è stato estratto.
+    """"""
+    # Ensure the destination directory exists
+    destination_path.mkdir(parents=True, exist_ok=True)
+    
+    # Download the archive
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    
+    # Save the archive to a temporary file
+    temp_archive_path = destination_path / ""temp_archive.tar.gz""
+    with open(temp_archive_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+    
+    # Extract the archive
+    with tarfile.open(temp_archive_path, 'r:gz') as tar:
+        tar.extractall(path=destination_path)
+    
+    # Remove the temporary archive file
+    temp_archive_path.unlink()
+    
+    return destination_path",english,english,none,
+62ece4982e6aefcf4aabbd70,"import platform
+
+def os_is_mac():
+    """"""
+    Verifica se il sistema operativo è macOS
+
+    :return: True se il sistema operativo è macOS
+    :rtype: bool
+    """"""
+    return platform.system() == 'Darwin'",none,english,none,
+62ece4982e6aefcf4aabbd71,"import re
+
+def regex_dict(item):
+    """"""
+    Converti le chiavi *.cpp in chiavi regex.
+
+    Dato un dizionario in cui le chiavi sono tutti nomi di file con caratteri jolly, converti solo le chiavi in regex equivalenti e lascia intatti i valori.
+
+    Esempio:
+
+    rules = {
+        '*.cpp':
+            {'a': 'arf', 'b': 'bark', 'c': 'coo'},
+        '*.h':
+            {'h': 'help'}
+    }
+    regex_keys = regex_dict(rules)
+
+    Argomenti:
+        item: dizionario da convertire
+    Ritorna:
+        dizionario con le chiavi convertite in regex.
+    """"""
+    regex_dict = {}
+    for key, value in item.items():
+        # Convert the wildcard pattern to a regex pattern
+        regex_key = re.escape(key).replace(r'\*', '.*')
+        regex_dict[regex_key] = value
+    return regex_dict",english,english,none,
+62ece4982e6aefcf4aabbd72,"def unquote(name):
+    """"""
+    Rimuovi le virgolette dal nome fornito.
+    """"""
+    return name.strip('""\'')",none,english,none,
+62ece4982e6aefcf4aabbd73,"import re
+import sys
+
+def split(s, platform='this'):
+    """"""
+    ### Variante multi-piattaforma di `shlex.split()` per la divisione di stringhe da riga di comando.  
+    Progettata per l'uso con `subprocess`, per l'iniezione di argomenti (`argv`) ecc. Utilizza espressioni regolari (REGEX) veloci.
+
+    - **platform**:  
+      - `'this'`: rilevamento automatico della piattaforma corrente.  
+      - `1`: stile POSIX.  
+      - `0`: stile Windows/CMD.  
+      - (altri valori riservati).
+    """"""
+    if platform == 'this':
+        platform = 1 if sys.platform != 'win32' else 0
+    
+    if platform == 1:  # POSIX
+        regex = re.compile(r'''((?:[^\s""']|""[^""]*""|'[^']*')+)''')
+    else:  # Windows/CMD
+        regex = re.compile(r'''((?:[^\s""]|""[^""]*"")+)''')
+    
+    return regex.findall(s)",none,english,none,
+62ece4982e6aefcf4aabbd74,"import os
+import shutil
+import tempfile
+from pathlib import Path
+from typing import Optional, Union
+from zipfile import ZipFile
+from tarfile import TarFile
+
+def prepare_repository_from_archive(
+    archive_path: str,
+    filename: Optional[str] = None,
+    tmp_path: Union[PosixPath, str] = ""/tmp"",
+) -> str:
+    # Convert tmp_path to Path object if it's a string
+    tmp_path = Path(tmp_path) if isinstance(tmp_path, str) else tmp_path
+    
+    # Ensure the temporary directory exists
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    
+    # Create a temporary directory to extract the archive
+    extract_dir = tempfile.mkdtemp(dir=tmp_path)
+    
+    # Determine the archive type based on the file extension
+    if archive_path.endswith('.zip'):
+        with ZipFile(archive_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+    elif archive_path.endswith('.tar.gz') or archive_path.endswith('.tgz'):
+        with TarFile.open(archive_path, 'r:gz') as tar_ref:
+            tar_ref.extractall(extract_dir)
+    elif archive_path.endswith('.tar.bz2') or archive_path.endswith('.tbz'):
+        with TarFile.open(archive_path, 'r:bz2') as tar_ref:
+            tar_ref.extractall(extract_dir)
+    elif archive_path.endswith('.tar'):
+        with TarFile.open(archive_path, 'r:') as tar_ref:
+            tar_ref.extractall(extract_dir)
+    else:
+        raise ValueError(""Unsupported archive format"")
+    
+    # If a specific filename is provided, return the path to that file
+    if filename:
+        file_path = Path(extract_dir) / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f""The file {filename} was not found in the archive."")
+        return str(file_path)
+    
+    # Otherwise, return the path to the extracted directory
+    return extract_dir",english,english,english,
+62ece4982e6aefcf4aabbd75,"import subprocess
+
+def aggiungi_ignorati(ignorati):
+    """"""
+    Utilizza il comando git per ottenere i nomi dei file, trasformali in una lista, ordina la lista per includere solo i file ignorati, restituisci quei file come una singola stringa con ogni nome di file separato da una virgola.
+    """"""
+    # Ottieni la lista dei file ignorati da git
+    result = subprocess.run(['git', 'ls-files', '--others', '--ignored', '--exclude-standard'], stdout=subprocess.PIPE)
+    ignored_files = result.stdout.decode('utf-8').splitlines()
+    
+    # Filtra i file ignorati in base alla lista fornita
+    filtered_files = [file for file in ignored_files if file in ignorati]
+    
+    # Ordina la lista dei file ignorati
+    filtered_files.sort()
+    
+    # Restituisci i file come una singola stringa separata da virgole
+    return ', '.join(filtered_files)",italian,english,none,
+62ece4982e6aefcf4aabbd76,"def match(filename):
+    """"""
+    Verifica se il nome file è di un tipo supportato da questo modulo
+
+    Argomenti:
+        filename: Nome file da confrontare
+    Ritorna:
+        False se non è una corrispondenza, True se è supportato
+    """"""
+    supported_extensions = ['.txt', '.csv', '.json', '.xml']
+    return any(filename.endswith(ext) for ext in supported_extensions)",none,english,none,
+62ece4982e6aefcf4aabbd77,"import re
+from datetime import timedelta
+
+def parse_frequency(frequency):
+    """"""
+    Dato un valore di frequenza sotto forma di stringa contenente un numero e un'unità di tempo,
+    restituisci un'istanza corrispondente di datetime.timedelta o None se la frequenza è None o ""always"".
+
+    Ad esempio, dato ""3 weeks"", restituisci datetime.timedelta(weeks=3).
+
+    Genera un'eccezione ValueError se la frequenza fornita non può essere analizzata.
+    """"""
+    if frequency is None or frequency.lower() == ""always"":
+        return None
+    
+    pattern = re.compile(r'^(\d+)\s*(second|minute|hour|day|week|month|year)s?$', re.IGNORECASE)
+    match = pattern.match(frequency.strip())
+    
+    if not match:
+        raise ValueError(f""Invalid frequency format: {frequency}"")
+    
+    value = int(match.group(1))
+    unit = match.group(2).lower()
+    
+    if unit == ""second"":
+        return timedelta(seconds=value)
+    elif unit == ""minute"":
+        return timedelta(minutes=value)
+    elif unit == ""hour"":
+        return timedelta(hours=value)
+    elif unit == ""day"":
+        return timedelta(days=value)
+    elif unit == ""week"":
+        return timedelta(weeks=value)
+    elif unit == ""month"":
+        return timedelta(days=30 * value)  # Approximate month as 30 days
+    elif unit == ""year"":
+        return timedelta(days=365 * value)  # Approximate year as 365 days
+    else:
+        raise ValueError(f""Unsupported time unit: {unit}"")",english,english,english,
+62ece4992e6aefcf4aabbd78,"def is_local(host):
+    """"""
+    Verifica se l'host è il localhost.
+
+    :param host: Il nome host o l'indirizzo IP.  
+    :return: True se l'host è il localhost.
+    """"""
+    local_hosts = {'localhost', '127.0.0.1', '::1'}
+    return host in local_hosts",none,english,none,
+62ece4992e6aefcf4aabbd79,"import re
+
+def make_find_paths(find_paths):
+    """"""
+    Dati una sequenza di percorsi frammentati o pattern passati tramite `--find`, trasforma tutti i percorsi frammentati in pattern glob. Lascia invariati i pattern già esistenti.
+
+    Ad esempio, dato `find_paths` come:
+      ['foo.txt', 'pp:root/somedir']
+
+    ... trasforma in:
+      ['sh:**/*foo.txt*/**', 'pp:root/somedir']
+    """"""
+    transformed_paths = []
+    for path in find_paths:
+        if re.match(r'^[a-zA-Z]+:', path):
+            # If the path already has a prefix (e.g., 'pp:'), leave it unchanged
+            transformed_paths.append(path)
+        else:
+            # Transform the path into a glob pattern
+            transformed_paths.append(f'sh:**/*{path}*/**')
+    return transformed_paths",english,english,none,
+62ece4992e6aefcf4aabbd7a,"import os
+
+def is_gitbash():
+    """"""
+    Restituisce True se viene eseguito in un terminale gitbash di Windows
+
+    :return: True se è gitbash
+    """"""
+    return 'GIT_BASH' in os.environ.get('TERM_PROGRAM', '')",none,english,none,
+62ece4992e6aefcf4aabbd7b,"import os
+import yaml
+
+def write_configuration(config_filename, rendered_config, mode=0o600, overwrite=False):
+    """"""
+    Dato un nome di file di configurazione di destinazione e un file YAML di configurazione renderizzato, scrivilo nel file.  
+    Crea eventuali directory contenitrici, se necessario. Tuttavia, se il file esiste già e `overwrite` è impostato su `False`, interrompi l'operazione prima di scrivere qualsiasi cosa.
+    """"""
+    if os.path.exists(config_filename) and not overwrite:
+        return
+    
+    # Create the directory if it doesn't exist
+    os.makedirs(os.path.dirname(config_filename), exist_ok=True)
+    
+    # Write the rendered configuration to the file
+    with open(config_filename, 'w') as config_file:
+        yaml.dump(rendered_config, config_file, default_flow_style=False)
+    
+    # Set the file permissions
+    os.chmod(config_filename, mode)",english,english,none,
+62ece4992e6aefcf4aabbd7c,"def oneline(script, separator="" && ""):
+    """"""
+    Converte uno script in un comando su una sola riga.  
+    Questo è utile per eseguire un singolo comando SSH e passare uno script su una sola riga.
+
+    :param script: Lo script da convertire in una singola riga.
+    :param separator: Il separatore da utilizzare tra i comandi (default è "" && "").
+    :return: Una stringa che rappresenta lo script su una sola riga.
+    """"""
+    lines = script.strip().splitlines()
+    return separator.join(line.strip() for line in lines if line.strip())",none,english,none,
+62ece4992e6aefcf4aabbd7d,"import subprocess
+import sys
+import os
+
+def subprocess_run_helper(func, *args, timeout, extra_env=None):
+    """"""
+    Esegui una funzione in un sottoprocesso.
+
+    Parametri
+    ----------
+    func : function
+        La funzione da eseguire. Deve trovarsi in un modulo importabile.
+    *args : str
+        Eventuali argomenti aggiuntivi da riga di comando da passare
+        come primo argomento a ``subprocess.run``.
+    extra_env : dict[str, str]
+        Eventuali variabili d'ambiente aggiuntive da impostare per il sottoprocesso.
+    """"""
+    # Ottieni il modulo e il nome della funzione
+    module_name = func.__module__
+    func_name = func.__name__
+
+    # Costruisci il comando per eseguire la funzione
+    command = [sys.executable, '-c', f'from {module_name} import {func_name}; {func_name}()']
+
+    # Aggiungi eventuali argomenti aggiuntivi
+    if args:
+        command.extend(args)
+
+    # Prepara l'ambiente
+    env = os.environ.copy()
+    if extra_env:
+        env.update(extra_env)
+
+    # Esegui il sottoprocesso
+    result = subprocess.run(command, env=env, timeout=timeout, capture_output=True, text=True)
+
+    return result",italian,english,none,
+62ece4992e6aefcf4aabbd7e,"import os
+
+def _resolve_string(matcher):
+    """"""
+    Ottieni il valore dall'ambiente dato un matcher che contiene un nome e un valore predefinito opzionale.  
+    Se la variabile non è definita nell'ambiente e non viene fornito alcun valore predefinito, viene generato un errore.
+    """"""
+    name, *default = matcher.groups()
+    if name in os.environ:
+        return os.environ[name]
+    elif default:
+        return default[0]
+    else:
+        raise ValueError(f""Environment variable '{name}' is not defined and no default value is provided."")",none,english,english,
+62ece4992e6aefcf4aabbd7f,"from urllib.parse import urlparse
+from typing import Tuple
+
+def _parse_image_ref(image_href: str) -> Tuple[str, str, bool]:
+    """"""
+    Analizza un href di un'immagine in parti composite.
+
+    :param image_href: href di un'immagine
+    :returns: una tupla nella forma (image_id, netloc, use_ssl)
+    :raises ValueError: se l'href non è valido
+    """"""
+    parsed_url = urlparse(image_href)
+    
+    if not parsed_url.netloc:
+        raise ValueError(""Invalid image href: missing netloc"")
+    
+    image_id = parsed_url.path.strip('/')
+    if not image_id:
+        raise ValueError(""Invalid image href: missing image ID"")
+    
+    use_ssl = parsed_url.scheme == 'https'
+    
+    return image_id, parsed_url.netloc, use_ssl",none,english,english,
+62ece4992e6aefcf4aabbd80,"import os
+
+def remove_ending_os_sep(input_list):
+    """"""
+    Itera su un elenco di stringhe e rimuovi i caratteri separatori di sistema operativi (os) finali.
+
+    Ogni stringa viene verificata per controllare se la sua lunghezza è maggiore di uno e se l'ultimo
+    carattere è il separatore di percorso. In tal caso, il carattere separatore di percorso
+    viene rimosso.
+
+    Argomenti:
+        input_list: elenco di stringhe
+
+    Restituisce:
+        Elenco elaborato di stringhe
+
+    Eccezioni:
+        TypeError
+    """"""
+    if not isinstance(input_list, list):
+        raise TypeError(""L'argomento deve essere una lista di stringhe."")
+    
+    processed_list = []
+    for item in input_list:
+        if not isinstance(item, str):
+            raise TypeError(""Tutti gli elementi della lista devono essere stringhe."")
+        
+        if len(item) > 1 and item[-1] == os.sep:
+            processed_list.append(item[:-1])
+        else:
+            processed_list.append(item)
+    
+    return processed_list",none,english,italian,
+62ece4992e6aefcf4aabbd82,"import re
+
+def get_pattern(pattern, strip=True):
+    """"""
+    Questo metodo converte la stringa fornita in un oggetto pattern regex
+    """"""
+    if strip:
+        pattern = pattern.strip()
+    return re.compile(pattern)",none,english,none,
+62ece4992e6aefcf4aabbd83,"import subprocess
+
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):
+    """"""
+    Esegui il/i comando/i fornito/i.
+    
+    :param commands: Lista di comandi da eseguire.
+    :param args: Lista di argomenti da passare ai comandi.
+    :param cwd: Directory di lavoro corrente (opzionale).
+    :param verbose: Se True, stampa l'output del comando (opzionale).
+    :param hide_stderr: Se True, nasconde l'output di errore (opzionale).
+    :param env: Dizionario di variabili d'ambiente (opzionale).
+    :return: Tupla contenente l'output del comando e il codice di uscita.
+    """"""
+    command = commands + args
+    stderr = subprocess.PIPE if hide_stderr else None
+    
+    process = subprocess.Popen(
+        command,
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        env=env,
+        text=True
+    )
+    
+    stdout, stderr = process.communicate()
+    
+    if verbose:
+        print(stdout)
+    
+    return stdout, process.returncode",none,english,none,
+62ece4992e6aefcf4aabbd84,"import re
+
+def is_ipv4(target):
+    """"""
+    Verifica se è un indirizzo IPv4 o no.
+    """"""
+    # Regular expression to match an IPv4 address
+    ipv4_pattern = re.compile(r'^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$')
+    return bool(ipv4_pattern.match(target))",english,english,none,
+62ece4992e6aefcf4aabbd85,"from rdflib import Graph, RDFS
+
+def find_roots(graph, prop):
+    """"""
+    Restituisce un insieme contenente tutte le radici della gerarchia delle sottoclassi.
+
+    Presuppone triple nella forma (figlio, prop, genitore), ovvero la direzione di
+    `RDFS.subClassOf` o `SKOS.broader`.
+    """"""
+    roots = set()
+    all_subjects = set(graph.subjects(predicate=prop))
+    all_objects = set(graph.objects(predicate=prop))
+    
+    # Le radici sono quei soggetti che non compaiono come oggetti in nessuna tripla
+    roots = all_subjects - all_objects
+    
+    return roots",italian,english,none,
+62ece4992e6aefcf4aabbd86,"def _dump_string(obj, dumper=None):
+    """"""
+    Serializza in una stringa Unicode (Python 2) o in una stringa (Python 3).
+    """"""
+    if dumper is not None:
+        return dumper(obj)
+    if isinstance(obj, bytes):
+        return obj.decode('utf-8')
+    elif isinstance(obj, str):
+        return obj
+    else:
+        return str(obj)",none,english,none,
+62ece4992e6aefcf4aabbd87,"import logging
+
+def build_app_logger(name='app', logfile='app.log', debug=True):
+    """"""
+    Logger per applicazioni di uso generale. Utile principalmente per il debugging.
+    """"""
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+    
+    # Create a file handler
+    file_handler = logging.FileHandler(logfile)
+    file_handler.setLevel(logging.DEBUG if debug else logging.INFO)
+    
+    # Create a console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG if debug else logging.INFO)
+    
+    # Create a formatter and set it for both handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+    
+    # Add the handlers to the logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    
+    return logger",english,english,none,
+62ece4992e6aefcf4aabbd88,"import numpy as np
+
+def make_array(shape, dtype=np.dtype(""float32"")):
+    """"""
+    Funzione per creare un array con una forma e un tipo di dato specificati.
+
+    Parametri
+    ----------
+    shape : tuple
+        forma dell'array da creare
+    dtype : `numpy.dtype`
+        tipo di dato dell'array da creare
+
+    Returns
+    -------
+    numpy.ndarray
+        array con la forma e il tipo di dato specificati
+    """"""
+    return np.zeros(shape, dtype=dtype)",none,english,none,
+62ece4992e6aefcf4aabbd89,"import math
+
+def gaussiana(x):
+    """"""
+    Questa funzione calcola il valore della distribuzione gaussiana per un dato `x`, con una media `u` pari a 0.2 e una deviazione standard `sigma` pari a 0.1.
+    """"""
+    u = 0.2
+    sigma = 0.1
+    coefficient = 1 / (sigma * math.sqrt(2 * math.pi))
+    exponent = -((x - u) ** 2) / (2 * sigma ** 2)
+    return coefficient * math.exp(exponent)",none,english,none,
+62ece4992e6aefcf4aabbd8a,"import logging
+import os
+import json
+import yaml
+
+def load_configurations(config_filenames, overrides=None, resolve_env=True):
+    """"""
+    Dato un elenco di nomi di file di configurazione, carica e valida ciascun file di configurazione.
+    Restituisci i risultati come una tupla composta da:
+    - un dizionario che associa il nome del file di configurazione alla corrispondente configurazione analizzata,
+    - una sequenza di istanze di `logging.LogRecord` contenenti eventuali errori di analisi.
+    """"""
+    configurations = {}
+    errors = []
+
+    if overrides is None:
+        overrides = {}
+
+    for filename in config_filenames:
+        try:
+            with open(filename, 'r') as file:
+                if filename.endswith('.json'):
+                    config = json.load(file)
+                elif filename.endswith('.yaml') or filename.endswith('.yml'):
+                    config = yaml.safe_load(file)
+                else:
+                    raise ValueError(f""Unsupported file format: {filename}"")
+
+                # Apply overrides
+                for key, value in overrides.items():
+                    if key in config:
+                        config[key] = value
+
+                # Resolve environment variables if required
+                if resolve_env:
+                    for key, value in config.items():
+                        if isinstance(value, str) and value.startswith('$'):
+                            env_var = value[1:]
+                            config[key] = os.getenv(env_var, value)
+
+                configurations[filename] = config
+
+        except Exception as e:
+            error_msg = f""Error loading configuration from {filename}: {str(e)}""
+            logging.error(error_msg)
+            errors.append(logging.LogRecord(
+                name=__name__,
+                level=logging.ERROR,
+                pathname=filename,
+                lineno=0,
+                msg=error_msg,
+                args=None,
+                exc_info=None
+            ))
+
+    return configurations, errors",english,english,english,
+62ece4992e6aefcf4aabbd8b,"def force_string(obj):
+    """"""
+    Questa funzione restituisce l'oggetto di tipo `bytes` corrispondente a ``obj`` nel caso in cui sia una stringa utilizzando UTF-8.
+    """"""
+    if isinstance(obj, str):
+        return obj.encode('utf-8')
+    return obj",none,english,none,
+62e60723d76274f8a4026b76,"from datetime import time, timedelta
+
+class Time:
+    def __init__(self, hour, minute, second, microsecond, tzinfo=None):
+        self._time = time(hour, minute, second, microsecond, tzinfo)
+
+    @classmethod
+    def from_ticks(cls, ticks, tz=None):
+        """"""
+        Crea un'istanza di tempo a partire dai ticks (nanosecondi trascorsi dalla mezzanotte).
+
+        :param ticks: nanosecondi trascorsi dalla mezzanotte
+        :type ticks: int
+        :param tz: fuso orario opzionale
+        :type tz: datetime.tzinfo
+
+        :rtype: Time
+
+        :raises ValueError: se il valore di ticks è fuori dai limiti
+            (0 <= ticks < 86400000000000)
+        """"""
+        if not (0 <= ticks < 86400000000000):
+            raise ValueError(""ticks must be in the range 0 <= ticks < 86400000000000"")
+        
+        # Convert ticks to microseconds
+        microseconds = ticks // 1000
+        
+        # Calculate hours, minutes, seconds, and microseconds
+        hours = microseconds // 3600000000
+        microseconds %= 3600000000
+        minutes = microseconds // 60000000
+        microseconds %= 60000000
+        seconds = microseconds // 1000000
+        microseconds %= 1000000
+        
+        return cls(hours, minutes, seconds, microseconds, tz)",english,english,english,
+62e60873d76274f8a4026bd8,"def protocol_handlers(cls, protocol_version=None):
+    """"""
+    Restituisce un dizionario dei gestori di protocollo Bolt disponibili,
+    indicizzati per tuple di versione. Se viene fornita una versione di protocollo
+    esplicita, il dizionario conterrà zero o un elemento, a seconda che quella
+    versione sia supportata o meno. Se non viene fornita alcuna versione di protocollo,
+    verranno restituite tutte le versioni disponibili.
+
+    :param protocol_version: tupla che identifica una specifica versione
+        del protocollo (ad esempio, (3, 5)) oppure None
+    :return: dizionario che associa una tupla di versione alla classe del gestore
+        per tutte le versioni di protocollo rilevanti e supportate
+    :raise TypeError: se la versione del protocollo non è passata come una tupla
+    """"""
+    # Dizionario di esempio che mappa le versioni del protocollo ai gestori
+    available_handlers = {
+        (3, 5): ""HandlerForV3_5"",
+        (4, 0): ""HandlerForV4_0"",
+        (4, 1): ""HandlerForV4_1"",
+    }
+
+    if protocol_version is not None:
+        if not isinstance(protocol_version, tuple):
+            raise TypeError(""La versione del protocollo deve essere una tupla."")
+        if protocol_version in available_handlers:
+            return {protocol_version: available_handlers[protocol_version]}
+        else:
+            return {}
+    else:
+        return available_handlers",italian,english,italian,
+62e60e3bd76274f8a4026d1a,"def from_raw_values(cls, values):
+    """"""
+    Crea un oggetto Bookmarks da una lista di valori stringa grezzi dei segnalibri.
+
+    Non dovresti aver bisogno di utilizzare questo metodo a meno che tu non voglia
+    deserializzare i segnalibri.
+
+    :param values: Valori stringa ASCII (segnalibri grezzi)
+    :type values: Iterable[str]
+    """"""
+    return cls(values)",none,english,none,
+62b87b199a0c4fa8b80b354c,"def _get_seq_with_type(seq, bufsize=None):
+    """"""
+    Restituisce una coppia (sequenza, tipo).  
+    La sequenza è derivata da *seq*  
+    (oppure è *seq*, se quest'ultima è di un tipo sequenza).
+    """"""
+    if isinstance(seq, (str, bytes, bytearray, list, tuple)):
+        return seq, type(seq)
+    else:
+        return list(seq), list",none,english,none,
+62b87b4f9a0c4fa8b80b3581,"def scale(self, other=None, recompute=False):
+    """"""
+    Calcola o imposta la scala (integrale dell'istogramma).
+
+    Se *other* è ``None``, restituisce la scala di questo istogramma.  
+    Se la scala non è stata calcolata in precedenza, viene calcolata e memorizzata per un utilizzo successivo (a meno che non venga esplicitamente richiesto di *ricalcolare*).  
+    Nota che, dopo aver modificato (riempito) l'istogramma, è necessario ricalcolare esplicitamente la scala se era stata calcolata in precedenza.
+
+    Se viene fornito un valore float in *other*, l'oggetto corrente (*self*) viene riscalato al valore di *other*.
+
+    Gli istogrammi con scala pari a zero non possono essere riscalati.  
+    Viene sollevata un'eccezione :exc:`.LenaValueError` se si tenta di farlo.
+    """"""
+    if not hasattr(self, '_scale') or recompute:
+        # Calcola la scala come integrale dell'istogramma
+        self._scale = sum(self.bins) * self.bin_width
+    
+    if other is None:
+        return self._scale
+    elif isinstance(other, float):
+        if self._scale == 0:
+            raise LenaValueError(""Cannot scale a histogram with zero scale."")
+        scale_factor = other / self._scale
+        self.bins = [bin * scale_factor for bin in self.bins]
+        self._scale = other
+    else:
+        raise TypeError(""Expected a float or None for 'other'."")",italian,english,english,
+62b87b519a0c4fa8b80b3583,"def scale(self, other=None):
+    """"""
+    Ottieni o imposta la scala del grafico.
+
+    Se *other* è ``None``, restituisce la scala di questo grafico.
+
+    Se viene fornito un valore numerico per *other*, il grafico viene ridimensionato a quel valore.
+    Se il grafico ha una scala sconosciuta o pari a zero, 
+    il tentativo di ridimensionarlo genererà un'eccezione :exc:`~.LenaValueError`.
+
+    Per ottenere risultati significativi, vengono utilizzati i campi del grafico.
+    Solo l'ultima coordinata viene ridimensionata.
+    Ad esempio, se il grafico ha coordinate *x* e *y*, 
+    verrà ridimensionata *y*, mentre per un grafico tridimensionale 
+    verrà ridimensionata *z*.
+    Tutti gli errori associati vengono ridimensionati insieme alla loro coordinata.
+    """"""
+    if other is None:
+        return self._scale
+    elif isinstance(other, (int, float)):
+        if self._scale == 0 or self._scale is None:
+            raise LenaValueError(""Impossibile ridimensionare un grafico con scala sconosciuta o pari a zero."")
+        scale_factor = other / self._scale
+        self._scale = other
+        # Ridimensiona l'ultima coordinata e gli errori associati
+        if hasattr(self, 'y'):
+            self.y *= scale_factor
+            if hasattr(self, 'y_err'):
+                self.y_err *= scale_factor
+        elif hasattr(self, 'z'):
+            self.z *= scale_factor
+            if hasattr(self, 'z_err'):
+                self.z_err *= scale_factor
+    else:
+        raise TypeError(""Il valore di scala deve essere un numero o None."")",italian,english,italian,
+62b87b869a0c4fa8b80b35e1,"def hist_to_graph(hist, make_value=None, get_coordinate=""left"",
+                  field_names=(""x"", ""y""), scale=None):
+    """"""
+    Convert a histogram to a graph.
+
+    Parameters:
+    - hist: The histogram to convert.
+    - make_value: Function to set the value of a graph point. Defaults to bin content.
+    - get_coordinate: Determines the coordinate of a graph point. Can be ""left"", ""right"", or ""middle"".
+    - field_names: Names of the graph fields. Must match the result dimension.
+    - scale: Scale of the graph. If True, uses the histogram's scale.
+
+    Returns:
+    - The resulting graph.
+    """"""
+    import numpy as np
+
+    if make_value is None:
+        make_value = lambda bin_: bin_
+
+    if get_coordinate not in [""left"", ""right"", ""middle""]:
+        raise ValueError(""get_coordinate must be 'left', 'right', or 'middle'"")
+
+    # Extract bin edges and contents
+    bin_edges = hist.bin_edges
+    bin_contents = hist.bin_contents
+
+    # Calculate coordinates based on get_coordinate
+    if get_coordinate == ""left"":
+        x_coords = bin_edges[:-1]
+    elif get_coordinate == ""right"":
+        x_coords = bin_edges[1:]
+    elif get_coordinate == ""middle"":
+        x_coords = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # Apply make_value to each bin content
+    y_values = [make_value(bin_) for bin_ in bin_contents]
+
+    # Ensure y_values is a list of tuples or lists
+    if not all(isinstance(y, (tuple, list)) for y in y_values):
+        y_values = [(y,) for y in y_values]
+
+    # Create the graph data
+    graph_data = {field_names[0]: x_coords}
+    for i in range(len(y_values[0])):
+        graph_data[field_names[i + 1]] = [y[i] for y in y_values]
+
+    # Handle scale
+    if scale is True:
+        scale = hist.scale
+
+    # Return the graph (assuming a Graph class exists)
+    return Graph(data=graph_data, scale=scale)",english,english,english,
+62b8b4baeb7e40a82d2d1136,"from zope.interface import Invalid, providedBy
+from zope.interface.verify import verifyObject, verifyClass
+
+def _verify(iface, candidate, tentative=False, vtype=None):
+    """"""
+    Verifica che il *candidate* possa fornire correttamente l'*iface*.
+
+    Questo processo include:
+
+    - Assicurarsi che il candidato dichiari di fornire l'interfaccia utilizzando ``iface.providedBy`` (a meno che *tentative* sia `True`, in quel caso questo passaggio viene saltato). Questo significa che la classe del candidato dichiara di `implementare l'interfaccia <zope.interface.implementer>`, oppure che il candidato stesso dichiara di `fornire l'interfaccia <zope.interface.provider>`.
+
+    - Assicurarsi che il candidato definisca tutti i metodi necessari.
+
+    - Assicurarsi che i metodi abbiano la firma corretta (per quanto possibile).
+
+    - Assicurarsi che il candidato definisca tutti gli attributi necessari.
+
+    :return bool: Restituisce un valore vero se tutto ciò che poteva essere verificato è stato superato.
+    :raises zope.interface.Invalid: Se una qualsiasi delle condizioni precedenti non è soddisfatta.
+
+    .. versionchanged:: 5.0  
+        Se più metodi o attributi sono invalidi, tutti questi errori vengono raccolti e riportati. In precedenza, veniva segnalato solo il primo errore. Come caso speciale, se è presente un solo errore, questo viene sollevato singolarmente, come avveniva prima.
+    """"""
+    errors = []
+
+    # Verifica che il candidato dichiari di fornire l'interfaccia
+    if not tentative and not iface.providedBy(candidate):
+        errors.append(f""{candidate} non dichiara di fornire l'interfaccia {iface}"")
+
+    # Verifica i metodi e gli attributi
+    try:
+        if vtype == 'class':
+            verifyClass(iface, candidate)
+        else:
+            verifyObject(iface, candidate)
+    except Invalid as e:
+        errors.append(str(e))
+
+    # Gestione degli errori
+    if errors:
+        if len(errors) == 1:
+            raise Invalid(errors[0])
+        else:
+            raise Invalid(""\n"".join(errors))
+
+    return True",italian,english,italian,
+62b8b4baeb7e40a82d2d1137,"from zope.interface import providedBy, Interface, Invalid
+from zope.interface.verify import verifyObject as zope_verify_object
+
+def verifyObject(iface, candidate, tentative=False):
+    """"""
+    Verifica che il *candidate* possa fornire correttamente l'*iface*.
+
+    Questo comporta:
+
+    - Assicurarsi che il candidato dichiari di fornire l'interfaccia utilizzando ``iface.providedBy`` (a meno che *tentative* sia `True`, nel qual caso questo passaggio viene saltato). Questo significa che la classe del candidato dichiara di `implementare <zope.interface.implementer>` l'interfaccia, oppure che il candidato stesso dichiara di `fornire <zope.interface.provider>` l'interfaccia.
+
+    - Assicurarsi che il candidato definisca tutti i metodi necessari.
+
+    - Assicurarsi che i metodi abbiano la firma corretta (per quanto possibile).
+
+    - Assicurarsi che il candidato definisca tutti gli attributi necessari.
+
+    :return bool: Restituisce un valore vero se tutto ciò che poteva essere verificato è stato superato.
+    :raises zope.interface.Invalid: Se una qualsiasi delle condizioni precedenti non è soddisfatta.
+
+    .. versionchanged:: 5.0  
+        Se più metodi o attributi sono invalidi, tutti questi errori vengono raccolti e riportati. In precedenza, veniva segnalato solo il primo errore. Come caso speciale, se è presente un solo errore, viene sollevato singolarmente, come in passato.
+    """"""
+    if not tentative:
+        if not iface.providedBy(candidate):
+            raise Invalid(f""The candidate does not provide the interface {iface}."")
+
+    try:
+        zope_verify_object(iface, candidate)
+    except Invalid as e:
+        raise Invalid(f""Verification failed: {e}"")
+
+    return True",none,english,english,
+62b8b4c1eb7e40a82d2d1139,"def verifyClass(iface, candidate, tentative=False):
+    """"""
+    Verifica che il *candidate* possa fornire correttamente *iface*.
+    """"""
+    if not all(hasattr(candidate, attr) for attr in dir(iface) if not attr.startswith('__')):
+        return False
+    
+    if not tentative:
+        for attr in dir(iface):
+            if not attr.startswith('__'):
+                iface_attr = getattr(iface, attr)
+                candidate_attr = getattr(candidate, attr)
+                if not callable(iface_attr) and not callable(candidate_attr):
+                    if iface_attr != candidate_attr:
+                        return False
+                elif callable(iface_attr) != callable(candidate_attr):
+                    return False
+    
+    return True",none,english,none,
+62b8b559eb7e40a82d2d11f6,"def determineMetaclass(bases, explicit_mc=None):
+    """"""
+    Determina la metaclasse a partire da una o più basi e da un'eventuale __metaclass__ esplicita.
+    """"""
+    if explicit_mc is not None:
+        return explicit_mc
+    for base in bases:
+        if hasattr(base, '__class__'):
+            return base.__class__
+    return type",none,english,none,
+62b8d22a48ba5a41d1c3f47d,"def pop(self, key, default=__marker):
+    """"""
+    D.pop(k[,d]) -> v, rimuove la chiave specificata e restituisce il valore corrispondente.  
+    Se la chiave non viene trovata, viene restituito `d` se fornito, altrimenti viene sollevata un'eccezione KeyError.
+    """"""
+    if key in self:
+        value = self[key]
+        del self[key]
+        return value
+    elif default is not __marker:
+        return default
+    else:
+        raise KeyError(f""KeyError: {key}"")",none,english,none,
+62b8d23748ba5a41d1c3f497,"def popitem(self):
+    """"""
+    Rimuove e restituisce la coppia `(chiave, valore)` meno frequentemente utilizzata.
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    
+    # Trova la chiave con il valore minimo (meno frequentemente utilizzata)
+    min_key = min(self, key=self.get)
+    value = self.pop(min_key)
+    return (min_key, value)",italian,english,english,
+62b8d23a48ba5a41d1c3f499,"def popitem(self):
+    """"""
+    Rimuove e restituisce la coppia `(chiave, valore)` meno recentemente utilizzata.
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    key = next(iter(self))
+    value = self.pop(key)
+    return (key, value)",none,english,english,
+62b8d23c48ba5a41d1c3f49b,"def popitem(self):
+    """"""
+    Rimuove e restituisce la coppia `(chiave, valore)` utilizzata più di recente.
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    key = next(reversed(self))
+    value = self[key]
+    del self[key]
+    return key, value",none,english,english,
+62b8d23e48ba5a41d1c3f49e,"def popitem(self):
+    """"""
+    Rimuovi e restituisci una coppia `(chiave, valore)` casuale.
+    """"""
+    if not self:
+        raise KeyError(""popitem(): dictionary is empty"")
+    key = next(iter(self))
+    value = self.pop(key)
+    return (key, value)",none,english,english,
+62b43425903eeb48555d3ea1,"import re
+
+def _create_in_regex(self) -> Pattern:
+    """"""
+    Crea l'espressione regolare per il parametro in-style.
+
+    Restituisce l'espressione regolare per il parametro in-style (:class:`re.Pattern`).
+    """"""
+    return re.compile(r':\w+')",none,english,none,
+62b43426903eeb48555d3ea2,"def _create_converter(self) -> _converting._Converter:
+    """"""
+    Crea il convertitore dello stile dei parametri.
+
+    Restituisce il convertitore dello stile dei parametri (:class:`._converting._Converter`).
+    """"""
+    return _converting._Converter()",none,english,none,
+62b8966c755ee91dce50a154,"from datetime import datetime
+from dateutil import parser
+
+def isoparse(self, dt_str):
+    """"""
+    Analizza una stringa datetime in formato ISO-8601 in un oggetto :class:`datetime.datetime`.
+
+    Una stringa datetime in formato ISO-8601 consiste in una parte relativa alla data, seguita
+    opzionalmente da una parte relativa all'ora. Le due parti sono separate da un singolo carattere
+    separatore, che è ``T`` nello standard ufficiale. I formati di data incompleti (come ``YYYY-MM``)
+    *non* possono essere combinati con una parte relativa all'ora.
+
+    I formati di data supportati sono:
+
+    Comuni:
+
+    - ``YYYY``
+    - ``YYYY-MM`` o ``YYYYMM``
+    - ``YYYY-MM-DD`` o ``YYYYMMDD``
+
+    Non comuni:
+
+    - ``YYYY-Www`` o ``YYYYWww`` - Settimana ISO (il giorno predefinito è 0)
+    - ``YYYY-Www-D`` o ``YYYYWwwD`` - Settimana ISO e giorno
+
+    La numerazione delle settimane e dei giorni ISO segue la stessa logica di
+    :func:`datetime.date.isocalendar`.
+
+    I formati di ora supportati sono:
+
+    - ``hh``
+    - ``hh:mm`` o ``hhmm``
+    - ``hh:mm:ss`` o ``hhmmss``
+    - ``hh:mm:ss.ssssss`` (fino a 6 cifre per i sotto-secondi)
+
+    La mezzanotte è un caso speciale per `hh`, poiché lo standard supporta sia
+    00:00 che 24:00 come rappresentazione. Il separatore decimale può essere
+    sia un punto che una virgola.
+
+    .. attenzione::
+
+        Il supporto per componenti frazionari diversi dai secondi fa parte dello
+        standard ISO-8601, ma non è attualmente implementato in questo parser.
+
+    I formati di offset del fuso orario supportati sono:
+
+    - `Z` (UTC)
+    - `±HH:MM`
+    - `±HHMM`
+    - `±HH`
+
+    Gli offset saranno rappresentati come oggetti :class:`dateutil.tz.tzoffset`,
+    con l'eccezione di UTC, che sarà rappresentato come :class:`dateutil.tz.tzutc`.
+    Gli offset del fuso orario equivalenti a UTC (come `+00:00`) saranno anch'essi
+    rappresentati come :class:`dateutil.tz.tzutc`.
+
+    :param dt_str:
+        Una stringa o un flusso contenente solo una stringa datetime in formato ISO-8601.
+
+    :return:
+        Restituisce un oggetto :class:`datetime.datetime` che rappresenta la stringa.
+        I componenti non specificati assumono il loro valore minimo.
+
+    .. avvertenza::
+
+        A partire dalla versione 2.7.0, la rigidità del parser non deve essere considerata
+        una parte stabile del contratto. Qualsiasi stringa ISO-8601 valida che viene analizzata
+        correttamente con le impostazioni predefinite continuerà a essere analizzata correttamente
+        nelle versioni future, ma le stringhe non valide che attualmente falliscono (ad esempio
+        ``2017-01-01T00:00+00:00:00``) non sono garantite di continuare a fallire nelle versioni
+        future se codificano una data valida.
+
+    .. versioneaggiunta:: 2.7.0
+    """"""
+    return parser.isoparse(dt_str)",none,english,none,
+62b896de755ee91dce50a183,"from datetime import datetime
+from dateutil import parser
+from dateutil.tz import gettz
+
+def parse(self, timestr, default=None, ignoretz=False, tzinfos=None, **kwargs):
+    """"""
+    Analizza la stringa di data/ora in un oggetto :class:`datetime.datetime`.
+
+    :param timestr:
+        Qualsiasi stringa di data/ora che utilizza i formati supportati.
+
+    :param default:
+        L'oggetto datetime predefinito. Se questo è un oggetto datetime e non
+        ``None``, gli elementi specificati in ``timestr`` sostituiscono gli elementi
+        nell'oggetto predefinito.
+
+    :param ignoretz:
+        Se impostato su ``True``, i fusi orari nelle stringhe analizzate vengono ignorati
+        e viene restituito un oggetto :class:`datetime.datetime` senza fuso orario.
+
+    :param tzinfos:
+        Nomi/alias di fusi orari aggiuntivi che possono essere presenti nella stringa.
+        Questo argomento mappa i nomi dei fusi orari (e opzionalmente gli offset da
+        quei fusi orari) ai fusi orari. Questo parametro può essere un dizionario con
+        alias di fusi orari che mappano i nomi dei fusi orari ai fusi orari o una
+        funzione che accetta due parametri (``tzname`` e ``tzoffset``) e restituisce
+        un fuso orario.
+
+    :param \*\*kwargs:
+        Argomenti keyword passati a ``_parse()``.
+
+    :return:
+        Restituisce un oggetto :class:`datetime.datetime` o, se l'opzione
+        ``fuzzy_with_tokens`` è impostata su ``True``, restituisce una tupla, il cui
+        primo elemento è un oggetto :class:`datetime.datetime` e il secondo è una
+        tupla contenente i token fuzzy.
+
+    :raises ParserError:
+        Sollevato per formati di stringa non validi o sconosciuti, se il
+        :class:`tzinfo` fornito non è in un formato valido o se verrebbe creata
+        una data non valida.
+
+    :raises TypeError:
+        Sollevato per input non stringa o flusso di caratteri.
+
+    :raises OverflowError:
+        Sollevato se la data analizzata supera il più grande intero C valido
+        sul tuo sistema.
+    """"""
+    if not isinstance(timestr, str):
+        raise TypeError(""Input must be a string."")
+
+    if default is not None and not isinstance(default, datetime):
+        raise TypeError(""Default must be a datetime object or None."")
+
+    if ignoretz:
+        tzinfos = None
+
+    try:
+        parsed_datetime = parser.parse(timestr, default=default, ignoretz=ignoretz, tzinfos=tzinfos, **kwargs)
+    except parser.ParserError as e:
+        raise parser.ParserError(f""Invalid or unknown string format: {e}"")
+    except OverflowError as e:
+        raise OverflowError(f""Parsed date exceeds the largest valid C integer on your system: {e}"")
+
+    return parsed_datetime",none,english,english,
+62b8a4a4755ee91dce50a3d3,"from datetime import datetime, timedelta
+
+def fromutc(self, dt):
+    """"""
+    Dato un oggetto datetime con consapevolezza del fuso orario (timezone-aware) in un determinato fuso orario, calcola un oggetto datetime con consapevolezza del fuso orario in un nuovo fuso orario.
+
+    Poiché questa è l'unica occasione in cui *sappiamo* di avere un oggetto datetime non ambiguo, cogliamo l'opportunità per determinare se il datetime è ambiguo e si trova in uno stato di ""fold"" (ad esempio, se è la prima occorrenza, in ordine cronologico, del datetime ambiguo).
+
+    :param dt:  
+        Un oggetto :class:`datetime.datetime` con consapevolezza del fuso orario (timezone-aware).
+    """"""
+    if dt.tzinfo is None:
+        raise ValueError(""fromutc() requires a timezone-aware datetime object"")
+    
+    # Convert the datetime to UTC
+    dt_utc = dt.astimezone(self.utc)
+    
+    # Calculate the offset from UTC for the new timezone
+    offset = self.utcoffset(dt_utc)
+    
+    # Apply the offset to get the new datetime
+    new_dt = dt_utc + offset
+    
+    # Check if the new datetime is ambiguous (e.g., during a DST transition)
+    if self.is_ambiguous(new_dt):
+        # If ambiguous, set the fold attribute to 1 (second occurrence)
+        new_dt = new_dt.replace(fold=1)
+    
+    return new_dt",english,english,english,
+62b8a7b2755ee91dce50a4a7,"from datetime import datetime
+
+def default_tzinfo(dt, tzinfo):
+    """"""
+    Imposta il parametro ``tzinfo`` solo sui datetime privi di informazioni sul fuso orario (naive).
+
+    Questo è utile, ad esempio, quando si lavora con un oggetto datetime che può avere un fuso orario implicito o esplicito, come nel caso del parsing di una stringa che rappresenta un fuso orario.
+
+    :param dt:
+        Il datetime su cui sostituire il fuso orario.
+
+    :param tzinfo:
+        L'istanza della sottoclasse :py:class:`datetime.tzinfo` da assegnare a
+        ``dt`` se (e solo se) è privo di informazioni sul fuso orario (naive).
+
+    :return:
+        Restituisce un oggetto :py:class:`datetime.datetime` con informazioni sul fuso orario (aware).
+    """"""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=tzinfo)
+    return dt",none,english,none,
+6305f9991d275c6667163c50,"def set_cut_chars(self, before: bytes, after: bytes) -> None:
+    """"""
+    Imposta i byte utilizzati per delimitare i punti di taglio.
+
+    Argomenti:
+        before: Divide il file prima di questi delimitatori.
+        after: Divide il file dopo questi delimitatori.
+    """"""
+    self.before_cut = before
+    self.after_cut = after",none,english,none,
+6306292052e177c0ba469f09,"from enum import Enum
+
+class RequestType(Enum):
+    PUBLIC_MESSAGE = 1
+    PRIVATE_MESSAGE = 2
+    LEGACY_PAYLOAD = 3
+    UNKNOWN = 4
+
+def identify_request(request: RequestType) -> str:
+    """"""
+    Prova a identificare se si tratta di una richiesta Diaspora.
+
+    Prova prima con un messaggio pubblico. Poi con un messaggio privato. Infine, verifica se si tratta di un payload legacy.
+    """"""
+    if request == RequestType.PUBLIC_MESSAGE:
+        return ""Richiesta Diaspora: Messaggio Pubblico""
+    elif request == RequestType.PRIVATE_MESSAGE:
+        return ""Richiesta Diaspora: Messaggio Privato""
+    elif request == RequestType.LEGACY_PAYLOAD:
+        return ""Richiesta Diaspora: Payload Legacy""
+    else:
+        return ""Tipo di richiesta sconosciuto""",none,english,italian,
+6306292152e177c0ba469f0d,"from typing import Union
+
+def identify_request(request: RequestType) -> bool:
+    """"""
+    Prova a identificare se si tratta di una richiesta Matrix.
+    
+    Args:
+        request (RequestType): La richiesta da identificare.
+    
+    Returns:
+        bool: True se la richiesta è di tipo Matrix, False altrimenti.
+    """"""
+    # Assuming RequestType has a 'type' attribute or similar to identify Matrix requests
+    if hasattr(request, 'type'):
+        return request.type == 'Matrix'
+    return False",english,english,none,
+6306292252e177c0ba469f11,"from datetime import datetime
+
+def format_dt(dt):
+    """"""
+    Formatta un oggetto datetime nel modo in cui i nodi D* si aspettano.
+    """"""
+    if not isinstance(dt, datetime):
+        raise ValueError(""Input must be a datetime object"")
+    
+    # Formato atteso dai nodi D*
+    return dt.strftime(""%Y-%m-%dT%H:%M:%S.%fZ"")",italian,english,english,
+6306292352e177c0ba469f1d,"import re
+from typing import Set, Tuple, Callable
+
+def find_tags(text: str, replacer: Callable = None) -> Tuple[Set[str], str]:
+    """"""
+    Trova i tag nel testo.
+
+    Cerca di ignorare i tag all'interno dei blocchi di codice.
+
+    Facoltativamente, se viene passato un ""replacer"", sostituirà anche la parola del tag con il risultato della funzione ""replacer"" chiamata con la parola del tag.
+
+    Restituisce un set di tag e il testo originale o modificato.
+    """"""
+    # Regex per trovare i tag (parole che iniziano con '#')
+    tag_pattern = re.compile(r'#\w+')
+    
+    # Regex per trovare blocchi di codice (tra",italian,english,none,
+6306292352e177c0ba469f1e,"import re
+
+def process_text_links(text):
+    """"""
+    Elabora i collegamenti nel testo, aggiungendo alcuni attributi e trasformando i collegamenti testuali in link cliccabili.
+    """"""
+    # Regular expression to match URLs
+    url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+    
+    # Function to replace matched URLs with HTML anchor tags
+    def replace_with_link(match):
+        url = match.group(0)
+        return f'<a href=""{url}"" target=""_blank"" rel=""noopener noreferrer"">{url}</a>'
+    
+    # Replace URLs in the text with clickable links
+    processed_text = url_pattern.sub(replace_with_link, text)
+    
+    return processed_text",english,english,none,
+6306292652e177c0ba469f34,"import requests
+from typing import Optional
+
+def fetch_content_type(url: str) -> Optional[str]:
+    """"""
+    Recupera l'intestazione HEAD dell'URL remoto per determinare il tipo di contenuto.
+    """"""
+    try:
+        response = requests.head(url, allow_redirects=True)
+        response.raise_for_status()
+        content_type = response.headers.get('Content-Type')
+        return content_type
+    except requests.RequestException:
+        return None",none,english,none,
+6306292a52e177c0ba469f41,"def test_tag(tag: str) -> bool:
+    """"""
+    Verifica se una parola può essere accettata come tag.
+    
+    Un tag è considerato valido se:
+    - Non è vuoto.
+    - Contiene solo caratteri alfanumerici e trattini bassi (_).
+    - Non inizia o finisce con un trattino basso.
+    - Non contiene spazi.
+    
+    :param tag: La stringa da verificare.
+    :return: True se il tag è valido, False altrimenti.
+    """"""
+    if not tag:
+        return False
+    
+    # Controlla che il tag non inizi o finisca con un trattino basso
+    if tag.startswith('_') or tag.endswith('_'):
+        return False
+    
+    # Controlla che il tag contenga solo caratteri alfanumerici e trattini bassi
+    for char in tag:
+        if not (char.isalnum() or char == '_'):
+            return False
+    
+    return True",italian,english,none,
+6306298b52e177c0ba469fdc,"def xml_children_as_dict(node):
+    """"""
+    Trasforma i figli del nodo <xml> in un dizionario, con chiavi basate sul nome del tag.
+
+    Questa è una conversione superficiale - i nodi figli non vengono elaborati ricorsivamente.
+    """"""
+    result = {}
+    for child in node:
+        tag = child.tag
+        if tag in result:
+            if isinstance(result[tag], list):
+                result[tag].append(child.text)
+            else:
+                result[tag] = [result[tag], child.text]
+        else:
+            result[tag] = child.text
+    return result",none,english,none,
+6306299052e177c0ba469fe8,"def check_sender_and_entity_handle_match(sender_handle, entity_handle):
+    """"""
+    Assicurati che i valori di `sender_handle` e `entity_handle` corrispondano.
+
+    Fondamentalmente, abbiamo già verificato che il mittente sia chi dichiara di essere al momento della ricezione del payload. Tuttavia, il mittente potrebbe cercare di impostare un altro autore all'interno del payload stesso, poiché 'Diaspora' include il mittente sia negli header del payload che nell'oggetto. Dobbiamo garantire che siano identici.
+    """"""
+    return sender_handle == entity_handle",none,english,none,
+630629b952e177c0ba46a043,"import json
+from urllib.parse import urljoin
+
+def get_nodeinfo_well_known_document(url, document_path=None):
+    """"""
+    Genera un documento NodeInfo `.well-known`.
+
+    Consulta la specifica: [http://nodeinfo.diaspora.software](http://nodeinfo.diaspora.software)
+
+    :param url: L'URL base completo con protocollo, ad esempio `https://example.com`  
+    :param document_path: Percorso personalizzato per il documento NodeInfo, se fornito (opzionale)  
+    :returns: dict
+    """"""
+    if document_path is None:
+        document_path = "".well-known/nodeinfo""
+    
+    well_known_url = urljoin(url, document_path)
+    
+    # Simulazione di un documento NodeInfo ben noto
+    nodeinfo_document = {
+        ""links"": [
+            {
+                ""rel"": ""http://nodeinfo.diaspora.software/ns/schema/2.0"",
+                ""href"": urljoin(url, ""nodeinfo/2.0"")
+            }
+        ]
+    }
+    
+    return nodeinfo_document",italian,english,none,
+630629d052e177c0ba46a0a1,"from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+def verify_relayable_signature(public_key, doc, signature):
+    """"""
+    Verifica gli elementi XML firmati per avere la certezza che l'autore dichiarato abbia effettivamente generato questo messaggio.
+    
+    :param public_key: La chiave pubblica in formato PEM.
+    :param doc: Il documento XML come stringa.
+    :param signature: La firma del documento.
+    :return: True se la firma è valida, False altrimenti.
+    """"""
+    try:
+        # Deserializza la chiave pubblica
+        pub_key = serialization.load_pem_public_key(
+            public_key.encode(),
+            backend=default_backend()
+        )
+        
+        # Verifica la firma
+        pub_key.verify(
+            signature,
+            doc.encode(),
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except Exception as e:
+        print(f""Verification failed: {e}"")
+        return False",italian,english,english,
+630629e052e177c0ba46a0c4,"import json
+from xml.etree import ElementTree as ET
+from typing import Dict
+
+def parse_diaspora_webfinger(document: str) -> Dict:
+    """"""
+    Analizza il webfinger di Diaspora, che può essere in formato JSON (nuovo) o in formato XRD (vecchio).
+
+    [https://diaspora.github.io/diaspora_federation/discovery/webfinger.html](https://diaspora.github.io/diaspora_federation/discovery/webfinger.html)
+    """"""
+    try:
+        # Try to parse as JSON (new format)
+        data = json.loads(document)
+        return data
+    except json.JSONDecodeError:
+        # If JSON parsing fails, try to parse as XML (old format)
+        try:
+            root = ET.fromstring(document)
+            namespaces = {'xrd': 'http://docs.oasis-open.org/ns/xri/xrd-1.0'}
+            links = root.findall('xrd:Link', namespaces)
+            result = {}
+            for link in links:
+                rel = link.get('rel')
+                href = link.get('href')
+                if rel and href:
+                    result[rel] = href
+            return result
+        except ET.ParseError:
+            # If both JSON and XML parsing fail, return an empty dict
+            return {}",english,english,none,
+630629e152e177c0ba46a0d1,"import requests
+from typing import Optional
+
+def try_retrieve_webfinger_document(handle: str) -> Optional[str]:
+    """"""
+    Prova a recuperare un documento webfinger conforme a RFC7033. Non genera eccezioni in caso di fallimento.
+    """"""
+    try:
+        # Split the handle into username and domain
+        username, domain = handle.split('@')
+        
+        # Construct the WebFinger URL
+        url = f""https://{domain}/.well-known/webfinger?resource=acct:{handle}""
+        
+        # Make the GET request
+        response = requests.get(url, headers={""Accept"": ""application/jrd+json""})
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            return response.text
+        else:
+            return None
+    except Exception:
+        return None",english,english,none,
+630629e152e177c0ba46a0d2,"import requests
+from urllib.parse import urlparse
+
+def retrieve_and_parse_diaspora_webfinger(handle):
+    """"""
+    Recupera e analizza un documento webfinger remoto di Diaspora.
+
+    :arg handle: Handle remoto da recuperare  
+    :returns: dict
+    """"""
+    # Split the handle into username and domain
+    username, domain = handle.split('@')
+    
+    # Construct the webfinger URL
+    webfinger_url = f""https://{domain}/.well-known/webfinger?resource=acct:{handle}""
+    
+    try:
+        # Make the GET request to retrieve the webfinger document
+        response = requests.get(webfinger_url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        # Parse the JSON response
+        webfinger_data = response.json()
+        
+        return webfinger_data
+    
+    except requests.exceptions.RequestException as e:
+        # Handle any errors that occur during the request
+        print(f""Error retrieving webfinger document: {e}"")
+        return {}",english,english,english,
+630629e252e177c0ba46a0d6,"import requests
+from lxml import etree
+
+def retrieve_diaspora_host_meta(host):
+    """"""
+    Recupera un documento host-meta remoto di Diaspora.
+
+    :arg host: Host da cui recuperare
+    :returns: Istanza di ``XRD``
+    """"""
+    url = f""https://{host}/.well-known/host-meta""
+    response = requests.get(url)
+    response.raise_for_status()
+    
+    # Parse the XML response
+    xml_root = etree.fromstring(response.content)
+    
+    # Assuming XRD is a class that can be initialized with the XML root
+    return XRD(xml_root)",english,english,none,
+630629e752e177c0ba46a0fb,"import requests
+
+def send_document(url, data, timeout=10, method=""post"", *args, **kwargs):
+    """"""
+    Metodo di supporto per inviare un documento tramite POST.
+
+    Gli ulteriori parametri ``*args`` e ``**kwargs`` saranno passati a ``requests.post``.
+
+    :arg url: URL completo a cui inviare, incluso il protocollo  
+    :arg data: Dizionario (sarà codificato come form), bytes o oggetto simile a un file da inviare nel corpo della richiesta  
+    :arg timeout: Secondi di attesa per la risposta (predefinito: 10)  
+    :arg method: Metodo da utilizzare, predefinito: post  
+    :returns: Tupla contenente il codice di stato (int o None) e l'errore (istanza della classe di eccezione o None)
+    """"""
+    try:
+        if method.lower() == ""post"":
+            response = requests.post(url, data=data, timeout=timeout, *args, **kwargs)
+        elif method.lower() == ""put"":
+            response = requests.put(url, data=data, timeout=timeout, *args, **kwargs)
+        else:
+            raise ValueError(f""Unsupported method: {method}"")
+        
+        response.raise_for_status()
+        return (response.status_code, None)
+    
+    except requests.exceptions.RequestException as e:
+        return (None, e)",none,english,english,
+6306091073426c38ae68acac,"def dict_insert(dic, val, key, *keys):
+    """"""
+    Inserisce un valore in una chiave annidata all'interno di un dizionario.
+
+    Per inserire un valore in una chiave annidata, è necessario fornire tutte le chiavi antenate
+    come argomenti del metodo.
+
+    Esempio:
+      dict_insert({}, 'val', *'key1.key2'.split('.'))
+
+    :param dic: un oggetto dizionario in cui inserire il valore della chiave annidata
+    :param val: un valore da inserire nel dizionario fornito
+    :param key: la prima chiave nella catena di chiavi che conterrà il valore
+    :param keys: sottochiavi nella catena di chiavi
+    """"""
+    current = dic
+    for k in keys[:-1]:
+        if k not in current:
+            current[k] = {}
+        current = current[k]
+    current[keys[-1]] = val
+    return dic",none,english,none,
+6306091a73426c38ae68acc8,"def list_of_file_names(settings_dirs, spec_option):
+    """"""
+    Crea un nuovo tipo complesso IniType
+    """"""
+    import os
+    file_names = []
+    for directory in settings_dirs:
+        if os.path.isdir(directory):
+            for file in os.listdir(directory):
+                if file.endswith(spec_option):
+                    file_names.append(os.path.join(directory, file))
+    return file_names",none,english,none,
+6306091b73426c38ae68acd7,"def ansible_config_manager(cls):
+    """"""
+    Ottiene il gestore di configurazione Ansible.
+    """"""
+    from ansible.parsing.dataloader import DataLoader
+    from ansible.inventory.manager import InventoryManager
+    from ansible.vars.manager import VariableManager
+    from ansible.playbook.play import Play
+    from ansible.executor.task_queue_manager import TaskQueueManager
+    from ansible.executor.playbook_executor import PlaybookExecutor
+    from ansible.plugins.callback import CallbackBase
+
+    class ResultCallback(CallbackBase):
+        """"""A sample callback plugin used for performing an action as results come in""""""
+        def v2_runner_on_ok(self, result, **kwargs):
+            """"""Print a json representation of the result""""""
+            host = result._host
+            print(f""{host.get_name()}: {result._result}"")
+
+    loader = DataLoader()
+    inventory = InventoryManager(loader=loader, sources='localhost,')
+    variable_manager = VariableManager(loader=loader, inventory=inventory)
+    callback = ResultCallback()
+
+    return {
+        'loader': loader,
+        'inventory': inventory,
+        'variable_manager': variable_manager,
+        'callback': callback
+    }",english,english,none,
+6306091b73426c38ae68acd9,"def workspace_manager(cls):
+    """"""
+    Ottiene il gestore dello spazio di lavoro.
+    """"""
+    return cls._workspace_manager",none,english,none,
+6306091b73426c38ae68acda,"def plugins_manager(cls):
+    """"""
+    Ottiene il gestore dei plugin.
+    """"""
+    return cls._plugins_manager",none,english,none,
+6306091c73426c38ae68acdc,"import yaml
+from typing import Dict, Any
+
+class IRValidatorException(Exception):
+    pass
+
+def validate_from_content(cls, spec_content=None) -> Dict[str, Any]:
+    """"""
+    Valida che il contenuto dello spec (YAML) contenga tutti i campi richiesti.
+
+    :param spec_content: contenuto del file spec
+    :raise IRValidatorException: quando i dati obbligatori
+    sono mancanti nel file spec
+    :return: Dizionario con i dati caricati da un file spec (YAML)
+    """"""
+    if spec_content is None:
+        raise IRValidatorException(""Il contenuto dello spec non può essere None."")
+    
+    try:
+        spec_data = yaml.safe_load(spec_content)
+    except yaml.YAMLError as e:
+        raise IRValidatorException(f""Errore nel parsing del contenuto YAML: {e}"")
+    
+    required_fields = [""field1"", ""field2"", ""field3""]  # Esempio di campi obbligatori
+    
+    for field in required_fields:
+        if field not in spec_data:
+            raise IRValidatorException(f""Campo obbligatorio mancante: {field}"")
+    
+    return spec_data",italian,english,italian,
+6306091c73426c38ae68acdd,"import yaml
+
+class IRValidatorException(Exception):
+    pass
+
+def validate_from_file(cls, yaml_file=None):
+    """"""
+    Carica e valida che un file YAML contenga tutti i campi richiesti.
+
+    :param yaml_file: Percorso del file YAML
+    :raise IRValidatorException: quando mancano dati obbligatori nel file
+    :return: Dizionario con i dati caricati da un file YAML
+    """"""
+    if yaml_file is None:
+        raise IRValidatorException(""No YAML file provided."")
+
+    try:
+        with open(yaml_file, 'r') as file:
+            data = yaml.safe_load(file)
+    except Exception as e:
+        raise IRValidatorException(f""Error loading YAML file: {e}"")
+
+    required_fields = ['field1', 'field2', 'field3']  # Example required fields
+    missing_fields = [field for field in required_fields if field not in data]
+
+    if missing_fields:
+        raise IRValidatorException(f""Missing required fields: {missing_fields}"")
+
+    return data",english,english,english,
+6306091d73426c38ae68ace5,"def _include_groups(self, parser_dict):
+    """"""
+    Risolve la direttiva ""include dict"" nei file di specifica
+    """"""
+    if 'include' in parser_dict:
+        for include_key in parser_dict['include']:
+            if include_key in parser_dict:
+                included_dict = parser_dict[include_key]
+                for key, value in included_dict.items():
+                    if key not in parser_dict:
+                        parser_dict[key] = value
+                    elif isinstance(value, dict) and isinstance(parser_dict[key], dict):
+                        parser_dict[key].update(value)
+                    elif isinstance(value, list) and isinstance(parser_dict[key], list):
+                        parser_dict[key].extend(value)
+        del parser_dict['include']
+    return parser_dict",none,english,none,
+6306092373426c38ae68acfa,"def get_spec_defaults(self):
+    """"""
+    Risolvere i valori degli argomenti dal file di specifica e da altre fonti.
+    """"""
+    # Assuming self.spec is a dictionary or similar structure that holds the specification
+    defaults = {}
+    if hasattr(self, 'spec'):
+        for key, value in self.spec.items():
+            if isinstance(value, dict) and 'default' in value:
+                defaults[key] = value['default']
+            else:
+                defaults[key] = value
+    return defaults",english,english,none,
+6306092973426c38ae68ad01,"def get_deprecated_args(self):
+    """"""
+    Restituzione di un dizionario con opzioni che deprecano altre.
+    """"""
+    deprecated_args = {
+        'old_arg1': 'new_arg1',
+        'old_arg2': 'new_arg2',
+        'old_arg3': 'new_arg3'
+    }
+    return deprecated_args",none,english,none,
+6306092c73426c38ae68ad02,"def validate_arg_deprecation(self, cli_args, answer_file_args):
+    """"""
+    Valida e stampa gli argomenti deprecati.
+
+    :param cli_args: il dizionario degli argomenti dalla CLI
+    :param answer_file_args: il dizionario degli argomenti dai file
+    """"""
+    deprecated_args = {
+        'old_arg1': 'new_arg1',
+        'old_arg2': 'new_arg2',
+        # Aggiungi altri argomenti deprecati qui
+    }
+
+    for arg in cli_args:
+        if arg in deprecated_args:
+            print(f""Attenzione: L'argomento '{arg}' è deprecato. Usa '{deprecated_args[arg]}' invece."")
+
+    for arg in answer_file_args:
+        if arg in deprecated_args:
+            print(f""Attenzione: L'argomento '{arg}' è deprecato. Usa '{deprecated_args[arg]}' invece."")",italian,english,italian,
+6306092d73426c38ae68ad04,"def get_parser_option_specs(self, command_name):
+    """"""
+    Ottiene tutte le opzioni per il comando specificato
+
+    :param command_name: il nome del comando (main, virsh, ospd, ecc...)
+    :return: la lista di tutte le opzioni del comando
+    """"""
+    if not hasattr(self, '_command_options'):
+        self._command_options = {}
+
+    if command_name in self._command_options:
+        return self._command_options[command_name]
+    
+    # Simulate fetching options for the command
+    # This is a placeholder implementation
+    options = []
+    if command_name == ""main"":
+        options = [""--help"", ""--version"", ""--verbose""]
+    elif command_name == ""virsh"":
+        options = [""--connect"", ""--list"", ""--details""]
+    elif command_name == ""ospd"":
+        options = [""--config"", ""--log-level"", ""--output""]
+    else:
+        options = [""--option1"", ""--option2"", ""--option3""]
+    
+    self._command_options[command_name] = options
+    return options",english,english,none,
+6306092d73426c38ae68ad05,"def get_option_spec(self, command_name, argument_name):
+    """"""
+    Ottiene la specifica per il nome dell'opzione specificato.
+    """"""
+    # Assuming self.options is a dictionary where keys are command names and values are dictionaries of argument specs
+    if command_name in self.options:
+        if argument_name in self.options[command_name]:
+            return self.options[command_name][argument_name]
+    return None",english,english,none,
+6306092d73426c38ae68ad06,"def get_silent_args(self, args):
+    """"""
+    Restituisce l'elenco degli argomenti silenziati.
+
+    :param args: Gli argomenti ricevuti.
+    :return: list, nomi degli argomenti silenziati.
+    """"""
+    silent_args = []
+    for arg in args:
+        if arg.startswith('--'):
+            silent_args.append(arg[2:])
+    return silent_args",none,english,none,
+6306092d73426c38ae68ad07,"def validate_requires_args(self, args):
+    """"""
+    Verifica se sono stati forniti tutti gli argomenti richiesti.
+    """"""
+    required_args = getattr(self, 'required_args', [])
+    missing_args = [arg for arg in required_args if arg not in args]
+    
+    if missing_args:
+        raise ValueError(f""Missing required arguments: {', '.join(missing_args)}"")
+    return True",none,english,english,
+6306092d73426c38ae68ad08,"def _get_conditionally_required_args(self, command_name, options_spec, args):
+    """"""
+    Elenca gli argomenti con la condizione ``required_when`` soddisfatta.
+
+    :param command_name: il nome del comando.
+    :param options_spec: la lista delle opzioni specifiche del comando.
+    :param args: gli argomenti di input ricevuti.
+    :return: list, lista dei nomi degli argomenti con la condizione
+        ``required_when`` soddisfatta.
+    """"""
+    required_args = []
+    for option in options_spec:
+        if hasattr(option, 'required_when'):
+            condition = option.required_when
+            if condition(command_name, args):
+                required_args.append(option.name)
+    return required_args",none,english,none,
+6306092e73426c38ae68ad09,"def validate_length_args(self, args):
+    """"""
+    Verifica se il valore degli argomenti non supera la lunghezza specificata.
+
+    :param args: Gli argomenti ricevuti.
+    """"""
+    max_length = 100  # Esempio di lunghezza massima consentita
+    for arg in args:
+        if len(str(arg)) > max_length:
+            raise ValueError(f""L'argomento {arg} supera la lunghezza massima consentita di {max_length} caratteri."")",italian,english,italian,
+6306092e73426c38ae68ad0a,"def validate_choices_args(self, args):
+    """"""
+    Verifica se il valore degli argomenti di scelta è una delle opzioni disponibili.
+
+    :param args: Gli argomenti ricevuti.
+    """"""
+    if not hasattr(self, 'choices'):
+        raise AttributeError(""No 'choices' attribute found in the class."")
+    
+    if not isinstance(self.choices, (list, tuple)):
+        raise TypeError(""'choices' must be a list or tuple."")
+    
+    if not args:
+        raise ValueError(""No arguments provided."")
+    
+    for arg in args:
+        if arg not in self.choices:
+            raise ValueError(f""Invalid choice: {arg}. Valid choices are: {self.choices}"")
+    
+    return True",none,english,english,
+6306092e73426c38ae68ad0b,"def validate_min_max_args(self, args):
+    """"""
+    Verifica se il valore degli argomenti è compreso tra i valori minimo e massimo.
+
+    :param args: Gli argomenti ricevuti.
+    """"""
+    if not hasattr(self, 'min_value') or not hasattr(self, 'max_value'):
+        raise AttributeError(""min_value and max_value must be defined in the class."")
+    
+    for arg in args:
+        if not (self.min_value <= arg <= self.max_value):
+            raise ValueError(f""Argument {arg} is not between {self.min_value} and {self.max_value}."")
+    return True",none,english,english,
+6306092e73426c38ae68ad0d,"def create_complex_argument_type(self, subcommand, type_name, option_name, spec_option):
+    """"""
+    Crea il tipo di argomento complesso.
+
+    :param subcommand: il nome del comando
+    :param type_name: il nome del tipo complesso
+    :param option_name: il nome dell'opzione
+    :param spec_option: le specifiche dell'opzione
+    :return: l'istanza del tipo complesso
+    """"""
+    # Assuming the complex type is a class that can be instantiated with the given parameters
+    class ComplexType:
+        def __init__(self, subcommand, type_name, option_name, spec_option):
+            self.subcommand = subcommand
+            self.type_name = type_name
+            self.option_name = option_name
+            self.spec_option = spec_option
+
+        def __repr__(self):
+            return f""ComplexType(subcommand={self.subcommand}, type_name={self.type_name}, option_name={self.option_name}, spec_option={self.spec_option})""
+
+    # Create and return an instance of the complex type
+    return ComplexType(subcommand, type_name, option_name, spec_option)",english,english,none,
+6306092e73426c38ae68ad0f,"def get_nested_custom_and_control_args(self, args):
+    """"""
+    Suddivide gli argomenti di input in controlli nidificati e personalizzati.
+
+    Argomenti di controllo: controllano il comportamento dell'IR. Questi argomenti
+        non saranno inseriti nel file spec yml.
+    Argomenti nidificati: sono utilizzati dai playbook di Ansible e saranno inseriti
+        nel file spec yml.
+    Argomenti personalizzati: variabili Ansible personalizzate da utilizzare al posto
+        dell'uso normale degli argomenti nidificati.
+
+    :param args: la lista raccolta di argomenti.
+    :return: (dict, dict): dizionari piatti (control_args, nested_args)
+    """"""
+    control_args = {}
+    nested_args = {}
+    
+    for key, value in args.items():
+        if key.startswith('control_'):
+            control_args[key] = value
+        elif key.startswith('custom_'):
+            nested_args[key] = value
+        else:
+            nested_args[key] = value
+    
+    return control_args, nested_args",none,english,none,
+6306092e73426c38ae68ad11,"def merge_extra_vars(vars_dict, extra_vars=None):
+    """"""
+    Estende ``vars_dict`` con ``extra-vars``
+
+    :param vars_dict: Dizionario in cui unire le extra-vars
+    :param extra_vars: Lista di extra-vars
+    """"""
+    if extra_vars is not None:
+        for key, value in extra_vars.items():
+            vars_dict[key] = value
+    return vars_dict",none,english,none,
+6306092f73426c38ae68ad13,"def ansible_playbook(ir_workspace, ir_plugin, playbook_path, verbose=None,
+                     extra_vars=None, ansible_args=None):
+    """"""
+    Avvolge il comando 'ansible-playbook' della CLI.
+
+    :param ir_workspace: Un oggetto Infrared Workspace che rappresenta lo spazio di lavoro attivo
+    :param ir_plugin: Un oggetto InfraredPlugin del plugin corrente
+    :param playbook_path: il percorso del playbook da eseguire
+    :param verbose: Livello di verbosità di Ansible
+    :param extra_vars: dict. Passato ad Ansible come extra-vars
+    :param ansible_args: dizionario di argomenti per ansible-playbook da inoltrare
+        direttamente ad Ansible.
+    """"""
+    import subprocess
+
+    # Costruisci il comando base
+    command = ['ansible-playbook', playbook_path]
+
+    # Aggiungi il livello di verbosità se specificato
+    if verbose:
+        command.extend(['-' + 'v' * verbose])
+
+    # Aggiungi extra_vars se specificato
+    if extra_vars:
+        extra_vars_str = ' '.join([f""{k}={v}"" for k, v in extra_vars.items()])
+        command.extend(['--extra-vars', extra_vars_str])
+
+    # Aggiungi ansible_args se specificato
+    if ansible_args:
+        for key, value in ansible_args.items():
+            command.extend([f""--{key}"", str(value)])
+
+    # Esegui il comando
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    # Gestisci l'output
+    if result.returncode != 0:
+        print(f""Errore durante l'esecuzione del playbook: {result.stderr}"")
+    else:
+        print(f""Playbook eseguito con successo: {result.stdout}"")",italian,english,italian,
+6306093273426c38ae68ad15,"def _run_playbook(cli_args, vars_dict, ir_workspace, ir_plugin):
+    """"""
+    Esegue il comando Ansible CLI con un dizionario di variabili.
+
+    :param vars_dict: dict, Sarà passato come extra-vars ad Ansible
+    :param cli_args: la lista di argomenti della riga di comando
+    :param ir_workspace: Un oggetto Infrared Workspace che rappresenta
+                         lo spazio di lavoro attivo
+    :param ir_plugin: Un oggetto InfraredPlugin del plugin corrente
+    :return: risultati di Ansible
+    """"""
+    import subprocess
+
+    # Convert the vars_dict to a string format suitable for extra-vars
+    extra_vars = "" "".join([f""{key}={value}"" for key, value in vars_dict.items()])
+
+    # Construct the full command
+    command = [""ansible-playbook""] + cli_args + [""--extra-vars"", extra_vars]
+
+    # Execute the command
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    # Return the result
+    return result",english,english,none,
+63060ada73426c38ae68ad31,"def _convert_non_cli_args(self, parser_name, values_dict):
+    """"""
+    Converte gli argomenti nei tipi corretti modificando il parametro values_dict.
+
+    Per impostazione predefinita, tutti i valori sono stringhe.
+
+    :param parser_name: Il nome del comando, ad esempio main, virsh, ospd, ecc.
+    :param values_dict: Il dizionario con gli argomenti
+    """"""
+    for key, value in values_dict.items():
+        if isinstance(value, str):
+            if value.lower() == 'true':
+                values_dict[key] = True
+            elif value.lower() == 'false':
+                values_dict[key] = False
+            elif value.isdigit():
+                values_dict[key] = int(value)
+            elif value.replace('.', '', 1).isdigit():
+                values_dict[key] = float(value)
+            elif value.lower() == 'none':
+                values_dict[key] = None
+    return values_dict",none,english,none,
+63060b1a73426c38ae68ad3e,"import os
+import json
+
+def get_plugin_spec_flatten_dict(plugin_dir):
+    """"""
+    Crea un dizionario non annidato a partire dalle specifiche del plugin.
+
+    :param plugin_dir: Un percorso alla directory del plugin  
+    :return: Un dizionario piatto che contiene le proprietà del plugin
+    """"""
+    flat_dict = {}
+    
+    # Check if the directory exists
+    if not os.path.isdir(plugin_dir):
+        raise FileNotFoundError(f""The directory {plugin_dir} does not exist."")
+    
+    # Look for a spec file (e.g., plugin_spec.json) in the plugin directory
+    spec_file = os.path.join(plugin_dir, ""plugin_spec.json"")
+    if not os.path.isfile(spec_file):
+        raise FileNotFoundError(f""No plugin specification file found in {plugin_dir}."")
+    
+    # Load the JSON file
+    with open(spec_file, 'r') as file:
+        spec_data = json.load(file)
+    
+    # Flatten the dictionary
+    def flatten_dict(d, parent_key='', sep='.'):
+        items = []
+        for k, v in d.items():
+            new_key = f""{parent_key}{sep}{k}"" if parent_key else k
+            if isinstance(v, dict):
+                items.extend(flatten_dict(v, new_key, sep=sep).items())
+            else:
+                items.append((new_key, v))
+        return dict(items)
+    
+    flat_dict = flatten_dict(spec_data)
+    
+    return flat_dict",english,english,english,
+63060b1b73426c38ae68ad42,"import os
+
+def inject_config(self):
+    """"""
+    Imposta la variabile d'ambiente per il percorso del file di configurazione, se non è già definita.
+    """"""
+    config_path = ""/path/to/config/file""  # Sostituisci con il percorso effettivo del file di configurazione
+    if 'CONFIG_PATH' not in os.environ:
+        os.environ['CONFIG_PATH'] = config_path",italian,english,none,
+63060b1b73426c38ae68ad43,"def extend_cli(self, root_subparsers):
+    """"""
+    Aggiunge le opzioni CLI specifiche al punto di ingresso principale.
+
+    :param subparser: l'oggetto subparser da estendere.
+    """"""
+    # Example: Adding a new subcommand 'example' with an optional argument '--option'
+    example_parser = root_subparsers.add_parser('example', help='Example command')
+    example_parser.add_argument('--option', type=str, help='An example option')",english,english,none,
+62ece4982e6aefcf4aabbd64,"def strip_root(percorso, radice):
+    """"""
+    Rimuovi la radice dal percorso, genera un'eccezione in caso di errore.
+    
+    :param percorso: Il percorso completo da cui rimuovere la radice.
+    :param radice: La radice da rimuovere dal percorso.
+    :return: Il percorso senza la radice.
+    :raises ValueError: Se la radice non è un prefisso del percorso.
+    """"""
+    if not percorso.startswith(radice):
+        raise ValueError(""La radice non è un prefisso del percorso."")
+    return percorso[len(radice):]",none,english,italian,
