@@ -137,6 +137,25 @@ Matches the `python-{model}-test.csv` output produced by the paper's R script fo
 | claude | spanish | 4100 | 55.12 | 51.34 | 283 | 128 | 0.0 | 0.1886 | medium | True |
 | claude | italian | 4100 | 55.12 | 52.46 | 260 | 151 | 1e-06 | 0.1326 | small | True |
 
+### McNemar — class-level (paired on (task_id, iteration); class passes iff every method passes)
+
+Use these effect sizes alongside the class-level pass-rate table above. `n_class_pairs` = 100 for greedy GPT/DeepSeek (1 iteration × 100 classes) and 1000 for Claude (10 iterations × 100 classes).
+
+| Model | Target | n class pairs | passed Eng % | passed Lang % | b (E+, T−) | c (E−, T+) | p (BH) | Cohen's g | magnitude | sig. |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| gpt | chinese | 100 | 37.0 | 36.0 | 5 | 4 | 1.0 | 0.0556 | small | False |
+| gpt | hindi | 100 | 37.0 | 38.0 | 4 | 5 | 1.0 | 0.0556 | small | False |
+| gpt | spanish | 100 | 37.0 | 34.0 | 7 | 4 | 0.77474 | 0.1364 | small | False |
+| gpt | italian | 100 | 37.0 | 33.0 | 7 | 3 | 0.6875 | 0.2 | medium | False |
+| deepseek | chinese | 100 | 41.0 | 45.0 | 5 | 9 | 0.726772 | 0.1429 | small | False |
+| deepseek | hindi | 100 | 41.0 | 39.0 | 7 | 5 | 0.929297 | 0.0833 | small | False |
+| deepseek | spanish | 100 | 41.0 | 36.0 | 9 | 4 | 0.64043 | 0.1923 | medium | False |
+| deepseek | italian | 100 | 41.0 | 38.0 | 8 | 5 | 0.77474 | 0.1154 | small | False |
+| claude | chinese | 1000 | 12.8 | 11.3 | 31 | 16 | 0.119958 | 0.1596 | medium | False |
+| claude | hindi | 1000 | 12.8 | 10.2 | 39 | 13 | 0.002457 | 0.25 | large | True |
+| claude | spanish | 1000 | 12.8 | 10.3 | 45 | 20 | 0.010506 | 0.1923 | medium | True |
+| claude | italian | 1000 | 12.8 | 8.3 | 47 | 2 | 0.0 | 0.4592 | large | True |
+
 ## Qualitative analysis (Table 9 equivalent)
 
 Percentage of methods (out of 410) whose comments / literals were written in the indicated language. E = English, target = Chinese/Hindi/Spanish/Italian, B = both.
@@ -238,7 +257,8 @@ Mean metric per (language, model). For Claude values are averaged across the 10 
 - `classeval_test_results.csv` — raw per-method test outcomes (errors/failures/testsRun/passed/reason).
 - `classeval_pass_rates.csv` / `classeval_pass_rates_by_iter.csv` — aggregated pass rates.
 - `classeval_failure_breakdown.csv` — counts of each failure reason per (language, model).
-- `classeval_test_mcnemar.csv` — McNemar + Cohen's g on (English vs target) pass/fail pairs (matches the `python-{model}-test.csv` file produced by the R script for CoderEval).
+- `classeval_test_mcnemar.csv` — method-level McNemar + Cohen's g on (English vs target) pass/fail pairs (matches the `python-{model}-test.csv` file produced by the R script for CoderEval).
+- `classeval_test_mcnemar_class_level.csv` — class-level McNemar + Cohen's g (unit = class-attempt; pair on (task_id, iteration)).
 - `classeval_pass_at_k_upstream.csv` / `classeval_pass_at_k_upstream_summary.txt` — upstream ClassEval `cal_metrics_pass_at_k` faithfully ported to Python (`fun_success`, `fun_partial_success`, `class_success`, `class_partial_success` for pass@n where n ≤ k).
 - `classeval_class_level_pass_rates.csv` / `classeval_class_level_pass_rates_by_iter.csv` — simple class-level pass aggregation (every method in a class must pass in the same iteration).
 

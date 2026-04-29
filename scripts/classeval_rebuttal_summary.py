@@ -179,6 +179,25 @@ def write_summary():
                          f"{r['p_adj_BH']} | {r['cohens_g']} | {r['magnitude']} | {r['significant_0.05']} |")
         lines.append("")
 
+    # ===== Class-level McNemar =====
+    mcn_cls_path = os.path.join(RES, "classeval_test_mcnemar_class_level.csv")
+    if os.path.exists(mcn_cls_path):
+        mcn_cls = load_csv(mcn_cls_path)
+        lines.append("### McNemar — class-level (paired on (task_id, iteration); class passes iff every method passes)")
+        lines.append("")
+        lines.append("Use these effect sizes alongside the class-level pass-rate table above. "
+                     "`n_class_pairs` = 100 for greedy GPT/DeepSeek (1 iteration × 100 classes) and "
+                     "1000 for Claude (10 iterations × 100 classes).")
+        lines.append("")
+        lines.append("| Model | Target | n class pairs | passed Eng % | passed Lang % | b (E+, T−) | c (E−, T+) | p (BH) | Cohen's g | magnitude | sig. |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+        for r in mcn_cls:
+            lines.append(f"| {r['model']} | {r['language']} | {r['n_class_pairs']} | "
+                         f"{r['passed_english_pct']} | {r['passed_lang_pct']} | "
+                         f"{r['b_engPass_langFail']} | {r['c_engFail_langPass']} | "
+                         f"{r['p_adj_BH']} | {r['cohens_g']} | {r['magnitude']} | {r['significant_0.05']} |")
+        lines.append("")
+
     # ===== Qualitative =====
     lines.append("## Qualitative analysis (Table 9 equivalent)")
     lines.append("")
@@ -270,7 +289,8 @@ def write_summary():
     lines.append("- `classeval_test_results.csv` — raw per-method test outcomes (errors/failures/testsRun/passed/reason).")
     lines.append("- `classeval_pass_rates.csv` / `classeval_pass_rates_by_iter.csv` — aggregated pass rates.")
     lines.append("- `classeval_failure_breakdown.csv` — counts of each failure reason per (language, model).")
-    lines.append("- `classeval_test_mcnemar.csv` — McNemar + Cohen's g on (English vs target) pass/fail pairs (matches the `python-{model}-test.csv` file produced by the R script for CoderEval).")
+    lines.append("- `classeval_test_mcnemar.csv` — method-level McNemar + Cohen's g on (English vs target) pass/fail pairs (matches the `python-{model}-test.csv` file produced by the R script for CoderEval).")
+    lines.append("- `classeval_test_mcnemar_class_level.csv` — class-level McNemar + Cohen's g (unit = class-attempt; pair on (task_id, iteration)).")
     lines.append("- `classeval_pass_at_k_upstream.csv` / `classeval_pass_at_k_upstream_summary.txt` — upstream ClassEval `cal_metrics_pass_at_k` faithfully ported to Python (`fun_success`, `fun_partial_success`, `class_success`, `class_partial_success` for pass@n where n ≤ k).")
     lines.append("- `classeval_class_level_pass_rates.csv` / `classeval_class_level_pass_rates_by_iter.csv` — simple class-level pass aggregation (every method in a class must pass in the same iteration).")
     lines.append("")
