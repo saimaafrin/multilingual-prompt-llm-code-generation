@@ -1,0 +1,16 @@
+language,model,n_class_attempts,class_strict_pass,class_partial_pass,class_strict_rate_pct,class_partial_rate_pct
+chinese,claude,1000,113,454,11.3,45.4
+chinese,deepseek,100,45,77,45.0,77.0
+chinese,gpt,100,36,74,36.0,74.0
+english,claude,1000,128,474,12.8,47.4
+english,deepseek,100,41,79,41.0,79.0
+english,gpt,100,37,75,37.0,75.0
+hindi,claude,1000,102,451,10.2,45.1
+hindi,deepseek,100,39,76,39.0,76.0
+hindi,gpt,100,38,76,38.0,76.0
+italian,claude,1000,83,431,8.3,43.1
+italian,deepseek,100,38,77,38.0,77.0
+italian,gpt,100,33,76,33.0,76.0
+spanish,claude,1000,103,406,10.3,40.6
+spanish,deepseek,100,36,79,36.0,79.0
+spanish,gpt,100,34,72,34.0,72.0

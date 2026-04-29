@@ -1,0 +1,104 @@
+ClassEval upstream pass@n  (k = number of samples per task; n = pass@n)
+All values are fractions in [0,1]. Multiply by 100 for percentages.
+
+=== gpt ===
+  fun_success  (k=1)
+    language    pass@1  
+    english     0.7317
+    chinese     0.7317
+    hindi       0.7317
+    spanish     0.7244
+    italian     0.7171
+
+  fun_partial_success  (k=1)
+    language    pass@1  
+    english     0.8927
+    chinese     0.9000
+    hindi       0.8878
+    spanish     0.8854
+    italian     0.8878
+
+  class_success  (k=1)
+    language    pass@1  
+    english     0.3700
+    chinese     0.3600
+    hindi       0.3800
+    spanish     0.3400
+    italian     0.3300
+
+  class_partial_success  (k=1)
+    language    pass@1  
+    english     0.7500
+    chinese     0.8000
+    hindi       0.7700
+    spanish     0.7400
+    italian     0.7600
+
+
+=== deepseek ===
+  fun_success  (k=1)
+    language    pass@1  
+    english     0.7683
+    chinese     0.7756
+    hindi       0.7537
+    spanish     0.7439
+    italian     0.7512
+
+  fun_partial_success  (k=1)
+    language    pass@1  
+    english     0.9024
+    chinese     0.9024
+    hindi       0.8976
+    spanish     0.9000
+    italian     0.8976
+
+  class_success  (k=1)
+    language    pass@1  
+    english     0.4100
+    chinese     0.4500
+    hindi       0.3900
+    spanish     0.3600
+    italian     0.3800
+
+  class_partial_success  (k=1)
+    language    pass@1  
+    english     0.7900
+    chinese     0.7900
+    hindi       0.7700
+    spanish     0.7800
+    italian     0.7800
+
+
+=== claude ===
+  fun_success  (k=10)
+    language    pass@1    pass@3    pass@5    pass@10 
+    english     0.5512  0.5590  0.5626  0.5659
+    chinese     0.5312  0.5518  0.5583  0.5634
+    hindi       0.5312  0.5376  0.5407  0.5463
+    spanish     0.5134  0.5268  0.5297  0.5317
+    italian     0.5246  0.5380  0.5436  0.5488
+
+  fun_partial_success  (k=10)
+    language    pass@1    pass@3    pass@5    pass@10 
+    english     0.7863  0.7969  0.8003  0.8024
+    chinese     0.7598  0.7806  0.7866  0.7927
+    hindi       0.7654  0.7696  0.7712  0.7732
+    spanish     0.7417  0.7526  0.7563  0.7610
+    italian     0.7451  0.7542  0.7568  0.7585
+
+  class_success  (k=10)
+    language    pass@1    pass@3    pass@5    pass@10 
+    english     0.1280  0.1300  0.1300  0.1300
+    chinese     0.1130  0.1224  0.1269  0.1300
+    hindi       0.1020  0.1053  0.1078  0.1100
+    spanish     0.1030  0.1172  0.1197  0.1200
+    italian     0.0830  0.0883  0.0928  0.1000
+
+  class_partial_success  (k=10)
+    language    pass@1    pass@3    pass@5    pass@10 
+    english     0.5190  0.5321  0.5369  0.5400
+    chinese     0.4770  0.5085  0.5205  0.5400
+    hindi       0.4900  0.4953  0.4978  0.5000
+    spanish     0.4540  0.4727  0.4792  0.4900
+    italian     0.4670  0.4763  0.4791  0.4800
+

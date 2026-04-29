@@ -23,6 +23,101 @@ Percentage of generated methods that pass ClassEval's unit tests. Each generated
 
 Per-iteration detail for Claude (10 iterations per language) is in `classeval_pass_rates_by_iter.csv`.
 
+### Upstream ClassEval pass@n (faithful port of `cal_metrics_pass_at_k`)
+
+Per-sample classification (`get_test_answer`): a sample is `success` iff all unit tests passed; `partial_success` iff some passed and none crashed; `error` iff the run crashed; `fail` iff every test failed by assertion. `pass@n` is computed with the unbiased Chen et al. estimator over the `k` samples we have per task (k = number of iterations: 10 for Claude, 1 for GPT/DeepSeek, so the greedy GPT/DeepSeek rows only have pass@1).
+
+#### `fun_success`
+
+| Model | Lang | k | pass@1 | pass@3 | pass@5 | pass@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| gpt | english | 1 | 0.7317 | — | — | — |
+| gpt | chinese | 1 | 0.7317 | — | — | — |
+| gpt | hindi | 1 | 0.7317 | — | — | — |
+| gpt | spanish | 1 | 0.7244 | — | — | — |
+| gpt | italian | 1 | 0.7171 | — | — | — |
+| deepseek | english | 1 | 0.7683 | — | — | — |
+| deepseek | chinese | 1 | 0.7756 | — | — | — |
+| deepseek | hindi | 1 | 0.7537 | — | — | — |
+| deepseek | spanish | 1 | 0.7439 | — | — | — |
+| deepseek | italian | 1 | 0.7512 | — | — | — |
+| claude | english | 10 | 0.5512 | 0.559 | 0.5626 | 0.5659 |
+| claude | chinese | 10 | 0.5312 | 0.5518 | 0.5583 | 0.5634 |
+| claude | hindi | 10 | 0.5312 | 0.5376 | 0.5407 | 0.5463 |
+| claude | spanish | 10 | 0.5134 | 0.5268 | 0.5297 | 0.5317 |
+| claude | italian | 10 | 0.5246 | 0.538 | 0.5436 | 0.5488 |
+
+#### `fun_partial_success`
+
+| Model | Lang | k | pass@1 | pass@3 | pass@5 | pass@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| gpt | english | 1 | 0.8927 | — | — | — |
+| gpt | chinese | 1 | 0.9 | — | — | — |
+| gpt | hindi | 1 | 0.8878 | — | — | — |
+| gpt | spanish | 1 | 0.8854 | — | — | — |
+| gpt | italian | 1 | 0.8878 | — | — | — |
+| deepseek | english | 1 | 0.9024 | — | — | — |
+| deepseek | chinese | 1 | 0.9024 | — | — | — |
+| deepseek | hindi | 1 | 0.8976 | — | — | — |
+| deepseek | spanish | 1 | 0.9 | — | — | — |
+| deepseek | italian | 1 | 0.8976 | — | — | — |
+| claude | english | 10 | 0.7863 | 0.7969 | 0.8003 | 0.8024 |
+| claude | chinese | 10 | 0.7598 | 0.7806 | 0.7866 | 0.7927 |
+| claude | hindi | 10 | 0.7654 | 0.7696 | 0.7712 | 0.7732 |
+| claude | spanish | 10 | 0.7417 | 0.7526 | 0.7563 | 0.761 |
+| claude | italian | 10 | 0.7451 | 0.7542 | 0.7568 | 0.7585 |
+
+#### `class_success`
+
+| Model | Lang | k | pass@1 | pass@3 | pass@5 | pass@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| gpt | english | 1 | 0.37 | — | — | — |
+| gpt | chinese | 1 | 0.36 | — | — | — |
+| gpt | hindi | 1 | 0.38 | — | — | — |
+| gpt | spanish | 1 | 0.34 | — | — | — |
+| gpt | italian | 1 | 0.33 | — | — | — |
+| deepseek | english | 1 | 0.41 | — | — | — |
+| deepseek | chinese | 1 | 0.45 | — | — | — |
+| deepseek | hindi | 1 | 0.39 | — | — | — |
+| deepseek | spanish | 1 | 0.36 | — | — | — |
+| deepseek | italian | 1 | 0.38 | — | — | — |
+| claude | english | 10 | 0.128 | 0.13 | 0.13 | 0.13 |
+| claude | chinese | 10 | 0.113 | 0.1224 | 0.1269 | 0.13 |
+| claude | hindi | 10 | 0.102 | 0.1053 | 0.1078 | 0.11 |
+| claude | spanish | 10 | 0.103 | 0.1172 | 0.1197 | 0.12 |
+| claude | italian | 10 | 0.083 | 0.0883 | 0.0928 | 0.1 |
+
+#### `class_partial_success`
+
+| Model | Lang | k | pass@1 | pass@3 | pass@5 | pass@10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| gpt | english | 1 | 0.75 | — | — | — |
+| gpt | chinese | 1 | 0.8 | — | — | — |
+| gpt | hindi | 1 | 0.77 | — | — | — |
+| gpt | spanish | 1 | 0.74 | — | — | — |
+| gpt | italian | 1 | 0.76 | — | — | — |
+| deepseek | english | 1 | 0.79 | — | — | — |
+| deepseek | chinese | 1 | 0.79 | — | — | — |
+| deepseek | hindi | 1 | 0.77 | — | — | — |
+| deepseek | spanish | 1 | 0.78 | — | — | — |
+| deepseek | italian | 1 | 0.78 | — | — | — |
+| claude | english | 10 | 0.519 | 0.5321 | 0.5369 | 0.54 |
+| claude | chinese | 10 | 0.477 | 0.5085 | 0.5205 | 0.54 |
+| claude | hindi | 10 | 0.49 | 0.4953 | 0.4978 | 0.5 |
+| claude | spanish | 10 | 0.454 | 0.4727 | 0.4792 | 0.49 |
+| claude | italian | 10 | 0.467 | 0.4763 | 0.4791 | 0.48 |
+
+
+### Class-level pass rate (strict, from `classeval_class_level_pass_rates.csv`)
+
+Fraction of class-attempts where every method in the class passed in the same iteration. Equivalent to upstream `class_success` pass@1 evaluated as a simple mean (no Chen et al. correction).
+
+| Model | English | Chinese | Hindi | Spanish | Italian |
+| --- | --- | --- | --- | --- | --- |
+| gpt | 37.0% (37/100) | 36.0% (36/100) | 38.0% (38/100) | 34.0% (34/100) | 33.0% (33/100) |
+| deepseek | 41.0% (41/100) | 45.0% (45/100) | 39.0% (39/100) | 36.0% (36/100) | 38.0% (38/100) |
+| claude | 12.8% (128/1000) | 11.3% (113/1000) | 10.2% (102/1000) | 10.3% (103/1000) | 8.3% (83/1000) |
+
 ### McNemar — English vs each target language (per model, paired on (iteration, method))
 
 Matches the `python-{model}-test.csv` output produced by the paper's R script for CoderEval. Rows paired on (task, iteration); `b` counts cases where English passed and the target language failed; `c` counts the reverse.
@@ -144,6 +239,8 @@ Mean metric per (language, model). For Claude values are averaged across the 10 
 - `classeval_pass_rates.csv` / `classeval_pass_rates_by_iter.csv` — aggregated pass rates.
 - `classeval_failure_breakdown.csv` — counts of each failure reason per (language, model).
 - `classeval_test_mcnemar.csv` — McNemar + Cohen's g on (English vs target) pass/fail pairs (matches the `python-{model}-test.csv` file produced by the R script for CoderEval).
+- `classeval_pass_at_k_upstream.csv` / `classeval_pass_at_k_upstream_summary.txt` — upstream ClassEval `cal_metrics_pass_at_k` faithfully ported to Python (`fun_success`, `fun_partial_success`, `class_success`, `class_partial_success` for pass@n where n ≤ k).
+- `classeval_class_level_pass_rates.csv` / `classeval_class_level_pass_rates_by_iter.csv` — simple class-level pass aggregation (every method in a class must pass in the same iteration).
 
 ## Caveats
 

@@ -90,6 +90,76 @@ def write_summary():
                      "`classeval_pass_rates_by_iter.csv`.")
         lines.append("")
 
+    # ===== Upstream ClassEval pass@n =====
+    upstream_path = os.path.join(RES, "classeval_pass_at_k_upstream.csv")
+    if os.path.exists(upstream_path):
+        ur = load_csv(upstream_path)
+        lines.append("### Upstream ClassEval pass@n (faithful port of `cal_metrics_pass_at_k`)")
+        lines.append("")
+        lines.append("Per-sample classification (`get_test_answer`): a sample is `success` iff "
+                     "all unit tests passed; `partial_success` iff some passed and none crashed; "
+                     "`error` iff the run crashed; `fail` iff every test failed by assertion. "
+                     "`pass@n` is computed with the unbiased Chen et al. estimator over the `k` "
+                     "samples we have per task (k = number of iterations: 10 for Claude, 1 for "
+                     "GPT/DeepSeek, so the greedy GPT/DeepSeek rows only have pass@1).")
+        lines.append("")
+        for metric in ("fun_success", "fun_partial_success", "class_success", "class_partial_success"):
+            lines.append(f"#### `{metric}`")
+            lines.append("")
+            # Determine all (model, n) combos that exist for this metric
+            ks = sorted({(r["model"], int(r["n"])) for r in ur})
+            ns_per_model = defaultdict(list)
+            for m, n in ks:
+                ns_per_model[m].append(n)
+            for m in ns_per_model:
+                ns_per_model[m] = sorted(set(ns_per_model[m]))
+            # Build header
+            header_cols = ["Model"]
+            for n in [1, 3, 5, 10]:
+                for lang in ["english", "chinese", "hindi", "spanish", "italian"]:
+                    if any(n in ns_per_model[m] for m in ns_per_model):
+                        header_cols.append(f"{lang.capitalize()} pass@{n}")
+            # Simpler: emit one row per (model) with all available pass@n × language cells
+            lines.append("| Model | Lang | k | pass@1 | pass@3 | pass@5 | pass@10 |")
+            lines.append("| --- | --- | --- | --- | --- | --- | --- |")
+            for model in MODELS:
+                for lang in ["english", "chinese", "hindi", "spanish", "italian"]:
+                    rs = [r for r in ur if r["model"] == model and r["language"] == lang]
+                    if not rs:
+                        continue
+                    k = rs[0]["k_samples"]
+                    by_n = {int(r["n"]): r[metric] for r in rs}
+                    cells = [model, lang, k]
+                    for n in (1, 3, 5, 10):
+                        cells.append(by_n.get(n, "—"))
+                    lines.append("| " + " | ".join(str(c) for c in cells) + " |")
+            lines.append("")
+        lines.append("")
+
+    # ===== Class-level pass rate (simple aggregation, complement to upstream pass@k) =====
+    cl_path = os.path.join(RES, "classeval_class_level_pass_rates.csv")
+    if os.path.exists(cl_path):
+        cl = load_csv(cl_path)
+        lines.append("### Class-level pass rate (strict, from `classeval_class_level_pass_rates.csv`)")
+        lines.append("")
+        lines.append("Fraction of class-attempts where every method in the class passed in the same "
+                     "iteration. Equivalent to upstream `class_success` pass@1 evaluated as a simple mean "
+                     "(no Chen et al. correction).")
+        lines.append("")
+        lines.append("| Model | English | Chinese | Hindi | Spanish | Italian |")
+        lines.append("| --- | --- | --- | --- | --- | --- |")
+        for model in MODELS:
+            row = f"| {model} |"
+            for lang in ["english", "chinese", "hindi", "spanish", "italian"]:
+                m = [r for r in cl if r["model"] == model and r["language"] == lang]
+                if m:
+                    r0 = m[0]
+                    row += f" {r0['class_strict_rate_pct']}% ({r0['class_strict_pass']}/{r0['n_class_attempts']}) |"
+                else:
+                    row += " N/A |"
+            lines.append(row)
+        lines.append("")
+
     # ===== McNemar for pass rates (same as CoderEval pipeline) =====
     mcn_path = os.path.join(RES, "classeval_test_mcnemar.csv")
     if os.path.exists(mcn_path):
@@ -201,6 +271,8 @@ def write_summary():
     lines.append("- `classeval_pass_rates.csv` / `classeval_pass_rates_by_iter.csv` — aggregated pass rates.")
     lines.append("- `classeval_failure_breakdown.csv` — counts of each failure reason per (language, model).")
     lines.append("- `classeval_test_mcnemar.csv` — McNemar + Cohen's g on (English vs target) pass/fail pairs (matches the `python-{model}-test.csv` file produced by the R script for CoderEval).")
+    lines.append("- `classeval_pass_at_k_upstream.csv` / `classeval_pass_at_k_upstream_summary.txt` — upstream ClassEval `cal_metrics_pass_at_k` faithfully ported to Python (`fun_success`, `fun_partial_success`, `class_success`, `class_partial_success` for pass@n where n ≤ k).")
+    lines.append("- `classeval_class_level_pass_rates.csv` / `classeval_class_level_pass_rates_by_iter.csv` — simple class-level pass aggregation (every method in a class must pass in the same iteration).")
     lines.append("")
     lines.append("## Caveats")
     lines.append("")
